@@ -46,8 +46,8 @@ Hệ thống tuân thủ mô hình 4-Container:
     docker-compose up -d
 3. Thiết lập Backend:
     ```bash
-    docker-compose exec app composer install
     docker-compose exec app cp .env.example .env
+    docker-compose exec app composer install
     docker-compose exec app php artisan key:generate
     docker-compose exec app php artisan migrate --seed
 4. Thiết lập Frontend:

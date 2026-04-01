@@ -19,7 +19,7 @@ services:
     container_name: laravel_nginx
     restart: unless-stopped
     ports:
-      - "8000:80" # Bạn sẽ truy cập web qua http://localhost:8000
+      - '8000:80' # Bạn sẽ truy cập web qua http://localhost:8000
     volumes:
       - ./:/var/www
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -37,21 +37,20 @@ services:
       MYSQL_DATABASE: note_management
       MYSQL_ROOT_PASSWORD: password
     ports:
-      - "3306:3306"
+      - '3306:3306'
     networks:
       - laravel_network
 
   # 4. Container Node.js chạy Vite (React)
   node:
-    image: node:18-alpine
+    image: node:20-alpine
     container_name: laravel_node
     working_dir: /var/www
     volumes:
       - ./:/var/www
     ports:
-      - "5173:5173" # Cổng mặc định của Vite
-    # Tự động cài npm và chạy lệnh dev
-    command: sh -c "npm install && npm run dev -- --host"
+      - "5173:5173"
+    command: sh -c "apk add --no-cache php php-mbstring php-openssl php-phar php-tokenizer php-dom php-xml php-xmlwriter php-session php-pdo php-fileinfo php-curl php-iconv php-ctype && npm install && npm run dev -- --host"
     networks:
       - laravel_network
 

@@ -18,6 +18,21 @@ class Team extends Model
     /** @use HasFactory<TeamFactory> */
     use GeneratesUniqueTeamSlugs, HasFactory, SoftDeletes;
 
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'current_team_id',
+    ];
+
+
+    // protected $hidden = [
+    //     'password',
+    //     'remember_token',
+    //     'two_factor_recovery_codes',
+    //     'two_factor_secret',
+    // ];
+
     /**
      * Bootstrap the model and its traits.
      */

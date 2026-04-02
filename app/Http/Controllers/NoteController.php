@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Note;
 use Illuminate\Http\Request;
-
+use Inertia\Inertia;
 class NoteController extends Controller
 {
     /**
@@ -12,7 +12,10 @@ class NoteController extends Controller
      */
     public function index()
     {
-        //
+        $notes = Note::where('user_id',auth()->id())
+        ->latest()
+        ->get();
+        return Inertia::render('note/home');
     }
 
     /**

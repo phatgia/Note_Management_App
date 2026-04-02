@@ -114,14 +114,14 @@ export default function Login({
                                     {/* Email */}
                                     <div className="grid gap-2">
                                         <Label htmlFor="email" className="font-bold text-gray-700">Email</Label>
-                                        <Input id="email" type="email" name="email" required placeholder="name@example.com" className="border-3 px-4 py-5 bg-gray-50 border-gray-200 focus:bg-white rounded-xl" autoFocus tabIndex={1} autoComplete="email"/>
+                                        <Input id="email" type="email" name="email" required placeholder="name@example.com" className="border-3 px-4 py-5 bg-gray-50 border-gray-200 focus:bg-white rounded-xl text-black" autoFocus tabIndex={1} autoComplete="email"/>
                                         <InputError message={errors.email} />
                                     </div>
 
                                     {/* Mật khẩu */}
                                     <div className="grid gap-2">
                                         <Label htmlFor="password" className="font-bold text-gray-700">Mật khẩu</Label>
-                                        <PasswordInput id="password" name="password" required tabIndex={2} autoComplete="current-password" placeholder="••••••••" className="border-3 px-4 py-5 bg-gray-50 border-gray-200 focus:bg-white rounded-xl"/>
+                                        <PasswordInput id="password" name="password" required tabIndex={2} autoComplete="current-password" placeholder="••••••••" className="border-3 px-4 py-5 bg-gray-50 border-gray-200 focus:bg-white rounded-xl text-black"/>
                                         <div className="flex items-center justify-end">
                                             {canResetPassword && (
                                                 <TextLink href={request()} className="text-sm text-sm text-orange-500 hover:text-orange-800" tabIndex={5}>

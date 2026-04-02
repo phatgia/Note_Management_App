@@ -9,10 +9,17 @@ Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect('/home');
+    }
+    return redirect('/login');
+});
+
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])
     ->group(function () {
-        Route::inertia('dashboard', 'dashboard')->name('dashboard');
+        Route::inertia('dashboard', 'note/home')->name('dashboard');
     });
 
 Route::middleware(['auth'])->group(function () {

@@ -14,15 +14,12 @@ export default function Register() {
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-white">
             <Head title="Đăng ký" />
             {/* Trái */}
-            <div className="relative hidden lg:block overflow-hidden">
-                {/* Nền */}
-                <div className="absolute inset-0 bg-gradient-to-br bg-neutral-900 to-orange-800"></div>
-
+            <div className="relative hidden lg:flex flex-col overflow-hidden bg-gradient-to-br from-neutral-900 to-orange-900">
                 {/* Nội dung */}
-                <div className="relative z-10 flex h-full flex-col p-50 pl-20 text-white">
+                <div className="relative z-10 flex flex-col justify-center h-full p-10 lg:p-14 xl:p-20 gap-8 text-white">
                     {/* Logo */}
-                    <div className="pt-30 flex items-center">
-                        <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <div className="flex items-center gap-3">
+                        <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
                             {/* Thân tờ giấy (Màu cam sáng) */}
                             <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
                             {/* Góc gập (Màu cam đậm) */}
@@ -31,17 +28,22 @@ export default function Register() {
                         <p className="font-bold text-3xl">Note Management</p>
                     </div>
 
-                    <div className="pt-15">
-                        <p className="font-bold text-5xl">Bắt đầu hành trình<br/> 
+                    {/* Tiêu đề */}
+                    <div>
+                        <p className="font-bold text-4xl xl:text-5xl">
+                            Bắt đầu hành trình<br/> 
                             ghi chú <span className="text-orange-500">của bạn</span>
                         </p>
                     </div>
 
-                    <div className="pt-15">
-                        <p className="text-gray-400">Tạo tài khoản miễn phí và bắt đầu tổ chức <br/> cuộc sống của bạn với Note Management ngay hôm nay.</p>
+                    {/* Mô tả */}
+                    <div>
+                        <p className="text-gray-400 text-sm xl:text-base max-w-md">
+                            Tạo tài khoản miễn phí và bắt đầu tổ chức cuộc sống của bạn với Note Management ngay hôm nay.
+                        </p>
                     </div>
                 </div>
-            </div> 
+            </div>
 
 
             {/* Phải */}

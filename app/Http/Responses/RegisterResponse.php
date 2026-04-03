@@ -14,7 +14,7 @@ class RegisterResponse implements RegisterResponseContract
         $user = $request->user();
         $team = $user?->currentTeam ?? $user?->personalTeam();
 
-        if (! $team) {
+        if (!$team) {
             abort(403);
         }
 
@@ -22,6 +22,6 @@ class RegisterResponse implements RegisterResponseContract
 
         return $request->wantsJson()
             ? new JsonResponse(['two_factor' => false], 201)
-            : redirect()->intended(route('dashboard'));
+            : redirect()->intended('/home');
     }
 }

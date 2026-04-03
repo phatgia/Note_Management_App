@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->string('image_path')->nullable();
             $table->string('password')->unique()->nullable();
             $table->timestamps();
+            // Trong file migration của bảng notes
+            $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');
         });
     }
 

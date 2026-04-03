@@ -1,12 +1,15 @@
 import { Head, router } from '@inertiajs/react'
 import React, { PropsWithChildren } from 'react';
 import { logout } from '@/routes';
-
+import { Link, usePage } from '@inertiajs/react';
 type Props = {
     title: string;
+    noteCount?: number;
 };
 
-export default function NoteLayout({ children, title }: PropsWithChildren<Props>) {
+export default function NoteLayout({ children, title, noteCount }: PropsWithChildren<Props>) {
+    const { auth } = usePage().props as any;
+    const user = auth.user;
     return (
         <div className="flex h-screen w-full bg-[#F8F9FA] overflow-hidden text-gray-800 font-sans">
             <Head title={title} />
@@ -46,7 +49,9 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
                             <span className="font-medium text-sm">Tất cả ghi chú</span>
                         </div>
-                        <span className="bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">12</span>
+                        <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                {noteCount ?? 0}
+                        </span>
                     </div>
 
                     <p className="text-xs font-semibold text-gray-400 mb-2 mt-2 uppercase tracking-wider">Nhãn</p>
@@ -58,8 +63,8 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                             NA
                         </div>
                         <div className="flex-1">
-                            <p className="text-sm font-bold">Nguyễn Văn A</p>
-                            <p className="text-xs text-gray-500">a@tdtu.edu.vn</p>
+                            <p className="text-sm font-bold">{user.name}</p>
+                            <p className="text-xs text-gray-500">{user.email}</p>
                         </div>
                         <button onClick={() => router.post(logout())} className="p-2 text-gray-400 hover:bg-gray-100 hover:text-orange-500 rounded-lg transition-colors border border-transparent hover:border-gray-200">
                             <svg 

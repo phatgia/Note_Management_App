@@ -138,7 +138,7 @@ export default function Login({
                                     </div>
 
                                     {/* Nút Đăng nhập */}
-                                    <Button type="submit" className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base font-bold rounded-xl hover:shadow-lg" tabIndex={4} disabled={processing} data-test="login-button">
+                                    <Button type="submit" className="mt-2 w-full cursor-pointer bg-orange-500 hover:bg-orange-600 text-white py-6 text-base font-bold rounded-xl hover:shadow-lg" tabIndex={4} disabled={processing} data-test="login-button">
                                         {processing && <Spinner className="mr-2" />}
                                         Đăng nhập
                                     </Button>

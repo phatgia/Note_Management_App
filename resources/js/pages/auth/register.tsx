@@ -83,7 +83,7 @@ export default function Register() {
                                         <InputError message={errors.password_confirmation}/>
                                     </div>
 
-                                    <Button type="submit" className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base font-bold rounded-xl hover:shadow-lg" tabIndex={5} data-test="register-user-button">
+                                    <Button type="submit" className="mt-2 w-full cursor-pointer bg-orange-500 hover:bg-orange-600 text-white py-6 text-base font-bold rounded-xl hover:shadow-lg" tabIndex={5} data-test="register-user-button">
                                         {processing && <Spinner />}
                                         Tạo tài khoản
                                     </Button>

@@ -58,10 +58,31 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
                 </div>
 
                 <div className="p-4 border-t border-gray-200">
+
+                    <div className="border rounded-full bg-orange-100 p-3 mb-3 text-xs flex items-center align-center gap-3 ">
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            strokeWidth={1.5} 
+                            stroke="currentColor" 
+                            className="w-5 h-5 text-orange-500"
+                        >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+
+                        <p>Chưa xác minh email</p>
+
+                        <button className="font-bold text-orange-500 cursor-pointer">
+                            Gửi lại
+                        </button>
+                    </div>
+
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-orange-200 text-orange-700 flex items-center justify-center font-bold">
                             NA
-                        </div>
+                        </div>                           
+
                         <div className="flex-1">
                             <p className="text-sm font-bold">{user.name}</p>
                             <p className="text-xs text-gray-500">{user.email}</p>

@@ -12,7 +12,7 @@ Route::get('/', function () {
     }
     return redirect()->route('login');
 });
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/home', [NoteController::class, 'index'])->name('home');
     
     Route::resource('notes', NoteController::class)->except(['index']);

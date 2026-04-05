@@ -70,3 +70,4 @@ Hệ thống tuân thủ mô hình 4-Container:
 5. Truy cập ứng dụng:
    Frontend: http://localhost:3000
    Backend API: http://localhost:8000
+   Hệ thống sẽ mô phỏng gửi email. Vui lòng truy cập Hộp thư giả lập (Mailpit) tại: http://localhost:8025

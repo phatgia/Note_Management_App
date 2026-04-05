@@ -73,32 +73,37 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
 
                         <p>Chưa xác minh email</p>
 
-                        <button className="font-bold text-orange-500 cursor-pointer">
+                        <Link href="" className="font-bold text-orange-500 cursor-pointer">
                             Gửi lại
-                        </button>
+                        </Link>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-orange-200 text-orange-700 flex items-center justify-center font-bold">
-                            NA
-                        </div>                           
+                    <div className="flex items-center gap-4">
+                        <Link href="/settings/profile" className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-orange-200 text-orange-700 flex items-center justify-center font-bold">
+                                NA
+                            </div>                           
 
-                        <div className="flex-1">
-                            <p className="text-sm font-bold">{user.name}</p>
-                            <p className="text-xs text-gray-500">{user.email}</p>
-                        </div>
-                        <button onClick={() => router.post(logout())} className="p-2 text-gray-400 hover:bg-gray-100 hover:text-orange-500 rounded-lg transition-colors border border-transparent hover:border-gray-200">
+                            <div className="flex-1">
+                                <p className="text-sm font-bold">{user.name}</p>
+                                <p className="text-xs text-gray-500">{user.email}</p>
+                            </div>
+
                             <svg 
-                                    xmlns="http://www.w3.org/2000/svg" 
-                                    fill="none" 
-                                    viewBox="0 0 24 24" 
-                                    strokeWidth={2} 
-                                    stroke="currentColor" 
-                                    className="w-5 h-5 transition-transform group-hover:translate-x-1"
-                                >
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                                xmlns="http://www.w3.org/2000/svg" 
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                strokeWidth={1.5} 
+                                stroke="currentColor" 
+                                className="w-5 h-5 text-gray-500 hover:text-orange-500 cursor-pointer transition-colors"
+                            >
+                                <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" 
+                                />
                             </svg>
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </aside>

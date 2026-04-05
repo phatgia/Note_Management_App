@@ -18,14 +18,14 @@ export default function NoteSettingLayout({ children, title, }: PropsWithChildre
             {/* Trái */}
             <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
                 {/* Logo */}
-                <div className="flex border-b border-gray-200 pb-4 px-4 py-9">
+                <div className="flex items-center border-b border-gray-200 pb-4 px-4 py-9">
                     <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                         {/* Thân tờ giấy (Màu cam sáng) */}
                         <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
                         {/* Góc gập (Màu cam đậm) */}
                         <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
                     </svg>
-                    <p className="font-bold text-xl items-center">Note Management</p>
+                    <p className="font-bold text-xl">Note Management</p>
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-4">

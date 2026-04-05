@@ -14,7 +14,7 @@ Route::get('/', function () {
 });
 Route::middleware(['auth'])->group(function () {
     Route::get('/home', [NoteController::class, 'index'])->name('home');
-    
+
     Route::resource('notes', NoteController::class)->except(['index']);
 });
 Route::prefix('{current_team}')
@@ -26,5 +26,7 @@ Route::prefix('{current_team}')
 Route::middleware(['auth'])->group(function () {
     Route::get('invitations/{invitation}/accept', [TeamInvitationController::class, 'accept'])->name('invitations.accept');
 });
-
+Route::get('/verify-email', function () {
+    return Inertia\Inertia::render('auth/verify-email');
+});
 require __DIR__ . '/settings.php';

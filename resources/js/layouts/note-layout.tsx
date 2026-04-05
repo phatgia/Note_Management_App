@@ -1,7 +1,8 @@
 import { Head, router } from '@inertiajs/react'
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, useState } from 'react'; // Thêm useState ở đây
 import { logout } from '@/routes';
 import { Link, usePage } from '@inertiajs/react';
+
 type Props = {
     title: string;
     noteCount?: number;
@@ -10,24 +11,36 @@ type Props = {
 export default function NoteLayout({ children, title, noteCount }: PropsWithChildren<Props>) {
     const { auth } = usePage().props as any;
     const user = auth.user;
+
+    // 1. Thêm State để chặn người dùng click nhiều lần gây lỗi spam
+    const [processing, setProcessing] = useState(false);
+
+    const handleResend = () => {
+        setProcessing(true);
+        router.post('/email/verification-notification', {}, {
+            onSuccess: () => {
+                router.get('/verify-email'); 
+            },
+            onError: () => {
+                alert('Lỗi! Không thể gửi mail lúc này. Vui lòng thử lại sau.');
+                setProcessing(false); 
+            },
+        });
+    };
+
     return (
         <div className="flex h-screen w-full bg-[#F8F9FA] overflow-hidden text-gray-800 font-sans">
             <Head title={title} />
 
-            {/* Trái */}
             <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
-                {/* Logo */}
                 <div className="flex border-b border-gray-200 pb-4 px-4 py-9">
                     <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        {/* Thân tờ giấy (Màu cam sáng) */}
                         <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
-                        {/* Góc gập (Màu cam đậm) */}
                         <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
                     </svg>
-                    <p className="font-bold text-xl">Note Management</p>
+                    <p className="font-bold text-xl ml-2">Note Management</p>
                 </div>
 
-                {/* Thanh tìm kiếm */}
                 <div className="px-4 py-4">
                     <div className="relative">
                         <input 
@@ -40,7 +53,6 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
                         </svg>
                     </div>
                 </div>
-
 
                 <div className="flex-1 overflow-y-auto px-4">
                     <p className="text-xs font-semibold text-gray-400 mb-2 mt-2 uppercase tracking-wider">Danh mục</p>
@@ -58,25 +70,31 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
                 </div>
 
                 <div className="p-4 border-t border-gray-200">
+                    
+                    {user && user.email_verified_at === null && (
+                        <div className="border rounded-full bg-orange-100 p-3 mb-3 text-xs flex items-center align-center gap-3">
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                strokeWidth={1.5} 
+                                stroke="currentColor" 
+                                className="w-5 h-5 text-orange-500"
+                            >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                            </svg>
 
-                    <div className="border rounded-full bg-orange-100 p-3 mb-3 text-xs flex items-center align-center gap-3 ">
-                        <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            fill="none" 
-                            viewBox="0 0 24 24" 
-                            strokeWidth={1.5} 
-                            stroke="currentColor" 
-                            className="w-5 h-5 text-orange-500"
-                        >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                        </svg>
+                            <p>Chưa xác minh email</p>
 
-                        <p>Chưa xác minh email</p>
-
-                        <button className="font-bold text-orange-500 cursor-pointer">
-                            Gửi lại
-                        </button>
-                    </div>
+                            <button 
+                                onClick={handleResend}
+                                disabled={processing}
+                                className={`font-bold text-orange-500 cursor-pointer transition-all ${processing ? 'opacity-50' : 'hover:underline'}`}
+                            >
+                                {processing ? 'Đang gửi...' : 'Gửi lại'}
+                            </button>
+                        </div>
+                    )}
 
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-orange-200 text-orange-700 flex items-center justify-center font-bold">
@@ -85,7 +103,7 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
 
                         <div className="flex-1">
                             <p className="text-sm font-bold">{user.name}</p>
-                            <p className="text-xs text-gray-500">{user.email}</p>
+                            <p className="text-xs text-gray-500 truncate w-32">{user.email}</p>
                         </div>
                         <button onClick={() => router.post(logout())} className="p-2 text-gray-400 hover:bg-gray-100 hover:text-orange-500 rounded-lg transition-colors border border-transparent hover:border-gray-200">
                             <svg 

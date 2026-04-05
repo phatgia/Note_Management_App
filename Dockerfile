@@ -17,3 +17,5 @@ WORKDIR /var/www
 
 COPY . .
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Chạy lệnh này để tạo bảng DB và bật server web Laravel lên
+CMD sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"

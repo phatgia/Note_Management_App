@@ -71,7 +71,7 @@ export default function NoteSettingLayout({ children, title, }: PropsWithChildre
                     </div>
                     {/* Tùy chọn */}
                     <div className="flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1">
-                        <Link className="flex items-center gap-3 cursor-pointer">
+                        <Link href= "/settings/appearance" className="flex items-center gap-3 cursor-pointer">
                             <svg 
                                 xmlns="http://www.w3.org/2000/svg" 
                                 fill="none" 

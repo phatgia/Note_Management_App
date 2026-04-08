@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
+
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect('/home');
@@ -30,4 +31,5 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/verify-email', function () {
     return Inertia\Inertia::render('auth/verify-email');
 });
+
 require __DIR__ . '/settings.php';

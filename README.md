@@ -62,12 +62,21 @@ Hệ thống tuân thủ mô hình 4-Container:
     docker-compose exec app php artisan key:generate
     docker-compose exec app php artisan migrate --seed
     ```
-4. Thiết lập Frontend:
+4. Tạo cơ sở dữ liệu và dữ liệu mẫu
+    ```bash
+    docker-compose exec app php artisan migrate --seed
+    ```
+5. Mở khóa thư mục lưu trữ ảnh (Bắt buộc để hiện Avatar)
+
+    ```bash
+    docker-compose exec app php artisan storage:link
+    ```
+
+6. Thiết lập Frontend:
     ```bash
     docker-compose exec node npm install
     docker-compose exec node npm run dev
     ```
-5. Truy cập ứng dụng:
-   Frontend: http://localhost:3000
-   Backend API: http://localhost:8000
+7. Truy cập ứng dụng:
+   Truy cập: http://localhost:8000
    Hệ thống sẽ mô phỏng gửi email. Vui lòng truy cập Hộp thư giả lập (Mailpit) tại: http://localhost:8025

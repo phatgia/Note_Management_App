@@ -41,7 +41,7 @@ export default function Create({ notes }: any) {
                 {/* Thân */}
                 <div className="max-w-7xl mx-auto p-6 lg:p-8 flex flex-col lg:flex-row gap-6 items-start">
                     
-                    {/* CỘT TRÁI: Nhập thông tin ghi chú (Rộng hơn - dùng flex-1) */}
+                    {/* Trái*/}
                     <form onSubmit={submit} className="flex-1 w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
                         
                         {/* Tiêu đề */}

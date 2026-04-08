@@ -177,11 +177,20 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
                                 </div>
                             )}
 
-                            <button onClick={()=>setIsMenuOpen(!isMenuOpen)} className="flex items-center justify-between gap-2">
+                            <button onClick={()=>setIsMenuOpen(!isMenuOpen)} className="flex items-center justify-between gap-2 cursor-pointer w-full text-left">
                                 <div className="flex items-center gap-3 flex-1 overflow-hidden group">
-                                    <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 border border-orange-200 flex items-center justify-center font-bold text-lg group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0">
-                                        {user.name.charAt(0).toUpperCase()}
-                                    </div>                           
+                                    
+                                    {user.avatar ? (
+                                        <img 
+                                            src={`/storage/${user.avatar}`} 
+                                            alt="Avatar" 
+                                            className="w-10 h-10 rounded-full object-cover border border-orange-200 shrink-0 shadow-sm"
+                                        />
+                                    ) : (
+                                        <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 border border-orange-200 flex items-center justify-center font-bold text-lg group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0">
+                                            {user.name.charAt(0).toUpperCase()}
+                                        </div>                           
+                                    )}
 
                                     <div className="flex-1 overflow-hidden">
                                         <p className="text-sm font-bold text-gray-800 truncate group-hover:text-orange-500 transition-colors">{user.name}</p>
@@ -189,6 +198,7 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
                                     </div>
                                 </div>
                             </button>
+                            
                         </div>
                     </div>
                 </div>

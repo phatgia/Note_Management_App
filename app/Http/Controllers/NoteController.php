@@ -25,7 +25,7 @@ class NoteController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return Inertia::render('note/create', ['category' => $categories]);
+        return Inertia::render('note/create-note', ['category' => $categories]);
     }
 
     /**

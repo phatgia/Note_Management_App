@@ -11,7 +11,7 @@ export default function Home({ notes }: any) {
                 
                 <div className="flex items-center gap-4">
                     <Link 
-                        href="/notes/create" 
+                        href="/create-note" 
                         className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

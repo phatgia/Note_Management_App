@@ -9,7 +9,9 @@ export default function NoteDetail({ note }: any) {
     const { data, setData, put, processing, errors } = useForm({
         title: note.title,
         content: note.content,
+        color: note.color || 'bg-white',
     });
+
 
     // Sửa
     const funcUpdate =(e: React.FormEvent) => {

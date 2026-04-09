@@ -25,8 +25,8 @@ export default function Home({ notes,categories }: any) {
     return (
         <NoteLayout title="Tất cả ghi chú" noteCount={notes.length} categories={categories}>
             {/* Thanh tiêu đề và Nút tạo mới */}
-            <div className="sticky top-0 bg-white flex items-center justify-between border-b border-gray-200 p-6 z-10">
-                <h1 className="text-2xl font-bold text-gray-900">Ghi chú được chia sẻ</h1>
+            <div className="sticky top-0 bg-background flex items-center justify-between border-b border-gray-200 p-6 z-10">
+                <h1 className="text-2xl font-bold text-foreground">Ghi chú được chia sẻ</h1>
                 
                 <div className="flex items-center gap-4">
                     <button onClick={gridView} className="bg-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2">
@@ -62,7 +62,7 @@ export default function Home({ notes,categories }: any) {
                         />
                         </svg>
                     </button>
-                    
+                
                     <Link 
                         href="/create-note" 
                         className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm transition-colors"
@@ -86,7 +86,7 @@ export default function Home({ notes,categories }: any) {
                 <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.158 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
                 <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
                 </svg>
-                <p className="font-semibold text-gray-700">Có thể chỉnh sửa</p>
+                <p className="font-semibold text-muted-foreground">Có thể chỉnh sửa</p>
                 <div className="flex-1 h-[1px] bg-gray-200"></div>
             </div>
 
@@ -117,10 +117,10 @@ export default function Home({ notes,categories }: any) {
                             </div>
 
                             {/* Tiêu đề & Nội dung từ Database */}
-                            <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-1" title={note.title}>
+                            <h3 className="font-bold text-card-foreground text-lg mb-2 line-clamp-1" title={note.title}>
                                 {note.title}
                             </h3>
-                            <p className="text-sm text-gray-600 line-clamp-3 mb-4">
+                            <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
                                 {stripHtml(note.content)}
                             </p>
 
@@ -164,7 +164,7 @@ export default function Home({ notes,categories }: any) {
                     d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" 
                 />
                 </svg>
-                <p className="font-semibold text-gray-700">Chỉ xem</p>
+                <p className="font-semibold text-muted-foreground">Chỉ xem</p>
                 <div className="flex-1 h-[1px] bg-gray-200"></div>
             </div>
         </NoteLayout>

@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react'
 import React, { PropsWithChildren, useState, useRef, useEffect } from 'react';
 import { logout } from '@/routes';
 import { Link, usePage } from '@inertiajs/react';
+import { useAppearance } from '@/hooks/use-appearance';
 
 type Props = {
     title: string;
@@ -24,6 +25,12 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
     const [processing, setProcessing] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+
+    const { resolvedAppearance, updateAppearance } = useAppearance();
+
+    const toggleTheme = () => {
+        updateAppearance(resolvedAppearance === 'light' ? 'dark' : 'light');
+    };
 
     const { url } = usePage();
 
@@ -52,18 +59,18 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
     };
 
     return (
-        <div className="flex h-screen w-full bg-[#F8F9FA] overflow-hidden text-gray-800 font-sans">
+        <div className="flex h-screen w-full bg-background overflow-hidden text-gray-800 font-sans">
             <Head title={title} />
 
             {/* Trái */}
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
+            <aside className="w-64 bg-sidebar border-r border-gray-200 flex flex-col h-full">
                 {/* Logo */}
                 <Link href="/home" className="cursor-pointer flex border-b border-gray-200 pb-4 px-4 py-9">
                     <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
                         <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
                     </svg>
-                    <p className="font-bold text-xl ml-2">Note Management</p>
+                    <p className="font-bold text-xl ml-2 text-card-foreground">Note Management</p>
                 </Link>
 
                 {/* Thanh tìm kiếm */}
@@ -72,7 +79,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                         <input 
                             type="text" 
                             placeholder="Tìm kiếm ghi chú..." 
-                            className="w-full bg-gray-50 border border-gray-200 text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                            className="w-full bg-back-ground border border-gray-200 text-muted-foreground text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
                         />
                         <svg className="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -83,7 +90,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                 <div className="flex-1 overflow-y-auto px-4">
                     <p className="text-xs font-semibold text-gray-400 mb-2 mt-2 uppercase tracking-wider">Danh mục</p>
                     
-                    <Link href="/home" className={url.startsWith('/home')?"flex items-center justify-between bg-orange-200 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors": "flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
+                    <Link href="/home" className={url.startsWith('/home')?"flex items-center justify-between bg-orange-200 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors": "flex items-center justify-between bg-card text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
                         <div className="flex items-center gap-3">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -95,8 +102,8 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                         </span>
                     </Link>
 
-                    <Link  href="/shared-note" className={url.startsWith('/shared-note')?"flex items-center justify-between bg-orange-200 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors":"flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
-                        <div className="flex items-center gap-3">
+                    <Link  href="/shared-note" className={url.startsWith('/shared-note')?"flex items-center justify-between bg-orange-200 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors":"flex items-center justify-between bg-card text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
+                        <div className="flex items-center gap-3 ">
                                 <svg 
                                     xmlns="http://www.w3.org/2000/svg" 
                                     fill="none" 
@@ -174,7 +181,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                         <div className="relative w-full" ref={menuRef}>
                             {/* Popup Menu */}
                             {isMenuOpen && (
-                                <div className="absolute bottom-[calc(100%+0.5rem)] left-0 w-full bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50 overflow-hidden">
+                                <div className="absolute bottom-[calc(100%+0.5rem)] left-0 w-full bg-background border border-gray-200 rounded-xl shadow-lg py-1 z-50 overflow-hidden">
                                     <Link 
                                         href="/settings/profile" 
                                         className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
@@ -236,8 +243,23 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
             </aside>
 
             {/* Phải */}
-            <main className="flex-1 flex flex-col h-full overflow-y-auto bg-[#F8F9FA]">
+            <main className="flex-1 flex flex-col h-full overflow-y-auto bg-background">
                 {children}
+                <button 
+                    onClick={toggleTheme}
+                    className="fixed bottom-6 right-6 p-3 rounded-full bg-card border border-border shadow-lg hover:scale-110 transition-all duration-300 z-50 cursor-pointer text-muted-foreground hover:text-orange-500"
+                    title={resolvedAppearance === 'light' ? 'Chuyển sang chế độ tối' : 'Chuyển sang chế độ sáng'}
+                >
+                    {resolvedAppearance === 'light' ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                        </svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-yellow-500">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                        </svg>
+                    )}
+                </button>
             </main>
         </div>
     );

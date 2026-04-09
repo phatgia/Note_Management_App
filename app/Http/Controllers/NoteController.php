@@ -85,7 +85,7 @@ class NoteController extends Controller
 
         $note->load('category');
 
-        return Inertia::render('note/show', [
+        return Inertia::render('note/note-detail', [
             'note' => $note
         ]);
     }

@@ -57,7 +57,8 @@ export default function Home({ notes,categories }: any) {
                     </div>
                 ) : (
                     notes.map((note: any) => (
-                        <div key={note.id} className="bg-white border border-orange-200 rounded-2xl p-5 flex flex-col min-h-[16rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                        
+                        <Link href={`/note-detail/${note.id}`} key={note.id} className="bg-white border border-orange-200 rounded-2xl p-5 flex flex-col min-h-[16rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                             
                             {/* Icon thẻ */}
                             <div className="flex items-center gap-2 mb-4">
@@ -91,7 +92,7 @@ export default function Home({ notes,categories }: any) {
                                     {new Date(note.created_at).toLocaleDateString('vi-VN')}
                                 </p>
                             </div>
-                        </div>
+                        </Link>
                     ))
                 )}
             </div>

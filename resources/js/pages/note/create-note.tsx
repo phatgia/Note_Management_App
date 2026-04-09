@@ -62,8 +62,8 @@ export default function Create({ notes, categories }: any) {
 
                 <div className="max-w-7xl mx-auto p-6 lg:p-8 flex flex-col lg:flex-row gap-6 items-start">
                     
-                    {/* CỘT TRÁI: FORM ĐIỀN THÔNG TIN */}
-                    <form onSubmit={submit} className={`flex-1 w-full border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6 transition-colors duration-500 ${data.bg_color}`}>
+                    {/* Trái*/}
+                    <form onSubmit={submit} className="flex-1 w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
                         
                         {/* 1. Tiêu đề */}
                         <div>

@@ -15,9 +15,9 @@ Route::get('/', function () {
 });
 Route::middleware(['auth'])->group(function () {
     Route::get('/home', [NoteController::class, 'index'])->name('home');
-
+    Route::get('/home', [NoteController::class, 'index'])->name('notes.index');
     Route::resource('note', NoteController::class)->except(['index']);
-    Route::get('/create-note',[NoteController::class, 'create'])->name('create-note');
+    Route::get('/create-note', [NoteController::class, 'create'])->name('create-note');
 });
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])

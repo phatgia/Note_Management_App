@@ -13,10 +13,14 @@ class NoteController extends Controller
      */
     public function index()
     {
+        $categories = \App\Models\Category::all();
         $notes = Note::where('user_id', auth()->id())
             ->latest()
             ->get();
-        return Inertia::render('note/home', ['notes' => $notes]);
+        return Inertia::render('note/home', [
+            'notes' => $notes,
+            'categories' => $categories,
+        ]);
     }
 
     /**
@@ -37,11 +41,34 @@ class NoteController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
+            'new_category_name' => 'nullable|string|max:50',
+            'new_category_color' => 'nullable|string',
+            'new_category_icon' => 'nullable|string',
+            'bg_color' => 'nullable|string',
             'image_path' => 'nullable|string',
             'password' => 'nullable|string'
         ]);
+        $categoryId = $request->category_id;
 
-        $request->user()->notes()->create($validated);
+        if ($request->filled('new_category_name')) {
+            $newCategory = \App\Models\Category::create([
+                'name' => $request->new_category_name,
+                'color' => $request->new_category_color,
+                'icon' => $request->new_category_icon,
+            ]);
+            $categoryId = $newCategory->id;
+        }
+
+        $validated['category_id'] = $categoryId;
+
+        $request->user()->notes()->create([
+            'title' => $validated['title'],
+            'content' => $validated['content'],
+            'category_id' => $validated['category_id'],
+            'bg_color' => $validated['bg_color'] ?? 'bg-white',
+            'image_path' => $validated['image_path'] ?? null,
+            'password' => $validated['password'] ?? null,
+        ]);
 
         return redirect()->route('notes.index')
             ->with('message', 'Tạo ghi chú thành công!');

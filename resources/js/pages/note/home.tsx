@@ -2,9 +2,14 @@ import React from 'react';
 import NoteLayout from '@/layouts/note-layout';
 import { Link } from '@inertiajs/react';
 
-export default function Home({ notes }: any) {
+const stripHtml = (htmlStr: string) => {
+    if (!htmlStr) return "";
+    const doc = new DOMParser().parseFromString(htmlStr, 'text/html');
+    return doc.body.textContent || "";
+};
+export default function Home({ notes,categories }: any) {
     return (
-        <NoteLayout title="Tất cả ghi chú" noteCount={notes.length}>
+        <NoteLayout title="Tất cả ghi chú" noteCount={notes.length} categories={categories}>
             {/* Thanh tiêu đề và Nút tạo mới */}
             <div className="sticky top-0 bg-white flex items-center justify-between border-b border-gray-200 p-6 z-10">
                 <h1 className="text-2xl font-bold text-gray-900">Tất cả ghi chú</h1>
@@ -68,7 +73,7 @@ export default function Home({ notes }: any) {
                                 {note.title}
                             </h3>
                             <p className="text-sm text-gray-600 line-clamp-3 mb-4">
-                                {note.content}
+                                {stripHtml(note.content)}
                             </p>
 
                             {/* Nhãn Danh mục (Category) - Sẽ hiển thị nếu Ghi chú này có gắn Category */}

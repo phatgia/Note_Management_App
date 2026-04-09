@@ -6,16 +6,22 @@ import { Link, usePage } from '@inertiajs/react';
 type Props = {
     title: string;
     noteCount?: number;
+    categories?: any[]; 
 };
 
-export default function NoteLayout({ children, title, noteCount }: PropsWithChildren<Props>) {
+const ICONS: Record<string, React.ReactNode> = {
+    tag: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M5.25 2.25a3 3 0 0 0-3 3v4.318a3 3 0 0 0 .879 2.121l9.58 9.581c.607.607 1.59.607 2.198 0l4.318-4.317a1.554 1.554 0 0 0 0-2.198l-9.581-9.58a3 3 0 0 0-2.122-.879H5.25ZM6.375 7.5a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25Z" clipRule="evenodd" /></svg>,
+    star: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" /></svg>,
+    heart: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" /></svg>,
+    book: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M11.25 4.533A9.707 9.707 0 0 0 6 3c-1.05 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>,
+    folder: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" /></svg>
+};
+
+export default function NoteLayout({ children, title, noteCount, categories }: PropsWithChildren<Props>) {
     const { auth } = usePage().props as any;
     const user = auth.user;
 
-    // State gửi xác thực mail
     const [processing, setProcessing] = useState(false);
-
-    // State và Ref cho pop-up 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -74,36 +80,51 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
 
                 <div className="flex-1 overflow-y-auto px-4">
                     <p className="text-xs font-semibold text-gray-400 mb-2 mt-2 uppercase tracking-wider">Danh mục</p>
-                    <div className="flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1">
+                    
+                    <Link href="/home" className="flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors">
                         <div className="flex items-center gap-3">
-                            <svg 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                fill="none" 
-                                viewBox="0 0 24 24" 
-                                strokeWidth={1.5} 
-                                stroke="currentColor" 
-                                className="w-5 h-5 text-orange-500 hover:text-orange-600 cursor-pointer transition-colors"
-                            >
-                                <path 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
-                                    d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" 
-                                />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                             </svg>
                             <span className="font-medium text-sm">Tất cả ghi chú</span>
                         </div>
                         <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                             {noteCount ?? 0}
                         </span>
-                    </div>
+                    </Link>
 
-                    <p className="text-xs font-semibold text-gray-400 mb-2 mt-2 uppercase tracking-wider">Nhãn</p>
+                    <p className="text-xs font-semibold text-gray-400 mb-2 mt-4 uppercase tracking-wider">Nhãn</p>
+                    
+                    {/* HIỂN THỊ DANH SÁCH NHÃN TỪ DATABASE */}
+                    <div className="flex flex-col gap-1 pb-4">
+                        {categories && categories.length > 0 ? (
+                            categories.map((cat: any) => {
+                                const textColorClass = cat.color ? cat.color.split(' ')[1] : 'text-gray-500';
+
+                                return (
+                                    <Link 
+                                        key={cat.id}
+                                        href={`#`} 
+                                        className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors text-gray-600 hover:bg-gray-100 font-medium text-sm group"
+                                    >
+                                        {/* Render Icon và gắn màu chữ vào Icon */}
+                                        <div className={`${textColorClass} group-hover:scale-110 transition-transform`}>
+                                            {ICONS[cat.icon] || ICONS['tag']}
+                                        </div>
+                                        <span className="truncate group-hover:text-gray-900 transition-colors">{cat.name}</span>
+                                    </Link>
+                                );
+                            })
+                        ) : (
+                            <span className="text-sm text-gray-400 italic px-3">Chưa có nhãn nào</span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Xác thực email */}
                 <div className="p-4 border-t border-gray-200">
                     {user && user.email_verified_at === null && (
-                        <div className="border rounded-full bg-orange-100 p-3 mb-3 text-xs flex items-center justify-between gap-2">
+                        <div className="border rounded-xl bg-orange-50 p-3 mb-3 text-xs flex flex-col gap-2 shadow-sm">
                             <div className="flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-500">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
@@ -114,17 +135,17 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
                             <button 
                                 onClick={handleResend} 
                                 disabled={processing} 
-                                className="font-bold text-orange-500 hover:text-orange-700 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                                className="w-full bg-white border border-orange-200 font-bold text-orange-600 hover:bg-orange-50 hover:text-orange-700 cursor-pointer disabled:opacity-50 py-1.5 rounded-lg transition-colors text-center"
                             >
-                                {processing ? 'Đang gửi...' : 'Gửi lại'}
+                                {processing ? 'Đang gửi...' : 'Gửi lại mã xác minh'}
                             </button>
                         </div>
                     )}
                     
                     {/* Hồ sơ người dùng */}
                     <div className="flex items-center justify-between gap-2">
-                        <div className="relative" ref={menuRef}>
-                            {/* Popup Menu (Nổi lên trên khi isMenuOpen = true) */}
+                        <div className="relative w-full" ref={menuRef}>
+                            {/* Popup Menu */}
                             {isMenuOpen && (
                                 <div className="absolute bottom-[calc(100%+0.5rem)] left-0 w-full bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50 overflow-hidden">
                                     <Link 
@@ -143,24 +164,9 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
                                         className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
                                         onClick={() => setIsMenuOpen(false)}
                                     >
-                                        <svg 
-                                            xmlns="http://www.w3.org/2000/svg" 
-                                            fill="none" 
-                                            viewBox="0 0 24 24" 
-                                            strokeWidth={1.5} 
-                                            stroke="currentColor" 
-                                            className="w-5 h-5 text-orange-500 hover:text-orange-500 transition-colors"
-                                        >
-                                            <path 
-                                                strokeLinecap="round" 
-                                                strokeLinejoin="round" 
-                                                d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" 
-                                            />
-                                            <path 
-                                                strokeLinecap="round" 
-                                                strokeLinejoin="round" 
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
-                                            />
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500 hover:text-orange-500 transition-colors">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
                                         Cài đặt
                                     </Link>
@@ -177,14 +183,13 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
                                 </div>
                             )}
 
-                            <button onClick={()=>setIsMenuOpen(!isMenuOpen)} className="flex items-center justify-between gap-2 cursor-pointer w-full text-left">
+                            <button onClick={()=>setIsMenuOpen(!isMenuOpen)} className="flex items-center justify-between gap-2 cursor-pointer w-full text-left p-2 rounded-lg hover:bg-gray-50 transition-colors">
                                 <div className="flex items-center gap-3 flex-1 overflow-hidden group">
-                                    
                                     {user.avatar ? (
                                         <img 
                                             src={`/storage/${user.avatar}`} 
                                             alt="Avatar" 
-                                            className="w-10 h-10 rounded-full object-cover border border-orange-200 shrink-0 shadow-sm"
+                                            className="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0 shadow-sm"
                                         />
                                     ) : (
                                         <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 border border-orange-200 flex items-center justify-center font-bold text-lg group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0">
@@ -198,7 +203,6 @@ export default function NoteLayout({ children, title, noteCount }: PropsWithChil
                                     </div>
                                 </div>
                             </button>
-                            
                         </div>
                     </div>
                 </div>

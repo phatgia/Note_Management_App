@@ -49,4 +49,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
 }

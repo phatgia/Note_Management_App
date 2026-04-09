@@ -87,8 +87,11 @@ class NoteController extends Controller
 
         $note->load('category');
 
+        $categories = \App\Models\Category::all();
+
         return Inertia::render('note/note-detail', [
-            'note' => $note
+            'note' => $note,
+            'categories' => $categories, // Bổ sung dòng này
         ]);
     }
 

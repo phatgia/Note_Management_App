@@ -18,6 +18,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home', [NoteController::class, 'index'])->name('notes.index');
     Route::resource('note', NoteController::class)->except(['index']);
     Route::get('/create-note', [NoteController::class, 'create'])->name('create-note');
+    Route::get('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'show'])->name('notes.show');
 });
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])

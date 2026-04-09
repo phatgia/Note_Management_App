@@ -60,7 +60,6 @@ Hệ thống tuân thủ mô hình 4-Container:
     docker-compose exec app cp .env.example .env
     docker-compose exec app composer install
     docker-compose exec app php artisan key:generate
-    docker-compose exec app php artisan migrate --seed
     ```
 4. Tạo cơ sở dữ liệu và dữ liệu mẫu
     ```bash

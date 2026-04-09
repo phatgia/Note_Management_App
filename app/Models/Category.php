@@ -10,6 +10,7 @@ class Category extends Model
     use HasFactory;
     protected $fillable = [
         'name',
+        'color',
         'icon',
     ];
     public function notes()

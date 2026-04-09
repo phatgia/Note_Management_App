@@ -99,7 +99,8 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                     <div className="flex flex-col gap-1 pb-4">
                         {categories && categories.length > 0 ? (
                             categories.map((cat: any) => {
-                                const textColorClass = cat.color ? cat.color.split(' ')[1] : 'text-gray-500';
+                                const colorString = cat.color || '';
+                                const textColorClass = colorString.split(' ').find((c: string) => c.startsWith('text-')) || 'text-gray-500';
 
                                 return (
                                     <Link 
@@ -107,11 +108,13 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                                         href={`#`} 
                                         className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors text-gray-600 hover:bg-gray-100 font-medium text-sm group"
                                     >
-                                        {/* Render Icon và gắn màu chữ vào Icon */}
-                                        <div className={`${textColorClass} group-hover:scale-110 transition-transform`}>
+                                        <div className={`${textColorClass} group-hover:scale-110 transition-transform shrink-0`}>
                                             {ICONS[cat.icon] || ICONS['tag']}
                                         </div>
-                                        <span className="truncate group-hover:text-gray-900 transition-colors">{cat.name}</span>
+                                        
+                                        <span className="flex-1 truncate group-hover:text-gray-900 transition-colors">
+                                            {cat.name || 'Nhãn bị lỗi trống tên'}
+                                        </span>
                                     </Link>
                                 );
                             })
@@ -120,7 +123,6 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                         )}
                     </div>
                 </div>
-
                 {/* Xác thực email */}
                 <div className="p-4 border-t border-gray-200">
                     {user && user.email_verified_at === null && (

@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'), // Mật khẩu là: password
         ]);
 
-        $categories = Category::factory()->count(3)->create();
+        $categories = Category::factory()->count(6)->create();
 
         Note::factory()->count(2)->create([
             'user_id' => $testUser->id,

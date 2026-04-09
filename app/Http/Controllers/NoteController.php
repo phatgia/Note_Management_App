@@ -14,9 +14,11 @@ class NoteController extends Controller
     public function index()
     {
         $categories = \App\Models\Category::all();
-        $notes = Note::where('user_id', auth()->id())
+        $notes = Note::with('category')
+            ->where('user_id', auth()->id())
             ->latest()
             ->get();
+
         return Inertia::render('note/home', [
             'notes' => $notes,
             'categories' => $categories,

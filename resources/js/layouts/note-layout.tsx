@@ -25,6 +25,8 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
+    const { url } = usePage();
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -56,13 +58,13 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
             {/* Trái */}
             <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
                 {/* Logo */}
-                <div className="flex border-b border-gray-200 pb-4 px-4 py-9">
+                <Link href="/home" className="cursor-pointer flex border-b border-gray-200 pb-4 px-4 py-9">
                     <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
                         <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
                     </svg>
                     <p className="font-bold text-xl ml-2">Note Management</p>
-                </div>
+                </Link>
 
                 {/* Thanh tìm kiếm */}
                 <div className="px-4 py-4">
@@ -81,12 +83,35 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                 <div className="flex-1 overflow-y-auto px-4">
                     <p className="text-xs font-semibold text-gray-400 mb-2 mt-2 uppercase tracking-wider">Danh mục</p>
                     
-                    <Link href="/home" className="flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors">
+                    <Link href="/home" className={url.startsWith('/home')?"flex items-center justify-between bg-orange-200 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors": "flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
                         <div className="flex items-center gap-3">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                             </svg>
                             <span className="font-medium text-sm">Tất cả ghi chú</span>
+                        </div>
+                        <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            {noteCount ?? 0}
+                        </span>
+                    </Link>
+
+                    <Link  href="/shared-note" className={url.startsWith('/shared-note')?"flex items-center justify-between bg-orange-200 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors":"flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
+                        <div className="flex items-center gap-3">
+                                <svg 
+                                    xmlns="http://www.w3.org/2000/svg" 
+                                    fill="none" 
+                                    viewBox="0 0 24 24" 
+                                    strokeWidth={1.5} 
+                                    stroke="currentColor" 
+                                    className="w-5 h-5 text-orange-500 group-hover:text-orange-500 transition-colors"
+                                >
+                                <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" 
+                                />
+                                </svg>
+                            <span className="font-medium text-sm">Được chia sẻ</span>
                         </div>
                         <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                             {noteCount ?? 0}

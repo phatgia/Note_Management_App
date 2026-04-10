@@ -52,15 +52,15 @@ export default function Security({
     }, [twoFactorEnabled, clearTwoFactorAuthData]);
 
     return (
-        <div className="w-full bg-[#F8F9FA] min-h-screen pb-12">
+        <div className="w-full bg-background min-h-screen pb-12">
             <Head title="Bảo mật"/>
 
-            <div className=" sticky top-0 bg-white border-b border-gray-200  text-2xl font-bold p-6.5 z-10">
+            <div className=" sticky top-0 bg-background text-card-foreground border-b border-gray-200  text-2xl font-bold p-6.5 z-10">
                 <h1>Bảo mật</h1>
             </div>
 
             <div className="space-y-6">
-                <div className="p-6 bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden w-1/3 m-10">
+                <div className="p-6 bg-card border border-gray-300 rounded-xl shadow-sm overflow-hidden w-1/3 m-10">
                     <div className="px-6 py-4 border-b border-gray-300 flex items-center gap-2">
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
@@ -68,7 +68,7 @@ export default function Security({
                             viewBox="0 0 24 24" 
                             strokeWidth={1.5} 
                             stroke="currentColor" 
-                            className="w-5 h-5 text-gray-500 hover:text-orange-500 cursor-pointer transition-colors"
+                            className="w-5 h-5 text-orange-500 hover:text-orange-500 cursor-pointer transition-colors"
                         >
                             <path 
                                 strokeLinecap="round" 
@@ -76,7 +76,7 @@ export default function Security({
                                 d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" 
                             />
                         </svg>
-                        <h2 className="font-bold text-gray-800 text-md">Thay đổi mật khẩu của bạn</h2>
+                        <h2 className="font-bold text-card-foreground text-md">Thay đổi mật khẩu của bạn</h2>
                     </div>
                     
                     <Form
@@ -99,7 +99,7 @@ export default function Security({
                                 currentPasswordInput.current?.focus();
                             }
                         }}
-                        className="space-y-6"
+                        className="space-y-6 dark:text-white"
                     >
                         {({ errors, processing, recentlySuccessful }) => (
                             <>
@@ -157,7 +157,7 @@ export default function Security({
                                     <Button
                                         disabled={processing}
                                         data-test="update-password-button"
-                                        className="text-white bg-orange-500 hover:bg-orange-600 cursor-pointer"
+                                        className="dark:bg-card dark:border border-orange-600 text-white bg-orange-500 hover:bg-orange-600 cursor-pointer"
                                     >
                                         Lưu mật khẩu
                                     </Button>

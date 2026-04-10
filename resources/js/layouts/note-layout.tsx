@@ -90,7 +90,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                 <div className="flex-1 overflow-y-auto px-4">
                     <p className="text-xs font-semibold text-gray-400 mb-2 mt-2 uppercase tracking-wider">Danh mục</p>
                     
-                    <Link href="/home" className={url.startsWith('/home')?"flex items-center justify-between bg-orange-200 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors": "flex items-center justify-between bg-card text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
+                    <Link href="/home" className={url.startsWith('/home')?"flex items-center justify-between bg-orange-200 dark:bg-card dark:border border-orange-500 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100  transition-colors": "flex items-center justify-between bg-card dark:hover:bg-gray-100 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
                         <div className="flex items-center gap-3">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -102,7 +102,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                         </span>
                     </Link>
 
-                    <Link  href="/shared-note" className={url.startsWith('/shared-note')?"flex items-center justify-between bg-orange-200 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors":"flex items-center justify-between bg-card text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
+                    <Link  href="/shared-note" className={url.startsWith('/shared-note')?"flex items-center justify-between bg-orange-200 dark:bg-card dark:border border-orange-500 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors":"flex items-center justify-between bg-card dark:hover:bg-gray-100 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
                         <div className="flex items-center gap-3 ">
                                 <svg 
                                     xmlns="http://www.w3.org/2000/svg" 
@@ -158,7 +158,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                 {/* Xác thực email */}
                 <div className="p-4 border-t border-gray-200">
                     {user && user.email_verified_at === null && (
-                        <div className="border rounded-xl bg-orange-50 p-3 mb-3 text-xs flex flex-col gap-2 shadow-sm">
+                        <div className="border rounded-xl bg-card p-3 mb-3 text-xs flex flex-col gap-2 shadow-sm">
                             <div className="flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-500">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
@@ -169,7 +169,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                             <button 
                                 onClick={handleResend} 
                                 disabled={processing} 
-                                className="w-full bg-white border border-orange-200 font-bold text-orange-600 hover:bg-orange-50 hover:text-orange-700 cursor-pointer disabled:opacity-50 py-1.5 rounded-lg transition-colors text-center"
+                                className="w-full bg-card border border-orange-200 font-bold text-orange-600 hover:bg-orange-50 hover:text-orange-700 cursor-pointer disabled:opacity-50 py-1.5 rounded-lg transition-colors text-center"
                             >
                                 {processing ? 'Đang gửi...' : 'Gửi lại mã xác minh'}
                             </button>
@@ -217,7 +217,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                                 </div>
                             )}
 
-                            <button onClick={()=>setIsMenuOpen(!isMenuOpen)} className="flex items-center justify-between gap-2 cursor-pointer w-full text-left p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                            <button onClick={()=>setIsMenuOpen(!isMenuOpen)} className="flex items-center justify-between gap-2 cursor-pointer w-full text-left p-2 rounded-lg transition-colors">
                                 <div className="flex items-center gap-3 flex-1 overflow-hidden group">
                                     {user.avatar ? (
                                         <img 
@@ -226,13 +226,13 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                                             className="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0 shadow-sm"
                                         />
                                     ) : (
-                                        <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 border border-orange-200 flex items-center justify-center font-bold text-lg group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0">
+                                        <div className="w-10 h-10 rounded-full dark:bg-card bg-orange-100 text-orange-600  border border-orange-500 flex items-center justify-center font-bold text-lg group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0">
                                             {user.name.charAt(0).toUpperCase()}
                                         </div>                           
                                     )}
 
                                     <div className="flex-1 overflow-hidden">
-                                        <p className="text-sm font-bold text-gray-800 truncate group-hover:text-orange-500 transition-colors">{user.name}</p>
+                                        <p className="text-sm font-bold text-gray-800 dark:text-orange-500 truncate group-hover:text-orange-500 transition-colors">{user.name}</p>
                                         <p className="text-xs text-gray-500 truncate">{user.email}</p>
                                     </div>
                                 </div>

@@ -25,18 +25,18 @@ export default function Home({ notes,categories }: any) {
     return (
         <NoteLayout title="Tất cả ghi chú" noteCount={notes.length} categories={categories}>
             {/* Thanh tiêu đề và Nút tạo mới */}
-            <div className="sticky top-0 bg-background flex items-center justify-between border-b border-gray-200 p-6 z-10">
+            <div className="sticky top-0 bg-card flex items-center justify-between border-b border-gray-200 p-6 z-10">
                 <h1 className="text-2xl font-bold text-foreground">Ghi chú được chia sẻ</h1>
                 
                 <div className="flex items-center gap-4">
-                    <button onClick={gridView} className="bg-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2">
+                    <button onClick={gridView} className="bg-orange-500 dark:bg-card border-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2">
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
                             fill="none" 
                             viewBox="0 0 24 24" 
                             strokeWidth={1.5} 
                             stroke="currentColor" 
-                            className="w-5 h-5 text-white cursor-pointer transition-colors"
+                            className="w-5 h-5 text-white dark:text-orange-500 cursor-pointer "
                         >
                         <path 
                             strokeLinecap="round" 
@@ -46,14 +46,14 @@ export default function Home({ notes,categories }: any) {
                         </svg>
                     </button>
 
-                    <button onClick={listview} className="bg-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2">
+                    <button onClick={listview} className="bg-orange-500 dark:bg-card border-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2">
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
                             fill="none" 
                             viewBox="0 0 24 24" 
                             strokeWidth={1.5} 
                             stroke="currentColor" 
-                            className="w-5 h-5 text-white cursor-pointer transition-colors"
+                            className="w-5 h-5 text-white dark:text-orange-500 cursor-pointer"
                         >
                         <path 
                             strokeLinecap="round" 
@@ -65,7 +65,7 @@ export default function Home({ notes,categories }: any) {
                 
                     <Link 
                         href="/create-note" 
-                        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm transition-colors"
+                        className="bg-orange-500 dark:bg-card border border-orange-500 dark:text-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm "
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

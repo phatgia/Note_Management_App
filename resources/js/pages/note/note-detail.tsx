@@ -43,18 +43,18 @@ export default function NoteDetail({ note }: any) {
 
     return(
         <NoteLayout title={data.title} noteCount={0}>
-            <div className="w-full bg-gray-100 min-h-screen pb-12 overflow-y-auto">
+            <div className="w-full bg-gray-100 dark:bg-background min-h-screen pb-12 overflow-y-auto">
                 <Head title="Chỉnh sửa ghi chú" />
 
                 {/* Thanh Header: Nút Quay lại & Nút Hành động */}
-                <div className="flex items-center justify-between sticky top-0 bg-white border-b border-gray-200 p-6 z-10 shadow-sm">
+                <div className="flex items-center justify-between sticky top-0 bg-white dark:bg-card border-b border-gray-200 p-6 z-10 shadow-sm">
                     <div className="flex items-center gap-4">
                         <Link href="/home" className="p-2 -ml-2 rounded-full hover:bg-orange-50 transition-colors group">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dark:text-orange-500 w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-colors">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                             </svg>
                         </Link>
-                        <span className="text-sm font-medium text-gray-500">
+                        <span className="text-sm font-medium text-gray-500 dark:text-card-foreground">
                             Cập nhật lần cuối: {new Date(note.updated_at).toLocaleDateString('vi-VN')}
                         </span>
                     </div>
@@ -64,11 +64,11 @@ export default function NoteDetail({ note }: any) {
                 <div className="max-w-7xl mx-auto p-6 lg:p-8 flex flex-col lg:flex-row gap-6 items-start">
                                     
                     {/* Trái*/}
-                    <form className="flex-1 w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
+                    <form className="flex-1 w-full bg-white dark:bg-card border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
                         
                         {/* Tiêu đề */}
                         <div>
-                            <Label htmlFor="title" className="text-sm font-bold text-gray-700">Tiêu đề</Label>
+                            <Label htmlFor="title" className="dark:text-card-foreground text-sm font-bold text-gray-700">Tiêu đề</Label>
                             <input 
                                 id="title" 
                                 type="text"
@@ -76,14 +76,14 @@ export default function NoteDetail({ note }: any) {
                                 onChange={(e) => setData('title', e.target.value)}
                                 required 
                                 placeholder="Nhập tiêu đề ghi chú..."
-                                className="mt-2 w-full text-lg font-semibold bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                                className="dark:bg-card dark:text-white mt-2 w-full text-lg font-semibold bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                             />
                             <InputError message={errors.title} className="mt-2" />
                         </div>
 
                         {/* Thanh công cụ định dạng*/}
                         <div className="flex items-center gap-4 border-y border-gray-100 py-3">
-                            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-200">
+                            <div className="dark:bg-card flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-200">
                                 <button type="button" className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded-md transition-colors font-serif font-bold w-8 h-8 flex items-center justify-center">B</button>
                                 <button type="button" className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded-md transition-colors font-serif italic w-8 h-8 flex items-center justify-center">I</button>
                                 <button type="button" className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded-md transition-colors font-serif underline w-8 h-8 flex items-center justify-center">U</button>
@@ -102,13 +102,13 @@ export default function NoteDetail({ note }: any) {
                                 required 
                                 rows={10}
                                 placeholder="Bắt đầu viết nội dung ghi chú của bạn ở đây..."
-                                className="w-full bg-transparent border-none focus:ring-0 text-gray-800 text-base leading-relaxed resize-y placeholder-gray-400 p-0"
+                                className="w-full bg-transparent dark:text-white border-none focus:ring-0 text-gray-800 text-base leading-relaxed resize-y placeholder-gray-400 p-0"
                             />
                             <InputError message={errors.content} className="mt-2" />
                         </div>
                         {/* Nhãn */}
                         <div className="border-t flex items-center gap-3 p-3">
-                            <Label className="text-sm text-gray-500 font-semibold">Nhãn</Label>
+                            <Label className="text-sm dark:text-card-foreground text-gray-500 font-semibold">Nhãn</Label>
                             {/* Các loại nhãn */}
                             <div className="flex gap-3">
                                 <div className="rounded-full bg-orange-200 p-1 pl-2 pr-2 flex items-center gap-2">
@@ -182,7 +182,7 @@ export default function NoteDetail({ note }: any) {
                         </div>
 
                         <div className="border-t p-3">
-                            <Label className="text-sm text-gray-500 font-semibold">Màu nền</Label>
+                            <Label className="text-sm dark:text-card-foreground text-gray-500 font-semibold">Màu nền</Label>
                             <div className="flex items-center gap-3 mt-3">
                                 <button className="w-8 h-8 rounded-full border-2 border-orange-500 bg-white shadow-sm ring-2 ring-offset-1 ring-orange-200"></button>
                                 <button className="w-8 h-8 rounded-full border border-gray-200 bg-blue-50 hover:scale-110 transition-transform"></button>
@@ -196,8 +196,8 @@ export default function NoteDetail({ note }: any) {
                     <div className="w-full lg:w-80 space-y-6">
                         
                         {/* Khung Chia sẻ */}
-                        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                            <div className="flex items-center gap-3 bg-gray-50 border-b border-gray-200 px-5 py-3 font-bold text-gray-700 text-sm">
+                        <div className="dark:bg-card bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                            <div className="flex items-center gap-3 dark:bg-card bg-gray-50 border-b border-gray-200 px-5 py-3 font-bold text-gray-700 text-sm">
                                 <svg 
                                     xmlns="http://www.w3.org/2000/svg" 
                                     fill="none" 
@@ -216,12 +216,12 @@ export default function NoteDetail({ note }: any) {
                                 Chia sẻ
                             </div>
 
-                            <div className="flex items-center justify-between p-5 space-y-4">
+                            <div className=" flex items-center justify-between p-5 space-y-4">
                                 <div className="flex items-center gap-3">
                                     <div className="flex items-center justify-center bg-orange-500 rounded-full w-10 h-10">
                                         TA
                                     </div>
-                                    <div className="">
+                                    <div className="dark:text-white">
                                         <h1>Trần Văn A</h1>
                                         <p className="text-xs">a@gmail.com</p>
 
@@ -234,11 +234,11 @@ export default function NoteDetail({ note }: any) {
 
 
                                 {isMenuOpen && (
-                                    <div className="absolute w-48 bg-white border border-gray-200 rounded-xl shadow-lg ">
+                                    <div className="dark:bg-card absolute w-48 bg-white border border-gray-300 rounded-xl ">
                                         <button 
                                             type="button"
                                             onClick={()=>{setIsMenuOpen(false); }}
-                                            className="cursor-pointer px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-2"
+                                            className="dark:bg-card dark:text-orange-500 cursor-pointer px-4 py-2.5 text-sm text-gray-700 hover:text-orange-600 flex items-center gap-2"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
@@ -251,7 +251,7 @@ export default function NoteDetail({ note }: any) {
                                         <button 
                                             type="button"
                                             onClick={()=>{setIsMenuOpen(false);}}
-                                            className="cursor-pointer px-4 py-2.5 text-sm text-red-600 hover:bg-red-50  flex items-center gap-2"
+                                            className="dark:bg-card cursor-pointer px-4 py-2.5 text-sm text-red-600  flex items-center gap-2"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
@@ -263,7 +263,7 @@ export default function NoteDetail({ note }: any) {
                             </div>
 
                             <div className="border-t flex items-center justify-center">
-                                <button className="flex items-center gap-3 cursor-pointer m-3 border border-gray-300 rounded-xl p-3 text-sm">
+                                <button className="dark:bg-card dark:border border-orange-500 dark:text-orange-500 flex items-center gap-3 cursor-pointer m-3 border border-gray-300 rounded-xl p-3 text-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                     </svg>
@@ -273,11 +273,11 @@ export default function NoteDetail({ note }: any) {
                         </div>
 
                         {/* Lưu hoặc xóa*/}
-                        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
+                        <div className="bg-white dark:bg-card border border-gray-200 rounded-2xl shadow-sm p-5">
                             <button 
                                 onClick={funcUpdate}
                                 disabled={processing}
-                                className="mb-3 cursor-pointer border border-gray-200 w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm flex items-center justify-center gap-2"
+                                className="dark:bg-card dark:border dark:text-orange-500 border-orange-500 mb-3 cursor-pointer border border-gray-200 w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm flex items-center justify-center gap-2"
                             >
                                 {/* {processing ? 'Đang lưu...' : 'Lưu ghi chú'}
                                 {!processing && ( */}
@@ -290,7 +290,7 @@ export default function NoteDetail({ note }: any) {
 
                             <button 
                                 onClick={funcDelete}
-                                className="cursor-pointer border border-gray-200 w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm flex items-center justify-center gap-2"
+                                className="cursor-pointer dark:bg-card dark:border dark:text-orange-500 border-orange-500 border border-gray-200 w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm flex items-center justify-center gap-2"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />

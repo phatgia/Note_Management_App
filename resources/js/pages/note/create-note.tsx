@@ -38,7 +38,10 @@ export default function Create({ notes, categories }: any) {
 
     const modules = useMemo(() => ({
         toolbar: { container: "#my-custom-toolbar" }
-    }), []);
+    }), [['bold', 'italic', 'underline', 'strike'], 
+            [{ 'color': [] }, { 'background': [] }],   
+            ['link', 'image'],                        
+            ['clean']]);
     const toggleCategory = (id: number) => {
         let newIds = [...data.category_ids];
         if (newIds.includes(id)) {
@@ -85,40 +88,20 @@ export default function Create({ notes, categories }: any) {
 
                         {/* 2. Nội dung */}
                         <div>
-                            <Label className="text-sm font-bold text-card-foreground mb-2 block">Nội dung</Label>
-                            <div className="bg-white/80 dark:bg-card dark:text-white backdrop-blur-sm rounded-lg border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 transition-all">                               
-                                {/* CUSTOM TOOLBAR */}
-                                <div id="my-custom-toolbar" className="flex flex-wrap items-center gap-2 bg-white/50 dark:bg-card border-b border-gray-200 dark:border-border px-3 py-2 rounded-t-lg">                               
-                                    <span className="ql-formats flex items-center bg-white dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm m-0">    
-                                        <button type="button" className="ql-bold"></button>
-                                        <button type="button" className="ql-italic"></button>
-                                        <button type="button" className="ql-underline"></button>
-                                        <button type="button" className="ql-strike"></button>
-                                    </span>
-
-                                    <span className="ql-formats flex items-center bg-white dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm m-0">
-                                        <select className="ql-color"></select>
-                                        <select className="ql-background"></select>
-                                    </span>
-
-                                    <span className="ql-formats flex items-center bg-white dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm m-0">
-                                        <button type="button" className="ql-link"></button>
-                                        <button type="button" className="ql-image"></button>
-                                    </span>
-
-                                    <span className="ql-formats flex items-center bg-white dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm m-0 ml-auto">
-                                        <button type="button" className="ql-clean"></button>
-                                    </span>
+                                <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 block">Nội dung</Label>
+                                <div className="bg-white/80 dark:bg-card backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 transition-all">
+                                    
+                                    <ReactQuill 
+                                        theme="snow" 
+                                        modules={modules} 
+                                        value={data.content} 
+                                        onChange={(value) => setData('content', value)}
+                                        placeholder="Bắt đầu viết nội dung ghi chú của bạn ở đây..."
+                                        className="border-none [&>.ql-toolbar]:bg-white/50 dark:[&>.ql-toolbar]:bg-gray-800/50 [&>.ql-toolbar]:border-none [&>.ql-toolbar]:border-b [&>.ql-toolbar]:border-gray-200 dark:[&>.ql-toolbar]:border-gray-700 [&>.ql-container.ql-snow]:border-none [&>.ql-container]:text-base [&>.ql-container]:min-h-[250px] dark:text-white"
+                                    />
                                 </div>
-
-                                <ReactQuill 
-                                    theme="snow" modules={modules} value={data.content} onChange={(value) => setData('content', value)}
-                                    placeholder="Bắt đầu viết nội dung ghi chú của bạn ở đây..."
-                                    className="border-none [&>.ql-container.ql-snow]:border-none [&>.ql-container]:text-base [&>.ql-container]:min-h-[250px]"
-                                />
+                                <InputError message={errors.content} className="mt-2" />
                             </div>
-                            <InputError message={errors.content} className="mt-2" />
-                        </div>
 
                         {/* 3. KHU VỰC NHÃN & TẠO NHÃN MỚI TÍCH HỢP ICON */}
                         <div className="border-t border-gray-200/60 flex flex-col gap-3 pt-4">

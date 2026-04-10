@@ -12,6 +12,7 @@ class Note extends Model
         'title',
         'content',
         'image_path',
+        'bg_color',
         'password',
     ];
 

@@ -106,8 +106,11 @@ export default function Home({ notes,categories }: any) {
                 ) : (
                     notes.map((note: any) => (
                         
-                        <Link href={`/note-detail/${note.id}`} key={note.id} className="bg-card border border-orange-200 rounded-2xl p-5 flex flex-col min-h-[16rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                            
+                        <Link 
+                            href={`/note-detail/${note.id}`} 
+                            key={note.id} 
+                            className={`${note.bg_color || 'bg-white'} dark:bg-gray-800/90 border border-orange-200 dark:border-gray-700 rounded-2xl p-5 flex flex-col min-h-[16rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer`}
+                        >                            
                             {/* Icon thẻ */}
                             <div className="flex items-center gap-2 mb-4">
                                 <div className="bg-orange-100 dark:bg-card dark:border border-orange-500 text-orange-500 p-1 rounded-lg">

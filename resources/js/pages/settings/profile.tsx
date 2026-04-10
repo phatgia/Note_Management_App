@@ -62,27 +62,27 @@ export default function Profile({
     };
 
     return (
-        <div className="w-full bg-[#F8F9FA] min-h-screen pb-12">
+        <div className="w-full bg-background min-h-screen pb-12">
             <Head title="Hồ sơ cá nhân" />
 
-            <div className=" sticky top-0 bg-white border-b border-gray-200 text-2xl font-bold p-6.5 z-10">
+            <div className=" sticky top-0 bg-card border-b border-gray-200 text-2xl text-muted-foreground font-bold p-6.5 z-10">
                 <h1>Hồ sơ cá nhân</h1>
             </div>
 
-            <div className="bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden w-1/3 m-10">
-                <div className="px-6 py-4 border-b border-gray-300 flex items-center gap-2">
+            <div className="bg-card border border-gray-300 rounded-xl shadow-sm overflow-hidden w-1/3 m-10">
+                <div className="text-card-foreground px-6 py-4 border-b border-gray-300 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-orange-500">
                         <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
                     </svg>
-                    <h2 className="font-bold text-gray-800 text-md">Thông tin cá nhân</h2>
+                    <h2 className="font-bold text-card-foreground text-md">Thông tin cá nhân</h2>
                 </div>
 
-                <form onSubmit={submitForm} className="space-y-6">
+                <form onSubmit={submitForm} className="text-card-foreground space-y-6">
                     
                     <div className="p-6 border-b border-gray-300 space-y-6 flex justify-between">
                         <div className="">
-                            <p className="font-semibold text-sm text-gray-800">Ảnh đại diện</p>
-                            <p className="text-xs text-gray-500 mt-1">JPG, PNG - tối đa 5MB</p>
+                            <p className="font-semibold text-sm  text-card-foreground">Ảnh đại diện</p>
+                            <p className="text-xs  text-card-foreground mt-1">JPG, PNG - tối đa 5MB</p>
                         </div>
                         <div className=" flex items-center gap-6">
                             
@@ -191,17 +191,17 @@ export default function Profile({
                 </form>
             </div>
             
-            <div className="bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden w-1/3 m-10">
+            <div className="bg-card border border-gray-300 rounded-xl shadow-sm overflow-hidden w-1/3 m-10">
                 <div className="px-6 py-4 border-b border-gray-300 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-orange-500">
                         <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
                     </svg>
-                    <h2 className="font-bold text-gray-800 text-md">Bảo mật</h2>
+                    <h2 className="font-bold text-card-foreground text-md">Bảo mật</h2>
                 </div>
                 <div className="p-6 border-b border-gray-300 space-y-6 flex flex justify-between">
                     <div className="">
-                        <p className="font-semibold text-sm text-gray-800">Đổi mật khẩu</p>
-                        <p className="text-xs text-gray-500 mt-1">Cập nhật mật khẩu đăng nhập</p>
+                        <p className="font-semibold text-sm text-card-foreground">Đổi mật khẩu</p>
+                        <p className="text-xs text-card-foreground mt-1">Cập nhật mật khẩu đăng nhập</p>
                     </div>
                     <div className=" flex items-center gap-6">
                         <div className="flex flex-col gap-2">

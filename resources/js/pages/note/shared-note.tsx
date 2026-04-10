@@ -26,7 +26,7 @@ export default function Home({ notes,categories }: any) {
         <NoteLayout title="Tất cả ghi chú" noteCount={notes.length} categories={categories}>
             {/* Thanh tiêu đề và Nút tạo mới */}
             <div className="sticky top-0 bg-background flex items-center justify-between border-b border-gray-200 p-6 z-10">
-                <h1 className="text-2xl font-bold text-foreground">Tất cả ghi chú</h1>
+                <h1 className="text-2xl font-bold text-foreground">Ghi chú được chia sẻ</h1>
                 
                 <div className="flex items-center gap-4">
                     <button onClick={gridView} className="bg-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2">
@@ -62,7 +62,7 @@ export default function Home({ notes,categories }: any) {
                         />
                         </svg>
                     </button>
-
+                
                     <Link 
                         href="/create-note" 
                         className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm transition-colors"
@@ -79,15 +79,14 @@ export default function Home({ notes,categories }: any) {
             <div className="flex items-center gap-3 m-3 mt-6">
                 <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    fill="currentColor" 
                     viewBox="0 0 24 24" 
-                    strokeWidth={2} 
-                    stroke="currentColor" 
+                    fill="currentColor" 
                     className="w-5 h-5 text-orange-500"
                 >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.158 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
                 </svg>
-                <p className="font-semibold text-muted-foreground">Đã ghim</p>
+                <p className="font-semibold text-muted-foreground">Có thể chỉnh sửa</p>
                 <div className="flex-1 h-[1px] bg-gray-200"></div>
             </div>
 
@@ -106,7 +105,7 @@ export default function Home({ notes,categories }: any) {
                 ) : (
                     notes.map((note: any) => (
                         
-                        <Link href={`/note-detail/${note.id}`} key={note.id} className="bg-card border border-orange-200 rounded-2xl p-5 flex flex-col min-h-[16rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                        <Link href={`/note-detail/${note.id}`} key={note.id} className="bg-white border border-orange-200 rounded-2xl p-5 flex flex-col min-h-[16rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                             
                             {/* Icon thẻ */}
                             <div className="flex items-center gap-2 mb-4">
@@ -126,16 +125,11 @@ export default function Home({ notes,categories }: any) {
                             </p>
 
                             {/* Nhãn Danh mục (Category) - Sẽ hiển thị nếu Ghi chú này có gắn Category */}
-                           {note.categories && note.categories.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mb-4 mt-2">
-                                    {note.categories.map((cat: any) => (
-                                        <span 
-                                            key={cat.id}
-                                            className={`text-xs font-bold px-2.5 py-1 rounded-full border ${cat.color ? cat.color : 'bg-gray-100 text-gray-600 border-gray-200'}`}
-                                        >
-                                            {cat.name || cat.Name}
-                                        </span>
-                                    ))}
+                            {note.category && (
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    <span className="bg-orange-50 text-orange-600 text-xs font-bold px-3 py-1.5 rounded-full border border-orange-100">
+                                        {note.category.name}
+                                    </span>
                                 </div>
                             )}
 
@@ -148,6 +142,30 @@ export default function Home({ notes,categories }: any) {
                         </Link>
                     ))
                 )}
+            </div>
+
+            <div className="flex items-center gap-3 m-3 mt-6">
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    strokeWidth={1.5} 
+                    stroke="currentColor" 
+                    className="w-5 h-5 text-orange-500"
+                >
+                <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" 
+                />
+                <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" 
+                />
+                </svg>
+                <p className="font-semibold text-muted-foreground">Chỉ xem</p>
+                <div className="flex-1 h-[1px] bg-gray-200"></div>
             </div>
         </NoteLayout>
     );

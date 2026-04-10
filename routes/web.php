@@ -22,6 +22,11 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'update'])->name('notes.update');
 
     Route::delete('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'destroy'])->name('notes.destroy');
+    Route::get('/shared-note', function () {
+        return Inertia\Inertia::render('note/shared-note', [
+            'notes' => [] 
+        ]);
+    })->name('shared-note');
 });
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])

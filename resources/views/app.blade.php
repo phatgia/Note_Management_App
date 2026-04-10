@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
-        <script>
+        <!-- <script>
             (function() {
                 const appearance = '{{ $appearance ?? "system" }}';
 
@@ -15,6 +15,22 @@
                     if (prefersDark) {
                         document.documentElement.classList.add('dark');
                     }
+                }
+            })();
+        </script> -->
+        <script>
+            (function() {
+                const savedTheme = localStorage.getItem('theme');
+                const serverTheme = '{{ $appearance ?? "system" }}';
+
+                if (
+                    savedTheme === 'dark' || 
+                    (savedTheme === null && serverTheme === 'dark') || 
+                    (savedTheme === null && serverTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                ) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
                 }
             })();
         </script>
@@ -43,7 +59,7 @@
             <title>{{ config('app.name', 'Laravel') }}</title>
         </x-inertia::head>
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased transition-colors duration-300">
         <x-inertia::app />
     </body>
 </html>

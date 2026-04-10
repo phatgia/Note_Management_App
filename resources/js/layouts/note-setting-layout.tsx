@@ -3,6 +3,8 @@ import React, { PropsWithChildren } from 'react';
 import { logout } from '@/routes';
 import { Link, usePage } from '@inertiajs/react';
 import Home from '@/pages/note/home';
+import { useAppearance } from '@/hooks/use-appearance';
+
 type Props = {
     title: string;
     // noteCount?: number;
@@ -11,12 +13,19 @@ type Props = {
 export default function NoteSettingLayout({ children, title, }: PropsWithChildren<Props>) {
     const { auth } = usePage().props as any;
     const user = auth.user;
+
+    const { resolvedAppearance, updateAppearance } = useAppearance();
+
+    const toggleTheme = () => {
+        updateAppearance(resolvedAppearance === 'light' ? 'dark' : 'light');
+    };
+
     return (
-        <div className="flex h-screen w-full bg-[#F8F9FA] overflow-hidden text-gray-800 font-sans">
+        <div className="flex h-screen w-full bg-background overflow-hidden text-gray-800 font-sans">
             <Head title={title} />
 
             {/* Trái */}
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
+            <aside className="w-64 bg-sidebar border-r border-gray-200 flex flex-col h-full">
                 {/* Logo */}
                 <div className="flex items-center border-b border-gray-200 pb-4 px-4 py-9">
                     <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,12 +34,12 @@ export default function NoteSettingLayout({ children, title, }: PropsWithChildre
                         {/* Góc gập (Màu cam đậm) */}
                         <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
                     </svg>
-                    <p className="font-bold text-xl">Note Management</p>
+                    <p className="font-bold text-card-foreground text-xl">Note Management</p>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-4">
+                <div className="flex-1 overflow-y-auto px-4 mt-3">
                     {/* Quay lại */}
-                    <div className="flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1">
+                    <div className="flex items-center justify-between bg-card text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1">
                         <Link href="/home" className="flex items-center gap-3 cursor-pointer">
                             <svg 
                                 xmlns="http://www.w3.org/2000/svg" 
@@ -50,7 +59,7 @@ export default function NoteSettingLayout({ children, title, }: PropsWithChildre
                         </Link>
                     </div>
                     {/* Hồ sơ cá nhân */}
-                    <div className="flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1">
+                    <div className="flex items-center justify-between bg-card text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1">
                         <Link href="/settings/profile" className="flex items-center gap-3 cursor-pointer">
                             <svg 
                                 xmlns="http://www.w3.org/2000/svg" 
@@ -70,7 +79,7 @@ export default function NoteSettingLayout({ children, title, }: PropsWithChildre
                         </Link>
                     </div>
                     {/* Tùy chọn */}
-                    <div className="flex items-center justify-between bg-orange-50 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1">
+                    <div className="flex items-center justify-between bg-card text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1">
                         <Link href= "/settings/appearance" className="flex items-center gap-3 cursor-pointer">
                             <svg 
                                 xmlns="http://www.w3.org/2000/svg" 
@@ -116,8 +125,23 @@ export default function NoteSettingLayout({ children, title, }: PropsWithChildre
             </aside>
 
             {/* Phải */}
-            <main className="flex-1 flex flex-col h-full overflow-y-auto bg-[#F8F9FA]">
+            <main className="flex-1 flex flex-col h-full overflow-y-auto bg-background">
                 {children}
+                <button 
+                    onClick={toggleTheme}
+                    className="fixed bottom-6 right-6 p-3 rounded-full bg-card border border-border shadow-lg hover:scale-110 transition-all duration-300 z-50 cursor-pointer text-muted-foreground hover:text-orange-500"
+                    title={resolvedAppearance === 'light' ? 'Chuyển sang chế độ tối' : 'Chuyển sang chế độ sáng'}
+                >
+                    {resolvedAppearance === 'light' ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                        </svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-yellow-500">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                        </svg>
+                    )}
+                </button>
             </main>
         </div>
     );

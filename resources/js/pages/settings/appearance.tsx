@@ -6,15 +6,15 @@ import NoteSettingLayout from '@/layouts/note-setting-layout';
 
 export default function Appearance() {
     return (
-        <div className="w-full bg-[#F8F9FA] min-h-screen pb-12">
+        <div className="w-full bg-background min-h-screen pb-12">
             <Head title="Tùy chỉnh"/>
 
-            <div className=" sticky top-0 bg-white border-b border-gray-200  text-2xl font-bold p-6.5 z-10">
+            <div className=" sticky top-0 bg-background border-b border-gray-200 text-card-foreground  text-2xl font-bold p-6.5 z-10">
                 <h1>Tùy chọn giao diện</h1>
             </div>
 
             <div className="space-y-6">
-                <div className="p-6 bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden w-1/2 m-10">
+                <div className="p-6 bg-card border border-gray-300 rounded-xl shadow-sm overflow-hidden w-1/2 m-10">
                     <div className="text-2xl font-bold px-6 py-4 border-b border-gray-300 flex items-center gap-2">
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
@@ -30,16 +30,16 @@ export default function Appearance() {
                                 d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" 
                             />
                         </svg>
-                        <h2 className="font-bold text-gray-800 text-md">Giao diện</h2>
+                        <h2 className="font-bold text-card-foreground text-md">Giao diện</h2>
                     </div>
 
                     <div className="px-6 py-4 border-b border-gray-300 flex items-center justify-between">
-                        <p className="font-bold">Chế độ tối</p>
+                        <p className="font-bold text-card-foreground">Chế độ tối</p>
                         <AppearanceTabs/>
                     </div>
 
                     <div className="px-6 py-4 border-b border-gray-300 flex items-center justify-between">
-                        <p className="font-bold">Cỡ chữ</p>
+                        <p className="font-bold text-card-foreground">Cỡ chữ</p>
                         <div className="text-xs gap-2 flex p-1">
                             <button className="cursor-pointer bg-white p-2 rounded-lg border border-gray-400 pl-4 pr-4">Nhỏ</button>
                             <button className="cursor-pointer bg-orange-400 p-2 rounded-lg border border-gray-400 pl-4 pr-4">Vừa</button>
@@ -48,7 +48,7 @@ export default function Appearance() {
                     </div>
 
                     <div className="px-6 py-4 border-b border-gray-300 flex items-center justify-between">
-                        <p className="font-bold">Màu nền mặc định cho ghi chú</p>
+                        <p className="font-bold text-card-foreground">Màu nền mặc định cho ghi chú</p>
                         <div className="gap-5 flex rounded-xl p-1">
                             <button className="cursor-pointer bg-white p-2 rounded-lg border border-gray-400"></button>
                             <button className="cursor-pointer bg-orange-200 p-2 rounded-lg border border-gray-400"></button>
@@ -59,7 +59,7 @@ export default function Appearance() {
                     </div>
 
                     <div className="px-6 py-4 border-b border-gray-300 flex items-center justify-between">
-                        <p className="font-bold">Hiển thị mặc định</p>
+                        <p className="font-bold text-card-foreground">Hiển thị mặc định</p>
                         <div className="text-xs gap-5 flex rounded-xl p-1">
                             <button className="cursor-pointer flex items-center gap-1 bg-white p-2 rounded-lg border border-gray-400">
                                 <svg 

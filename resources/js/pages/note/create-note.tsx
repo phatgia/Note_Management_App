@@ -55,58 +55,60 @@ export default function Create({ notes, categories }: any) {
 
     return (
         <NoteLayout title="Tạo ghi chú" noteCount={notes?.length || 0} categories={categories}>
-            <div className="w-full bg-[#F8F9FA] min-h-screen pb-12 overflow-y-auto">
+            <div className="w-full bg-background min-h-screen pb-12 overflow-y-auto">
                 <Head title="Tạo ghi chú" />
 
                 {/* --- THANH TIÊU ĐỀ --- */}
-                <div className="flex items-center gap-4 sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
-                    <Link href="/home" className="p-2 -ml-2 rounded-full hover:bg-orange-50 transition-colors group">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-colors">
+                <div className="flex items-center gap-4 sticky top-0 bg-card border-b border-gray-200 p-6 z-10">
+                    <Link href="/home" className="p-2 -ml-2 rounded-full transition-colors group">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dark:text-orange-500 w-6 h-6 text-gray-500">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                         </svg>
                     </Link>
-                    <h1 className="text-2xl font-bold text-gray-900">Tạo ghi chú mới</h1>
+                    <h1 className="text-2xl font-bold text-card-foreground">Tạo ghi chú mới</h1>
                 </div>
 
                 <div className="max-w-7xl mx-auto p-6 lg:p-8 flex flex-col lg:flex-row gap-6 items-start">
                     
                     {/* Trái*/}
-                    <form onSubmit={submit} className="flex-1 w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
+                    <form onSubmit={submit} className="flex-1 w-full bg-card border border-gray-300 rounded-2xl shadow-sm p-6 space-y-6">
                         
                         {/* 1. Tiêu đề */}
                         <div>
-                            <Label htmlFor="title" className="text-sm font-bold text-gray-700">Tiêu đề</Label>
+                            <Label htmlFor="title" className="text-sm font-bold text-card-foreground">Tiêu đề</Label>
                             <input 
                                 id="title" type="text" value={data.title} onChange={(e) => setData('title', e.target.value)} required placeholder="Nhập tiêu đề ghi chú..."
-                                className="mt-2 w-full text-lg font-semibold bg-white/60 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all backdrop-blur-sm"
+                                className="mt-2 w-full text-lg font-semibold bg-white/60 dark:bg-card dark:text-white border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all backdrop-blur-sm"
                             />
                             <InputError message={errors.title} className="mt-2" />
                         </div>
 
                         {/* 2. Nội dung */}
                         <div>
-                            <Label className="text-sm font-bold text-gray-700 mb-2 block">Nội dung</Label>
-                            <div className="bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 transition-all">
-                                
+                            <Label className="text-sm font-bold text-card-foreground mb-2 block">Nội dung</Label>
+                            <div className="bg-white/80 dark:bg-card dark:text-white backdrop-blur-sm rounded-lg border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 transition-all">                               
                                 {/* CUSTOM TOOLBAR */}
-                                <div id="my-custom-toolbar" className="flex items-center gap-4 bg-white/50 border-b border-gray-200 px-3 py-2">
-                                    <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-gray-200 shadow-sm">
-                                        <button type="button" className="ql-bold w-8 h-8 rounded hover:bg-gray-100 transition-colors"></button>
-                                        <button type="button" className="ql-italic w-8 h-8 rounded hover:bg-gray-100 transition-colors"></button>
-                                        <button type="button" className="ql-underline w-8 h-8 rounded hover:bg-gray-100 transition-colors"></button>
-                                        <button type="button" className="ql-strike w-8 h-8 rounded hover:bg-gray-100 transition-colors"></button>
-                                    </div>
-                                    <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-gray-200 shadow-sm">
+                                <div id="my-custom-toolbar" className="flex flex-wrap items-center gap-2 bg-white/50 dark:bg-card border-b border-gray-200 dark:border-border px-3 py-2 rounded-t-lg">                               
+                                    <span className="ql-formats flex items-center bg-white dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm m-0">    
+                                        <button type="button" className="ql-bold"></button>
+                                        <button type="button" className="ql-italic"></button>
+                                        <button type="button" className="ql-underline"></button>
+                                        <button type="button" className="ql-strike"></button>
+                                    </span>
+
+                                    <span className="ql-formats flex items-center bg-white dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm m-0">
                                         <select className="ql-color"></select>
                                         <select className="ql-background"></select>
-                                    </div>
-                                    <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-gray-200 shadow-sm">
-                                        <button type="button" className="ql-link w-8 h-8 rounded hover:bg-gray-100 transition-colors"></button>
-                                        <button type="button" className="ql-image w-8 h-8 rounded hover:bg-gray-100 transition-colors"></button>
-                                    </div>
-                                    <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-gray-200 shadow-sm ml-auto">
-                                        <button type="button" className="ql-clean w-8 h-8 rounded hover:bg-gray-100 transition-colors"></button>
-                                    </div>
+                                    </span>
+
+                                    <span className="ql-formats flex items-center bg-white dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm m-0">
+                                        <button type="button" className="ql-link"></button>
+                                        <button type="button" className="ql-image"></button>
+                                    </span>
+
+                                    <span className="ql-formats flex items-center bg-white dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm m-0 ml-auto">
+                                        <button type="button" className="ql-clean"></button>
+                                    </span>
                                 </div>
 
                                 <ReactQuill 
@@ -120,7 +122,7 @@ export default function Create({ notes, categories }: any) {
 
                         {/* 3. KHU VỰC NHÃN & TẠO NHÃN MỚI TÍCH HỢP ICON */}
                         <div className="border-t border-gray-200/60 flex flex-col gap-3 pt-4">
-                            <Label className="text-sm text-gray-500 font-semibold">Nhãn</Label>
+                            <Label className="text-sm text-card-foreground font-semibold">Nhãn</Label>
                             
                             <div className="flex gap-3 flex-wrap items-center">
                                 {/* Load danh sách nhãn cũ */}
@@ -142,7 +144,7 @@ export default function Create({ notes, categories }: any) {
 
                                 {/* Form tạo Nhãn mới */}
                                 {isAddingTag ? (
-                                    <div className="flex flex-col gap-2 bg-white border border-gray-300 rounded-xl p-2 shadow-sm animate-in fade-in zoom-in duration-200">
+                                    <div className="flex flex-col gap-2 bg-card border border-gray-300 rounded-xl p-2 shadow-sm animate-in fade-in zoom-in duration-200">
                                         
                                         <div className="flex items-center gap-2">
                                             <input 
@@ -155,7 +157,7 @@ export default function Create({ notes, categories }: any) {
                                             <button 
                                                 type="button" 
                                                 onClick={() => { setIsAddingTag(false); setData('new_category_name', ''); }} 
-                                                className="ml-auto text-gray-400 hover:text-red-500 p-1 bg-gray-50 rounded-md"
+                                                className="ml-auto dark:bg-card cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 rounded-md"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
                                             </button>
@@ -170,7 +172,7 @@ export default function Create({ notes, categories }: any) {
                                                     <button
                                                         key={iconKey} type="button"
                                                         onClick={() => setData('new_category_icon', iconKey)}
-                                                        className={`p-1 rounded-md transition-all ${data.new_category_icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`}
+                                                        className={` cursor-pointer p-1 rounded-md transition-all ${data.new_category_icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300 ' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`}
                                                     >
                                                         {ICONS[iconKey]}
                                                     </button>
@@ -183,7 +185,7 @@ export default function Create({ notes, categories }: any) {
                                                     <button
                                                         key={idx} type="button"
                                                         onClick={() => setData('new_category_color', colorClass)}
-                                                        className={`w-5 h-5 rounded-full border transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${data.new_category_color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`}
+                                                        className={`w-5 h-5 rounded-full border cursor-pointer transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${data.new_category_color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`}
                                                     />
                                                 ))}
                                             </div>
@@ -192,7 +194,7 @@ export default function Create({ notes, categories }: any) {
                                 ) : (
                                     <button 
                                         type="button" onClick={() => setIsAddingTag(true)}
-                                        className="text-sm border border-orange-400 border-dashed bg-white flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 transition-colors text-orange-600 font-medium items-center gap-1"
+                                        className="dark:bg-card text-sm border border-orange-500 border-dashed bg-white flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 transition-colors text-orange-600 font-medium items-center gap-1"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                                             <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
@@ -205,7 +207,7 @@ export default function Create({ notes, categories }: any) {
 
                         {/* 4. Màu nền bài viết */}
                         <div className="border-t border-gray-200/60 pt-4 flex items-center gap-6">
-                            <Label className="text-sm text-gray-500 font-semibold">Màu nền</Label>
+                            <Label className="text-sm text-card-foreground font-semibold">Màu nền</Label>
                             <div className="flex items-center gap-3">
                                 <button type="button" onClick={() => setData('bg_color', 'bg-white')} className={`w-8 h-8 rounded-full border-2 bg-white shadow-sm transition-all ${data.bg_color === 'bg-white' ? 'border-orange-500 ring-4 ring-orange-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
                                 <button type="button" onClick={() => setData('bg_color', 'bg-blue-50')} className={`w-8 h-8 rounded-full border-2 bg-blue-50 shadow-sm transition-all ${data.bg_color === 'bg-blue-50' ? 'border-blue-500 ring-4 ring-blue-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
@@ -217,8 +219,8 @@ export default function Create({ notes, categories }: any) {
 
                     {/* CỘT PHẢI */}
                     <div className="w-full lg:w-80 space-y-6">
-                        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
-                            <button onClick={submit} disabled={processing} className="w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                        <div className="bg-card border border-gray-300 rounded-2xl shadow-sm p-5">
+                            <button onClick={submit} disabled={processing} className="cursor-pointer w-full py-3 px-4 bg-orange-500 dark:bg-card dark:border border-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
                                 {processing ? 'Đang lưu...' : 'Lưu ghi chú'}
                                 {!processing && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>}
                             </button>

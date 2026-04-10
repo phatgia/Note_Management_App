@@ -141,3 +141,33 @@
         @apply bg-background text-foreground;
     }
 }
+
+
+.ql-toolbar button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+.dark .ql-snow .ql-stroke {
+    stroke: #d1d5db !important; 
+}
+
+.dark .ql-snow .ql-fill, 
+.dark .ql-snow .ql-stroke.ql-fill {
+    fill: #d1d5db !important;
+}
+
+.dark .ql-snow .ql-picker {
+    color: #d1d5db !important;
+}
+
+.dark .ql-snow .ql-picker-options {
+    background-color: var(--card) !important;
+    border-color: var(--border) !important;
+}
+
+.dark .ql-snow.ql-toolbar button:hover .ql-stroke,
+.dark .ql-snow .ql-toolbar button:hover .ql-stroke {
+    stroke: #f97316 !important; 
+}

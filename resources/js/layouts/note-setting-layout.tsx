@@ -107,7 +107,7 @@ export default function NoteSettingLayout({ children, title, }: PropsWithChildre
 
                 <div className="p-4 border-t border-gray-200">
                     <div className="flex items-center justify-center gap-3">
-                        <button onClick={() => router.post(logout())} className="cursor-pointer hover:text-orange-600 text-orange-400 items-center flex gap-3 p-2 text-gray-400 hover:bg-gray-100 hover:text-orange-500 rounded-lg transition-colors border border-transparent hover:border-gray-200">
+                        <button onClick={() => router.post(logout())} className="flex items-center gap-2 cursor-pointer text-orange-500">
                             <svg 
                                     xmlns="http://www.w3.org/2000/svg" 
                                     fill="none" 

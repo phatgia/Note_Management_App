@@ -119,11 +119,16 @@ const { viewMode, updateViewMode } = useViewMode();
                             </p>
 
                             {/* Nhãn Danh mục (Category) - Sẽ hiển thị nếu Ghi chú này có gắn Category */}
-                            {note.category && (
-                                <div className="flex flex-wrap gap-2 mb-4">
-                                    <span className="bg-orange-50 text-orange-600 text-xs font-bold px-3 py-1.5 rounded-full border border-orange-100">
-                                        {note.category.name}
-                                    </span>
+                           {note.categories && note.categories.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-4 mt-2">
+                                    {note.categories.map((cat: any) => (
+                                        <span 
+                                            key={cat.id}
+                                            className={`text-xs font-bold px-2.5 py-1 rounded-full border ${cat.color ? cat.color : 'bg-gray-100 text-gray-600 border-gray-200'}`}
+                                        >
+                                            {cat.name || cat.Name}
+                                        </span>
+                                    ))}
                                 </div>
                             )}
 

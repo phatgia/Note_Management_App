@@ -19,6 +19,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('note', NoteController::class)->except(['index']);
     Route::get('/create-note', [NoteController::class, 'create'])->name('create-note');
     Route::get('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'show'])->name('notes.show');
+    Route::put('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'update'])->name('notes.update');
+
+    Route::delete('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'destroy'])->name('notes.destroy');
     Route::get('/shared-note', function () {
         return Inertia\Inertia::render('note/shared-note', [
             'notes' => [] 

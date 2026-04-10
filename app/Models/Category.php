@@ -15,6 +15,6 @@ class Category extends Model
     ];
     public function notes()
     {
-        return $this->hasMany(Note::class);
+        return $this->belongsToMany(Note::class);
     }
 }

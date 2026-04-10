@@ -26,10 +26,10 @@ const ICONS: Record<string, React.ReactNode> = {
 export default function Create({ notes, categories }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
 
-    const { data, setData, post, processing, errors } = useForm({
+   const { data, setData, post, processing, errors } = useForm({
         title: '',
         content: '',
-        category_id: null as number | null, 
+        category_ids: [] as number[], 
         new_category_name: '',                     
         new_category_color: TAG_COLORS[0], 
         new_category_icon: 'tag', 
@@ -39,7 +39,15 @@ export default function Create({ notes, categories }: any) {
     const modules = useMemo(() => ({
         toolbar: { container: "#my-custom-toolbar" }
     }), []);
-
+    const toggleCategory = (id: number) => {
+        let newIds = [...data.category_ids];
+        if (newIds.includes(id)) {
+            newIds = newIds.filter(item => item !== id); 
+        } else {
+            newIds.push(id);
+        }
+        setData('category_ids', newIds);
+    };
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/note'); 
@@ -122,19 +130,14 @@ export default function Create({ notes, categories }: any) {
                                     categories.map((cat: any) => (
                                         <button 
                                             key={cat.id} type="button"
-                                            onClick={() => {
-                                                setData('category_id', cat.id);
-                                                setData('new_category_name', ''); 
-                                                setIsAddingTag(false);
-                                            }}
+                                            onClick={() => toggleCategory(cat.id)}
                                             className={`rounded-full px-3 py-1.5 flex items-center gap-2 text-sm font-medium border transition-all 
                                                 ${cat.color ? cat.color : 'bg-gray-100 text-gray-700 border-gray-200'} 
-                                                ${data.category_id === cat.id ? 'ring-2 ring-offset-2 ring-gray-400 scale-105 shadow-md' : 'hover:scale-105 opacity-80 hover:opacity-100'}
+                                                ${data.category_ids.includes(cat.id) ? 'ring-2 ring-offset-2 ring-gray-400 scale-105 shadow-md' : 'hover:scale-105 opacity-80 hover:opacity-100'}
                                             `}
                                         >
-                                            {/* Hiển thị Icon từ CSDL, nếu lỗi thì dùng icon 'tag' */}
                                             {ICONS[cat.icon] || ICONS['tag']}
-                                            {cat.name} 
+                                            {cat.name || cat.Name} 
                                         </button>
                                     ))
                                 )}
@@ -148,7 +151,6 @@ export default function Create({ notes, categories }: any) {
                                                 type="text" autoFocus placeholder="Tên nhãn mới..." value={data.new_category_name}
                                                 onChange={(e) => {
                                                     setData('new_category_name', e.target.value);
-                                                    setData('category_id', null); 
                                                 }}
                                                 className="text-sm border-none bg-transparent focus:ring-0 p-0 w-40 text-gray-700 placeholder-gray-400 font-medium"
                                             />

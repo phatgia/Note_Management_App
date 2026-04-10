@@ -6,15 +6,13 @@ use App\Models\Category;
 use App\Models\Note;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+
 class NoteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $categories = \App\Models\Category::all();
-        $notes = Note::with('category')
+        $notes = Note::with('categories') 
             ->where('user_id', auth()->id())
             ->latest()
             ->get();
@@ -25,24 +23,25 @@ class NoteController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $categories = Category::all();
-        return Inertia::render('note/create-note', ['category' => $categories]);
+        $categories = \App\Models\Category::all();
+        $notes = \App\Models\Note::where('user_id', auth()->id())->get();
+
+        return Inertia::render('note/create-note', [
+            'categories' => $categories,
+            'notes' => $notes,
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'category_id' => 'nullable|exists:categories,id',
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'exists:categories,id',
             'new_category_name' => 'nullable|string|max:50',
             'new_category_color' => 'nullable|string',
             'new_category_icon' => 'nullable|string',
@@ -50,7 +49,8 @@ class NoteController extends Controller
             'image_path' => 'nullable|string',
             'password' => 'nullable|string'
         ]);
-        $categoryId = $request->category_id;
+
+        $categoryIds = $request->category_ids ?? [];
 
         if ($request->filled('new_category_name')) {
             $newCategory = \App\Models\Category::create([
@@ -58,63 +58,54 @@ class NoteController extends Controller
                 'color' => $request->new_category_color,
                 'icon' => $request->new_category_icon,
             ]);
-            $categoryId = $newCategory->id;
+            $categoryIds[] = $newCategory->id;
         }
 
-        $validated['category_id'] = $categoryId;
-
-        $request->user()->notes()->create([
+        $note = $request->user()->notes()->create([
             'title' => $validated['title'],
             'content' => $validated['content'],
-            'category_id' => $validated['category_id'],
             'bg_color' => $validated['bg_color'] ?? 'bg-white',
             'image_path' => $validated['image_path'] ?? null,
             'password' => $validated['password'] ?? null,
         ]);
 
+        $note->categories()->sync($categoryIds);
+
         return redirect()->route('notes.index')
             ->with('message', 'Tạo ghi chú thành công!');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Note $note)
     {
         if ($note->user_id !== auth()->id()) {
             abort(403);
         }
 
-        $note->load('category');
+        $note->load('categories');
 
         $categories = \App\Models\Category::all();
 
         return Inertia::render('note/note-detail', [
             'note' => $note,
-            'categories' => $categories, // Bổ sung dòng này
+            'categories' => $categories,
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Note $note)
     {
-        // Tránh việc user này gõ URL lấy id để sửa ghi chú của user khác
         if ($note->user_id !== auth()->id()) {
             abort(403, 'Bạn không có quyền sửa ghi chú này!');
         }
 
+        $note->load('categories'); 
         $categories = Category::all();
+
         return Inertia::render('note/edit', [
             'note' => $note,
             'categories' => $categories
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Note $note)
     {
         if ($note->user_id !== auth()->id()) {
@@ -124,18 +115,37 @@ class NoteController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'category_id' => 'nullable|exists:categories,id',
+            'category_ids' => 'nullable|array', 
+            'category_ids.*' => 'exists:categories,id',
+            'new_category_name' => 'nullable|string|max:50',
+            'new_category_color' => 'nullable|string',
+            'new_category_icon' => 'nullable|string',
+            'bg_color' => 'nullable|string',
         ]);
 
-        $note->update($validated);
+        $categoryIds = $request->category_ids ?? [];
+
+        if ($request->filled('new_category_name')) {
+            $newCategory = \App\Models\Category::create([
+                'name' => $request->new_category_name,
+                'color' => $request->new_category_color,
+                'icon' => $request->new_category_icon,
+            ]);
+            $categoryIds[] = $newCategory->id;
+        }
+
+        $note->update([
+            'title' => $validated['title'],
+            'content' => $validated['content'],
+            'bg_color' => $validated['bg_color'] ?? 'bg-white',
+        ]);
+
+        $note->categories()->sync($categoryIds);
 
         return redirect()->route('notes.index')
             ->with('message', 'Đã cập nhật ghi chú thành công!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Note $note)
     {
         if ($note->user_id !== auth()->id()) {

@@ -13,11 +13,8 @@ class Note extends Model
         'content',
         'image_path',
         'password',
-        'category_id',
     ];
-    protected $hidden = [
-        'password',
-    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

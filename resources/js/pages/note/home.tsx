@@ -121,9 +121,19 @@ export default function Home({ notes,categories }: any) {
                             <h3 className="font-bold text-card-foreground text-lg mb-2 line-clamp-1" title={note.title}>
                                 {note.title}
                             </h3>
-                            <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                                {stripHtml(note.content)}
-                            </p>
+                            {note.password ? (
+                                <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 font-medium italic mt-3 mb-2 bg-gray-50/50 dark:bg-gray-800/50 p-2 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 w-max">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                        <path fillRule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clipRule="evenodd" />
+                                    </svg>
+                                    <span className="text-xs">Ghi chú đã được bảo mật</span>
+                                </div>
+                            ) : (
+                                <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mt-2 leading-relaxed">
+                                    {/* Hàm in nội dung cũ của bạn, ví dụ: stripHtml(note.content) */}
+                                    {note.content.replace(/(<([^>]+)>)/gi, "")}
+                                </p>
+                            )}
 
                             {/* Nhãn Danh mục (Category) - Sẽ hiển thị nếu Ghi chú này có gắn Category */}
                            {note.categories && note.categories.length > 0 && (

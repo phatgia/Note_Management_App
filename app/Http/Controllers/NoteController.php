@@ -12,7 +12,7 @@ class NoteController extends Controller
     public function index(Request $request)
     {
         $categories = \App\Models\Category::all();
-        
+
         $query = Note::with('categories')
             ->where('user_id', auth()->id())
             ->latest();
@@ -28,7 +28,7 @@ class NoteController extends Controller
         return Inertia::render('note/home', [
             'notes' => $notes,
             'categories' => $categories,
-            'currentCategoryId' => $request->category_id, 
+            'currentCategoryId' => $request->category_id,
         ]);
     }
 
@@ -106,7 +106,7 @@ class NoteController extends Controller
             abort(403, 'Bạn không có quyền sửa ghi chú này!');
         }
 
-        $note->load('categories'); 
+        $note->load('categories');
         $categories = Category::all();
 
         return Inertia::render('note/edit', [
@@ -124,12 +124,13 @@ class NoteController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'category_ids' => 'nullable|array', 
+            'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:categories,id',
             'new_category_name' => 'nullable|string|max:50',
             'new_category_color' => 'nullable|string',
             'new_category_icon' => 'nullable|string',
             'bg_color' => 'nullable|string',
+            'password' => 'nullable|string',
         ]);
 
         $categoryIds = $request->category_ids ?? [];
@@ -147,6 +148,7 @@ class NoteController extends Controller
             'title' => $validated['title'],
             'content' => $validated['content'],
             'bg_color' => $validated['bg_color'] ?? 'bg-white',
+            'password' => $validated['password'],
         ]);
 
         $note->categories()->sync($categoryIds);

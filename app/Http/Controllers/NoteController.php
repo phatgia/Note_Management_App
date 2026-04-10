@@ -9,17 +9,26 @@ use Inertia\Inertia;
 
 class NoteController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $categories = \App\Models\Category::all();
-        $notes = Note::with('categories') 
+        
+        $query = Note::with('categories')
             ->where('user_id', auth()->id())
-            ->latest()
-            ->get();
+            ->latest();
+
+        if ($request->filled('category_id')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('categories.id', $request->category_id);
+            });
+        }
+
+        $notes = $query->get();
 
         return Inertia::render('note/home', [
             'notes' => $notes,
             'categories' => $categories,
+            'currentCategoryId' => $request->category_id, 
         ]);
     }
 

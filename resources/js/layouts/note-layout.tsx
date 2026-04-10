@@ -137,8 +137,13 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                                 return (
                                     <Link 
                                         key={cat.id}
-                                        href={`#`} 
-                                        className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors text-gray-600 hover:bg-gray-100 font-medium text-sm group"
+                                        href={`/home?category_id=${cat.id}`} 
+                                        className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors font-medium text-sm group
+                                            ${url === `/home?category_id=${cat.id}` 
+                                                ? 'bg-orange-100 dark:bg-card border-orange-200 border text-orange-700' 
+                                                : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                            }
+                                        `}
                                     >
                                         <div className={`${textColorClass} group-hover:scale-110 transition-transform shrink-0`}>
                                             {ICONS[cat.icon] || ICONS['tag']}

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
-        <!-- <script>
+        <script>
             (function() {
                 const appearance = '{{ $appearance ?? "system" }}';
 
@@ -16,25 +16,12 @@
                         document.documentElement.classList.add('dark');
                     }
                 }
-            })();
-        </script> -->
-        <script>
-            (function() {
-                const savedTheme = localStorage.getItem('theme');
-                const serverTheme = '{{ $appearance ?? "system" }}';
 
-                if (
-                    savedTheme === 'dark' || 
-                    (savedTheme === null && serverTheme === 'dark') || 
-                    (savedTheme === null && serverTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-                ) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
+                const savedFontSize = localStorage.getItem('fontSize') || 'medium';
+                const fontSizeMap = { small: '14px', medium: '16px', large: '18px' };
+                document.documentElement.style.fontSize = fontSizeMap[savedFontSize];
             })();
         </script>
-
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {

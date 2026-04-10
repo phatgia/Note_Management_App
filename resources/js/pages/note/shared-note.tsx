@@ -1,6 +1,7 @@
 import React,{useState} from 'react';
 import NoteLayout from '@/layouts/note-layout';
 import { Link } from '@inertiajs/react';
+import {useViewMode} from '@/hooks/use-view-mode';
 
 const stripHtml = (htmlStr: string) => {
     if (!htmlStr) return "";
@@ -12,31 +13,23 @@ const stripHtml = (htmlStr: string) => {
 
 export default function Home({ notes,categories }: any) {
 
-    const [viewMode, setViewMode] = useState('grid');
+const { viewMode, updateViewMode } = useViewMode();
 
-
-    const gridView =()=>{
-        setViewMode('grid');
-    }
-
-    const listview =()=>{
-        setViewMode('list');
-    }
     return (
-        <NoteLayout title="Tất cả ghi chú" noteCount={notes.length} categories={categories}>
+        <NoteLayout title="Chia sẻ ghi chú" noteCount={notes.length} categories={categories}>
             {/* Thanh tiêu đề và Nút tạo mới */}
             <div className="sticky top-0 bg-card flex items-center justify-between border-b border-gray-200 p-6 z-10">
                 <h1 className="text-2xl font-bold text-foreground">Ghi chú được chia sẻ</h1>
                 
                 <div className="flex items-center gap-4">
-                    <button onClick={gridView} className="bg-orange-500 dark:bg-card border-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2">
+                    <button onClick={()=>updateViewMode('grid')} className={viewMode ==='grid'?"bg-orange-500 dark:bg-card dark:border-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2":"border border-gray-500 rounded-md px-4 py-2"}>
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
                             fill="none" 
                             viewBox="0 0 24 24" 
                             strokeWidth={1.5} 
                             stroke="currentColor" 
-                            className="w-5 h-5 text-white dark:text-orange-500 cursor-pointer "
+                            className={viewMode === 'grid'?"w-5 h-5 text-white bg-orange-500 dark:bg-card dark:text-orange-500 cursor-pointer":"w-5 h-5 text-gray-500 cursor-pointer"}
                         >
                         <path 
                             strokeLinecap="round" 
@@ -46,14 +39,14 @@ export default function Home({ notes,categories }: any) {
                         </svg>
                     </button>
 
-                    <button onClick={listview} className="bg-orange-500 dark:bg-card border-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2">
+                    <button onClick={()=>updateViewMode('list')} className={viewMode ==='list'?"bg-orange-500 dark:bg-card dark:border-orange-500 border-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2":"border border-gray-500 rounded-md px-4 py-2"}>
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
                             fill="none" 
                             viewBox="0 0 24 24" 
                             strokeWidth={1.5} 
                             stroke="currentColor" 
-                            className="w-5 h-5 text-white dark:text-orange-500 cursor-pointer"
+                            className={viewMode === 'list'?"w-5 h-5 text-white bg-orange-500 dark:bg-card dark:text-orange-500 cursor-pointer":"w-5 h-5 text-gray-500 cursor-pointer"}
                         >
                         <path 
                             strokeLinecap="round" 

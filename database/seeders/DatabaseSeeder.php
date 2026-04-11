@@ -17,14 +17,21 @@ class DatabaseSeeder extends Seeder
         $testUser = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => bcrypt('password'), // Mật khẩu là: password
+            'password' => bcrypt('password'),
         ]);
 
-        $categories = Category::factory()->count(6)->create();
-
-        Note::factory()->count(2)->create([
+        $categories = Category::factory()->count(6)->create([
             'user_id' => $testUser->id,
-            'category_id' => $categories->random()->id,
         ]);
+
+        $notes = Note::factory()->count(2)->create([
+            'user_id' => $testUser->id,
+        ]);
+
+        foreach ($notes as $note) {
+            $randomCategoryIds = $categories->random(rand(1, 3))->pluck('id');
+            
+            $note->categories()->attach($randomCategoryIds);
+        }
     }
 }

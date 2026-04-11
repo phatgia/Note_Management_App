@@ -6,8 +6,6 @@ import { useAppearance } from '@/hooks/use-appearance';
 
 type Props = {
     title: string;
-    noteCount?: number;
-    categories?: any[]; 
 };
 
 const ICONS: Record<string, React.ReactNode> = {
@@ -18,10 +16,12 @@ const ICONS: Record<string, React.ReactNode> = {
     folder: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" /></svg>
 };
 
-export default function NoteLayout({ children, title, noteCount, categories }: PropsWithChildren<Props>) {
-    const { auth } = usePage().props as any;
+export default function NoteLayout({ children, title }: PropsWithChildren<Props>) {
+    const { auth, sidebarData } = usePage().props as any;
     const user = auth.user;
-
+    const categories = sidebarData?.categories || [];
+    const noteCount = sidebarData?.noteCount || 0;
+    const sharedCount = sidebarData?.sharedCount || 0;
     const [processing, setProcessing] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -90,7 +90,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                 <div className="flex-1 overflow-y-auto px-4">
                     <p className="text-xs font-semibold text-gray-400 mb-2 mt-2 uppercase tracking-wider">Danh mục</p>
                     
-                    <Link href="/home" className={url.startsWith('/home')?"flex items-center justify-between bg-orange-200 dark:bg-card dark:border border-orange-500 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100  transition-colors": "flex items-center justify-between bg-card dark:hover:bg-gray-100 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
+                    <Link href="/home" className={url.startsWith('/home')?"flex items-center justify-between bg-orange-200 dark:bg-card dark:border border-orange-500 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors": "flex items-center justify-between bg-card dark:hover:bg-gray-100 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
                         <div className="flex items-center gap-3">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -98,11 +98,11 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                             <span className="font-medium text-sm">Tất cả ghi chú</span>
                         </div>
                         <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                            {noteCount ?? 0}
+                            {noteCount}
                         </span>
                     </Link>
 
-                    <Link  href="/shared-note" className={url.startsWith('/shared-note')?"flex items-center justify-between bg-orange-200 dark:bg-card dark:border border-orange-500 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors":"flex items-center justify-between bg-card dark:hover:bg-gray-100 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
+                    <Link href="/shared-note" className={url.startsWith('/shared-note')?"flex items-center justify-between bg-orange-200 dark:bg-card dark:border border-orange-500 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors":"flex items-center justify-between bg-card dark:hover:bg-gray-100 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
                         <div className="flex items-center gap-3 ">
                                 <svg 
                                     xmlns="http://www.w3.org/2000/svg" 
@@ -121,7 +121,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                             <span className="font-medium text-sm">Được chia sẻ</span>
                         </div>
                         <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                            {noteCount ?? 0}
+                            {sharedCount}
                         </span>
                     </Link>
 
@@ -233,7 +233,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                                     ) : (
                                         <div className="w-10 h-10 rounded-full dark:bg-card bg-orange-100 text-orange-600  border border-orange-500 flex items-center justify-center font-bold text-lg group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0">
                                             {user.name.charAt(0).toUpperCase()}
-                                        </div>                           
+                                        </div>                          
                                     )}
 
                                     <div className="flex-1 overflow-hidden">

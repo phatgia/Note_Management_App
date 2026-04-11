@@ -20,13 +20,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/create-note', [NoteController::class, 'create'])->name('create-note');
     Route::get('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'show'])->name('notes.show');
     Route::put('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'update'])->name('notes.update');
-
+    Route::post('/note-detail/{note}/share', [\App\Http\Controllers\NoteController::class, 'share'])->name('notes.share');
+    Route::put('/note-detail/{note}/share/{user}', [\App\Http\Controllers\NoteController::class, 'updateShare'])->name('notes.share.update');
+    Route::delete('/note-detail/{note}/share/{user}', [\App\Http\Controllers\NoteController::class, 'removeShare'])->name('notes.share.destroy');
     Route::delete('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'destroy'])->name('notes.destroy');
-    Route::get('/shared-note', function () {
-        return Inertia\Inertia::render('note/shared-note', [
-            'notes' => [] 
-        ]);
-    })->name('shared-note');
+    Route::get('/shared-note', [\App\Http\Controllers\NoteController::class, 'sharedNotes'])->name('notes.shared');
 });
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])

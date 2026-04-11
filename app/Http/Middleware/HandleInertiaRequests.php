@@ -35,17 +35,20 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $user = $request->user();
-
-        return [
-            ...parent::share($request),
-            'name' => config('app.name'),
+        return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $user,
+                'user' => $request->user(),
             ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
-            'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
-        ];
+            'sidebarData' => function () use ($request) {
+                if (!$request->user())
+                    return null;
+
+                return [
+                    'categories' => \App\Models\Category::where('user_id', $request->user()->id)->get(),
+                    'noteCount' => \App\Models\Note::where('user_id', $request->user()->id)->count(),
+                    'sharedCount' => \Illuminate\Support\Facades\DB::table('note_user')->where('user_id', $request->user()->id)->count(),
+                ];
+            },
+        ]);
     }
 }

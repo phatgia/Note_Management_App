@@ -11,8 +11,7 @@ class NoteController extends Controller
 {
     public function index(Request $request)
     {
-        $categories = \App\Models\Category::all();
-
+        $categories = \App\Models\Category::where('user_id', auth()->id())->get();
         $query = Note::with('categories')
             ->where('user_id', auth()->id())
             ->latest();
@@ -34,7 +33,7 @@ class NoteController extends Controller
 
     public function create()
     {
-        $categories = \App\Models\Category::all();
+        $categories = \App\Models\Category::where('user_id', auth()->id())->get();
         $notes = \App\Models\Note::where('user_id', auth()->id())->get();
 
         return Inertia::render('note/create-note', [
@@ -63,6 +62,7 @@ class NoteController extends Controller
 
         if ($request->filled('new_category_name')) {
             $newCategory = \App\Models\Category::create([
+                'user_id' => auth()->id(),
                 'name' => $request->new_category_name,
                 'color' => $request->new_category_color,
                 'icon' => $request->new_category_icon,
@@ -86,17 +86,27 @@ class NoteController extends Controller
 
     public function show(Note $note)
     {
-        if ($note->user_id !== auth()->id()) {
-            abort(403);
+        $isOwner = $note->user_id === auth()->id();
+        $sharedUser = $note->sharedUsers()->where('user_id', auth()->id())->first();
+
+        if (!$isOwner && !$sharedUser) {
+            abort(403, 'Bạn không có quyền xem ghi chú này!');
         }
 
-        $note->load('categories');
+        $note->load(['categories', 'sharedUsers']);
+        
+        // Lấy danh sách nhãn
+        $categories = \App\Models\Category::where('user_id', auth()->id())
+                                          ->orWhereNull('user_id')
+                                          ->get();
 
-        $categories = \App\Models\Category::all();
+        $canEdit = $isOwner || ($sharedUser && $sharedUser->pivot->role === 'editor');
 
         return Inertia::render('note/note-detail', [
             'note' => $note,
             'categories' => $categories,
+            'isOwner' => $isOwner,
+            'canEdit' => $canEdit, 
         ]);
     }
 
@@ -107,8 +117,7 @@ class NoteController extends Controller
         }
 
         $note->load('categories');
-        $categories = Category::all();
-
+        $categories = \App\Models\Category::where('user_id', auth()->id())->get();
         return Inertia::render('note/edit', [
             'note' => $note,
             'categories' => $categories
@@ -137,6 +146,7 @@ class NoteController extends Controller
 
         if ($request->filled('new_category_name')) {
             $newCategory = \App\Models\Category::create([
+                'user_id' => auth()->id(),
                 'name' => $request->new_category_name,
                 'color' => $request->new_category_color,
                 'icon' => $request->new_category_icon,
@@ -167,5 +177,53 @@ class NoteController extends Controller
 
         return redirect()->route('notes.index')
             ->with('message', 'Ghi chú đã được đưa vào hư vô!');
+    }
+    public function share(Request $request, Note $note)
+    {
+        if ($note->user_id !== auth()->id())
+            abort(403);
+
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'role' => 'required|in:viewer,editor'
+        ], [
+            'email.exists' => 'Không tìm thấy tài khoản với email này trong hệ thống.'
+        ]);
+
+        $userToShare = \App\Models\User::where('email', $request->email)->first();
+
+        if ($userToShare->id === auth()->id()) {
+            return back()->withErrors(['email' => 'Bạn không thể tự chia sẻ cho chính mình!']);
+        }
+
+        $note->sharedUsers()->syncWithoutDetaching([
+            $userToShare->id => ['role' => $request->role]
+        ]);
+
+        return back()->with('message', 'Đã chia sẻ thành công!');
+    }
+
+    public function updateShare(Request $request, Note $note, \App\Models\User $user)
+    {
+        if ($note->user_id !== auth()->id())
+            abort(403);
+        $note->sharedUsers()->updateExistingPivot($user->id, ['role' => $request->role]);
+        return back();
+    }
+
+    public function removeShare(Note $note, \App\Models\User $user)
+    {
+        if ($note->user_id !== auth()->id())
+            abort(403);
+        $note->sharedUsers()->detach($user->id);
+        return back();
+    }
+    public function sharedNotes()
+    {
+        $notes = auth()->user()->sharedNotes()->with('categories')->latest()->get();
+
+        return Inertia::render('note/shared-note', [
+            'notes' => $notes
+        ]);
     }
 }

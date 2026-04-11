@@ -24,4 +24,8 @@ class Note extends Model
     {
         return $this->belongsToMany(Category::class);
     }
+    public function sharedUsers()
+    {
+        return $this->belongsToMany(User::class, 'note_user')->withPivot('role')->withTimestamps();
+    }
 }

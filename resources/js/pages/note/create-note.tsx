@@ -57,8 +57,8 @@ export default function Create({ notes, categories }: any) {
     };
 
     return (
-        <NoteLayout title="Tạo ghi chú" noteCount={notes?.length || 0} categories={categories}>
-            <div className="w-full bg-background min-h-screen pb-12 overflow-y-auto">
+            <NoteLayout title="Tạo ghi chú">
+                <div className="w-full bg-background min-h-screen pb-12 overflow-y-auto">
                 <Head title="Tạo ghi chú" />
 
                 {/* --- THANH TIÊU ĐỀ --- */}

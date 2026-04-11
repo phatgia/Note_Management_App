@@ -23,8 +23,7 @@ export default function Home({ notes,categories }: any) {
         setViewMode('list');
     }
     return (
-        <NoteLayout title="Tất cả ghi chú" noteCount={notes.length} categories={categories}>
-            {/* Thanh tiêu đề và Nút tạo mới */}
+            <NoteLayout title="Tất cả ghi chú">
             <div className="sticky top-0 bg-card flex items-center justify-between border-b border-gray-200 p-6 z-10">
                 <h1 className="text-2xl font-bold text-foreground">Tất cả ghi chú</h1>
                 
@@ -133,12 +132,10 @@ export default function Home({ notes,categories }: any) {
                                 </div>
                             ) : (
                                 <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mt-2 leading-relaxed">
-                                    {/* Hàm in nội dung cũ của bạn, ví dụ: stripHtml(note.content) */}
                                     {note.content.replace(/(<([^>]+)>)/gi, "")}
                                 </p>
                             )}
 
-                            {/* Nhãn Danh mục (Category) - Sẽ hiển thị nếu Ghi chú này có gắn Category */}
                            {note.categories && note.categories.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mb-4 mt-2">
                                     {note.categories.map((cat: any) => (

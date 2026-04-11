@@ -53,4 +53,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Note::class);
     }
+    public function sharedNotes()
+    {
+        return $this->belongsToMany(Note::class, 'note_user')->withPivot('role')->withTimestamps();
+    }
 }

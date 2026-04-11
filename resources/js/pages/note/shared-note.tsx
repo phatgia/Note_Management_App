@@ -18,7 +18,7 @@ const { viewMode, updateViewMode } = useViewMode();
     return (
         <NoteLayout title="Chia sẻ ghi chú" noteCount={notes.length} categories={categories}>
             {/* Thanh tiêu đề và Nút tạo mới */}
-            <div className="sticky top-0 bg-card flex items-center justify-between border-b border-gray-200 p-6 z-10">
+            <div className="sticky top-0 bg-card flex items-center justify-between border-b border-gray-300 p-6 z-10">
                 <h1 className="text-2xl font-bold text-foreground">Ghi chú được chia sẻ</h1>
                 
                 <div className="flex items-center gap-4">
@@ -80,7 +80,7 @@ const { viewMode, updateViewMode } = useViewMode();
                 <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
                 </svg>
                 <p className="font-semibold text-muted-foreground">Có thể chỉnh sửa</p>
-                <div className="flex-1 h-[1px] bg-gray-200"></div>
+                <div className="flex-1 h-[1px] bg-gray-300"></div>
             </div>
 
             {/* Khu vực hiển thị lưới Ghi chú */}

@@ -34,6 +34,22 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
 
     const { url } = usePage();
 
+    const [searchQuery, setSearchQuery] = useState(() =>{
+        if(typeof window !== 'undefined') {
+            return new URLSearchParams(window.location.search).get('search') || '';
+        }
+        return '';
+    });
+
+    useEffect(()=>{
+            const delayDebounceFn = setTimeout(() => {
+            const basePath = url.split('?')[0]; 
+            router.get(basePath, {search: searchQuery}, {preserveState:true, preserveScroll:true, replace:true}
+            );
+        }, 300); 
+        return () => clearTimeout(delayDebounceFn);
+    },[searchQuery]);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -63,9 +79,9 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
             <Head title={title} />
 
             {/* Trái */}
-            <aside className="w-64 bg-sidebar border-r border-gray-200 flex flex-col h-full">
+            <aside className="w-64 bg-sidebar border-r border-gray-300 flex flex-col h-full">
                 {/* Logo */}
-                <Link href="/home" className="cursor-pointer flex border-b border-gray-200 pb-4 px-4 py-9">
+                <Link href="/home" className="cursor-pointer flex border-b border-gray-300 pb-4 px-4 py-9">
                     <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
                         <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
@@ -78,8 +94,10 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                     <div className="relative">
                         <input 
                             type="text" 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Tìm kiếm ghi chú..." 
-                            className="w-full bg-back-ground border border-gray-200 text-muted-foreground text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                            className="w-full bg-back-ground border border-gray-300 text-muted-foreground text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
                         />
                         <svg className="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -156,7 +174,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                     </div>
                 </div>
                 {/* Xác thực email */}
-                <div className="p-4 border-t border-gray-200">
+                <div className="p-4 border-t border-gray-300">
                     {user && user.email_verified_at === null && (
                         <div className="border rounded-xl bg-card p-3 mb-3 text-xs flex flex-col gap-2 shadow-sm">
                             <div className="flex items-center gap-2">
@@ -181,7 +199,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                         <div className="relative w-full" ref={menuRef}>
                             {/* Popup Menu */}
                             {isMenuOpen && (
-                                <div className="absolute bottom-[calc(100%+0.5rem)] left-0 w-full bg-background border border-gray-200 rounded-xl shadow-lg py-1 z-50 overflow-hidden">
+                                <div className="absolute bottom-[calc(100%+0.5rem)] left-0 w-full bg-background border border-gray-300 rounded-xl shadow-lg py-1 z-50 overflow-hidden">
                                     <Link 
                                         href="/settings/profile" 
                                         className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
@@ -223,7 +241,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                                         <img 
                                             src={`/storage/${user.avatar}`} 
                                             alt="Avatar" 
-                                            className="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0 shadow-sm"
+                                            className="w-10 h-10 rounded-full object-cover border border-gray-300 shrink-0 shadow-sm"
                                         />
                                     ) : (
                                         <div className="w-10 h-10 rounded-full dark:bg-card bg-orange-100 text-orange-600  border border-orange-500 flex items-center justify-center font-bold text-lg group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0">

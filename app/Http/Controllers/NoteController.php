@@ -9,16 +9,23 @@ use Inertia\Inertia;
 
 class NoteController extends Controller
 {
-    public function index()
+    public function index(Request $rq)
     {
         $categories = \App\Models\Category::all();
         $notes = Note::with('categories') 
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->get();
+            ->where('user_id', auth()->id());
+
+        if($rq->filled('search')){
+            $searchTerm = $rq->search;
+            $notes->where(function($q) use ($searchTerm){
+                $q->where('title','like',"%{$searchTerm}%")->orWhere('content', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        $res= $notes->latest()->get();
 
         return Inertia::render('note/home', [
-            'notes' => $notes,
+            'notes' => $res,
             'categories' => $categories,
         ]);
     }

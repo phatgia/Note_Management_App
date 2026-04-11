@@ -25,7 +25,7 @@ const ICONS: Record<string, React.ReactNode> = {
 
 export default function NoteDetail({ auth, note, categories, isOwner, canEdit }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [openMenuId, setOpenMenuId] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     
@@ -100,7 +100,7 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setIsMenuOpen(false);
+                setOpenMenuId(null);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -113,7 +113,7 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                 <Head title={canEdit ? "Chỉnh sửa ghi chú" : "Xem ghi chú"} />
 
                 {/* --- THANH TIÊU ĐỀ --- */}
-                <div className="flex items-center justify-between sticky top-0 bg-white dark:bg-card border-b border-gray-200 dark:border-gray-700 p-6 z-10 shadow-sm transition-colors">
+                <div className="flex items-center justify-between sticky top-0 bg-white dark:bg-card border-b border-gray-300 dark:border-gray-700 p-6 z-10 transition-colors">
                     <div className="flex items-center gap-4">
                         <Link href="/home" className="p-2 -ml-2 rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors group">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-orange-500 transition-colors">
@@ -181,20 +181,20 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                             {/* Nội dung */}
                             <div>
                                 <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 block">Nội dung</Label>
-                                <div className={`bg-white/80 dark:bg-card backdrop-blur-sm rounded-lg transition-all ${!canEdit ? 'border-none' : 'border border-gray-200 dark:border-gray-700 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500'}`}>
+                                <div className={`bg-white/80 dark:bg-card backdrop-blur-sm rounded-lg transition-all ${!canEdit ? 'border-none' : 'border border-gray-300 dark:border-gray-700 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500'}`}>
                                     {canEdit && (
                                         <div id="my-custom-toolbar" className="flex items-center gap-4 bg-white/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-3 py-2">
-                                            <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm">
+                                            <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-300 dark:border-gray-700 shadow-sm">
                                                 <button type="button" className="ql-bold w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
                                                 <button type="button" className="ql-italic w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
                                                 <button type="button" className="ql-underline w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
                                                 <button type="button" className="ql-strike w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
                                             </div>
-                                            <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm">
+                                            <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-300 dark:border-gray-700 shadow-sm">
                                                 <select className="ql-color"></select>
                                                 <select className="ql-background"></select>
                                             </div>
-                                            <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm ml-auto">
+                                            <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-300 dark:border-gray-700 shadow-sm ml-auto">
                                                 <button type="button" className="ql-clean w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
                                             </div>
                                         </div>
@@ -210,14 +210,14 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                             </div>
 
                             {/* NHÃN */}
-                            <div className="border-t border-gray-200/60 dark:border-gray-700/60 flex flex-col gap-3 pt-4">
+                            <div className="border-t border-gray-300/60 dark:border-gray-700/60 flex flex-col gap-3 pt-4">
                                 <Label className="text-sm text-gray-500 dark:text-gray-400 font-semibold">Nhãn</Label>
                                 <div className="flex gap-3 flex-wrap items-center">
                                     {categories && categories.length > 0 && (
                                         categories.map((cat: any) => (
                                             <button 
                                                 key={cat.id} type="button" onClick={() => toggleCategory(cat.id)}
-                                                className={`rounded-full px-3 py-1.5 flex items-center gap-2 text-sm font-medium border transition-all ${cat.color ? cat.color : 'bg-gray-100 text-gray-700 border-gray-200'} ${data.category_ids.includes(cat.id) ? 'ring-2 ring-offset-2 ring-gray-400 scale-105 shadow-md' : (canEdit ? 'hover:scale-105 opacity-80 hover:opacity-100' : 'opacity-100 cursor-default')}`}
+                                                className={`rounded-full px-3 py-1.5 flex items-center gap-2 text-sm font-medium border transition-all ${cat.color ? cat.color : 'bg-gray-100 text-gray-700 border-gray-300'} ${data.category_ids.includes(cat.id) ? 'ring-2 ring-offset-2 ring-gray-400 scale-105 shadow-md' : (canEdit ? 'hover:scale-105 opacity-80 hover:opacity-100' : 'opacity-100 cursor-default')}`}
                                             >
                                                 {ICONS[cat.icon] || ICONS['tag']} {cat.name || cat.Name} 
                                             </button>
@@ -239,7 +239,7 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                                 </div>
                                                 <div className="h-px w-full bg-gray-100 dark:bg-gray-700"></div>
                                                 <div className="flex items-center gap-4 justify-between">
-                                                    <div className="flex items-center gap-1 border-r border-gray-200 dark:border-gray-700 pr-3">
+                                                    <div className="flex items-center gap-1 border-r border-gray-300 dark:border-gray-700 pr-3">
                                                         {Object.keys(ICONS).map((iconKey) => (
                                                             <button key={iconKey} type="button" onClick={() => setData('new_category_icon', iconKey)} className={`p-1 rounded-md transition-all ${data.new_category_icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300'}`}>
                                                                 {ICONS[iconKey]}
@@ -264,7 +264,7 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
 
                             {/* Màu nền */}
                             {canEdit && (
-                                <div className="border-t border-gray-200/60 dark:border-gray-700/60 pt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+                                <div className="border-t border-gray-300/60 dark:border-gray-700/60 pt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
                                     <Label className="text-sm text-gray-500 dark:text-card-foreground font-semibold">Màu nền</Label>
                                     <div className="flex items-center gap-3">
                                         <button type="button" onClick={() => setData('bg_color', 'bg-white')} className={`w-8 h-8 rounded-full border-2 bg-white shadow-sm transition-all ${data.bg_color === 'bg-white' ? 'border-orange-500 ring-4 ring-orange-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
@@ -282,38 +282,65 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                 
                                 {/* Khung Chia sẻ (Chỉ owner mới thấy) */}
                                 {isOwner && (
-                                    <div className="bg-white dark:bg-card border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden transition-colors">
-                                        <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-5 py-3 font-bold text-gray-700 dark:text-gray-200 text-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500">
+                                    <div className="dark:bg-card bg-white border border-gray-300 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+                                        <div className="flex items-center gap-3 dark:bg-card bg-gray-50 border-b border-gray-300 dark:border-gray-700 px-5 py-3 font-bold text-gray-700 dark:text-gray-200 text-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500 group-hover:text-orange-500 transition-colors">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
                                             </svg>
-                                            Đang chia sẻ với
+                                            Chia sẻ
                                         </div>
                                         
-                                        <div className="max-h-48 overflow-y-auto">
+                                        <div className="max-h-48 overflow-y-auto" ref={menuRef}>
                                             {note.shared_users && note.shared_users.length > 0 ? (
                                                 note.shared_users.map((user: any) => (
                                                     <div key={user.id} className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700/50 last:border-0 relative">
                                                         <div className="flex items-center gap-3 overflow-hidden pr-2">
-                                                            <div className="flex items-center justify-center bg-orange-100 text-orange-600 font-bold rounded-full w-9 h-9 shrink-0">
+                                                            <div className="flex items-center justify-center bg-orange-500 text-white rounded-full w-10 h-10 font-bold shrink-0">
                                                                 {user.name.charAt(0).toUpperCase()}
                                                             </div>
-                                                            <div className="overflow-hidden">
+                                                            <div className="dark:text-white overflow-hidden">
                                                                 <h1 className="font-bold text-gray-800 dark:text-white truncate text-sm">{user.name}</h1>
-                                                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                                                                <p className="text-xs text-gray-500 truncate">{user.email}</p>
                                                             </div>
                                                         </div>
                                                         
-                                                        <button 
-                                                            type="button" 
-                                                            onClick={() => {
-                                                                if(confirm(`Gỡ quyền truy cập của ${user.name}?`)) router.delete(`/note-detail/${note.id}/share/${user.id}`);
-                                                            }}
-                                                            className="shrink-0 text-red-400 hover:text-red-600 p-1 bg-red-50 dark:bg-red-900/20 rounded-md transition-colors"
-                                                            title="Gỡ quyền"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                        </button>
+                                                        <div className="relative">
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={() => setOpenMenuId(openMenuId === user.id ? null : user.id)} 
+                                                                className={`cursor-pointer text-xs font-bold border rounded-full px-3 py-1 transition-colors ${user.pivot.role === 'editor' ? 'text-green-800 border-green-300 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' : 'text-blue-800 border-blue-300 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'}`}
+                                                            >
+                                                                {user.pivot.role === 'editor' ? 'Sửa' : 'Xem'}
+                                                            </button>
+
+                                                            {openMenuId === user.id && (
+                                                                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 overflow-hidden">
+                                                                    <button 
+                                                                        type="button" 
+                                                                        onClick={() => { 
+                                                                            setOpenMenuId(null); 
+                                                                            router.put(`/note-detail/${note.id}/share/${user.id}`, { role: user.pivot.role === 'editor' ? 'viewer' : 'editor' }); 
+                                                                        }} 
+                                                                        className="w-full text-left cursor-pointer px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-2 transition-colors"
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                                                                        Đổi thành {user.pivot.role === 'editor' ? 'Chỉ xem' : 'Được sửa'}
+                                                                    </button>
+                                                                    <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                                                                    <button 
+                                                                        type="button" 
+                                                                        onClick={() => { 
+                                                                            setOpenMenuId(null); 
+                                                                            if(confirm(`Gỡ quyền truy cập của ${user.name}?`)) router.delete(`/note-detail/${note.id}/share/${user.id}`); 
+                                                                        }} 
+                                                                        className="w-full text-left cursor-pointer px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" /></svg>
+                                                                        Gỡ quyền truy cập
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 ))
                                             ) : (
@@ -324,7 +351,7 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                         <div className="border-t border-gray-200 dark:border-gray-700 flex items-center justify-center p-3">
                                             <button onClick={() => setIsShareModalOpen(true)} type="button" className="flex items-center justify-center w-full gap-2 cursor-pointer border border-gray-300 dark:border-gray-600 rounded-xl p-2 text-sm text-gray-700 dark:text-gray-300 font-bold hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 dark:hover:bg-gray-800 transition-colors">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                                                Mời người khác
+                                                Thêm người chia sẻ
                                             </button>
                                         </div>
                                     </div>

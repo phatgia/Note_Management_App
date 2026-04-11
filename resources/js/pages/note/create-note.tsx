@@ -25,6 +25,7 @@ const ICONS: Record<string, React.ReactNode> = {
 
 export default function Create({ notes, categories }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
    const { data, setData, post, processing, errors } = useForm({
         title: '',
@@ -62,7 +63,7 @@ export default function Create({ notes, categories }: any) {
                 <Head title="Tạo ghi chú" />
 
                 {/* --- THANH TIÊU ĐỀ --- */}
-                <div className="flex items-center gap-4 sticky top-0 bg-card border-b border-gray-200 p-6 z-10">
+                <div className="flex items-center gap-4 sticky top-0 bg-card border-b border-gray-300 p-6 z-10">
                     <Link href="/home" className="p-2 -ml-2 rounded-full transition-colors group">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dark:text-orange-500 w-6 h-6 text-gray-500">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
@@ -202,6 +203,82 @@ export default function Create({ notes, categories }: any) {
 
                     {/* CỘT PHẢI */}
                     <div className="w-full lg:w-80 space-y-6">
+                        <div className="dark:bg-card bg-white border border-gray-300 rounded-2xl shadow-sm overflow-hidden">
+                            <div className="flex items-center gap-3 dark:bg-card bg-gray-50 border-b border-gray-300 px-5 py-3 font-bold text-gray-700 text-sm">
+                                <svg 
+                                    xmlns="http://www.w3.org/2000/svg" 
+                                    fill="none" 
+                                    viewBox="0 0 24 24" 
+                                    strokeWidth={1.5} 
+                                    stroke="currentColor" 
+                                    className="w-5 h-5 text-orange-500 group-hover:text-orange-500 transition-colors"
+                                >
+                                <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" 
+                                />
+                                </svg>
+                                Chia sẻ
+                            </div>
+                            
+                            {/* Thông tin người chia sẻ */}
+                            {/* <div className=" flex items-center justify-between p-5 space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center bg-orange-500 rounded-full w-10 h-10">
+                                        TA
+                                    </div>
+                                    <div className="dark:text-white">
+                                        <h1>Trần Văn A</h1>
+                                        <p className="text-xs">a@gmail.com</p>
+
+                                    </div>
+                                </div>
+
+                                <button type="button" onClick={() => setIsMenuOpen(!isMenuOpen)} className="cursor-pointer text-xs text-green-800 font-bold border border-green-300 rounded-full px-3 py-1 bg-green-100 hover:bg-green-200 transition-colors">
+                                    Sửa
+                                </button>
+
+                                {isMenuOpen && (
+                                    <div className="dark:bg-card absolute w-48 bg-white border border-gray-300 rounded-xl ">
+                                        <button 
+                                            type="button"
+                                            onClick={()=>{setIsMenuOpen(false); }}
+                                            className="dark:bg-card dark:text-orange-500 cursor-pointer px-4 py-2.5 text-sm text-gray-700 hover:text-orange-600 flex items-center gap-2"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                            </svg>
+                                            Đổi thành Chỉ xem
+                                        </button>
+                                        <div className="border-t border-gray-100 my-1"></div>
+                                        
+                                        <button 
+                                            type="button"
+                                            onClick={()=>{setIsMenuOpen(false);}}
+                                            className="dark:bg-card cursor-pointer px-4 py-2.5 text-sm text-red-600  flex items-center gap-2"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                                            </svg>
+                                            Gỡ quyền truy cập
+                                        </button>
+                                    </div>
+                                )}
+                            </div> */}
+
+                            <div className="border-t flex items-center justify-center">
+                                <button className="dark:bg-card dark:border border-orange-500 dark:text-orange-500 flex items-center gap-3 cursor-pointer m-3 border border-gray-300 rounded-xl p-3 text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                    </svg>
+                                    Thêm người chia sẻ
+                                </button>
+                            </div>
+                        </div>
+                        
+
+
                         <div className="bg-card border border-gray-300 rounded-2xl shadow-sm p-5">
                             <button onClick={submit} disabled={processing} className="cursor-pointer w-full py-3 px-4 bg-orange-500 dark:bg-card dark:border border-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
                                 {processing ? 'Đang lưu...' : 'Lưu ghi chú'}

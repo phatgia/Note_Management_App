@@ -9,23 +9,26 @@ use Inertia\Inertia;
 
 class NoteController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request) 
     {
-        $categories = \App\Models\Category::where('user_id', auth()->id())->get();
-        $query = Note::with('categories')
+        $categories = \App\Models\Category::where('user_id', auth()->id())
+            ->orWhereNull('user_id')
+            ->get();
+
+        $notesQuery = Note::with('categories')
             ->where('user_id', auth()->id())
             ->latest();
 
         if ($request->filled('category_id')) {
-            $query->whereHas('categories', function ($q) use ($request) {
+            $notesQuery->whereHas('categories', function ($q) use ($request) {
                 $q->where('categories.id', $request->category_id);
             });
         }
 
-        $notes = $query->get();
+        $notes = $notesQuery->get();
 
         return Inertia::render('note/home', [
-            'notes' => $notes,
+            'notes' => $notes, 
             'categories' => $categories,
             'currentCategoryId' => $request->category_id,
         ]);
@@ -33,7 +36,10 @@ class NoteController extends Controller
 
     public function create()
     {
-        $categories = \App\Models\Category::where('user_id', auth()->id())->get();
+        $categories = \App\Models\Category::where('user_id', auth()->id())
+            ->orWhereNull('user_id')
+            ->get();
+
         $notes = \App\Models\Note::where('user_id', auth()->id())->get();
 
         return Inertia::render('note/create-note', [
@@ -44,7 +50,6 @@ class NoteController extends Controller
 
     public function store(Request $request)
     {
-
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -94,11 +99,10 @@ class NoteController extends Controller
         }
 
         $note->load(['categories', 'sharedUsers']);
-        
-        // Lấy danh sách nhãn
+
         $categories = \App\Models\Category::where('user_id', auth()->id())
-                                          ->orWhereNull('user_id')
-                                          ->get();
+            ->orWhereNull('user_id')
+            ->get();
 
         $canEdit = $isOwner || ($sharedUser && $sharedUser->pivot->role === 'editor');
 
@@ -106,13 +110,17 @@ class NoteController extends Controller
             'note' => $note,
             'categories' => $categories,
             'isOwner' => $isOwner,
-            'canEdit' => $canEdit, 
+            'canEdit' => $canEdit,
         ]);
     }
 
     public function edit(Note $note)
     {
-        if ($note->user_id !== auth()->id()) {
+
+        $isOwner = $note->user_id === auth()->id();
+        $isEditor = $note->sharedUsers()->where('user_id', auth()->id())->wherePivot('role', 'editor')->exists();
+
+        if (!$isOwner && !$isEditor) {
             abort(403, 'Bạn không có quyền sửa ghi chú này!');
         }
 
@@ -126,8 +134,11 @@ class NoteController extends Controller
 
     public function update(Request $request, Note $note)
     {
-        if ($note->user_id !== auth()->id()) {
-            abort(403);
+        $isOwner = $note->user_id === auth()->id();
+        $isEditor = $note->sharedUsers()->where('user_id', auth()->id())->wherePivot('role', 'editor')->exists();
+
+        if (!$isOwner && !$isEditor) {
+            abort(403, 'Bạn không có quyền sửa ghi chú này!');
         }
 
         $validated = $request->validate([
@@ -163,14 +174,13 @@ class NoteController extends Controller
 
         $note->categories()->sync($categoryIds);
 
-        return redirect()->route('notes.index')
-            ->with('message', 'Đã cập nhật ghi chú thành công!');
+        return back()->with('message', 'Đã cập nhật ghi chú thành công!');
     }
 
     public function destroy(Note $note)
     {
         if ($note->user_id !== auth()->id()) {
-            abort(403);
+            abort(403, 'Chỉ chủ bài viết mới có quyền xóa!');
         }
 
         $note->delete();
@@ -178,6 +188,7 @@ class NoteController extends Controller
         return redirect()->route('notes.index')
             ->with('message', 'Ghi chú đã được đưa vào hư vô!');
     }
+
     public function share(Request $request, Note $note)
     {
         if ($note->user_id !== auth()->id())
@@ -207,6 +218,7 @@ class NoteController extends Controller
     {
         if ($note->user_id !== auth()->id())
             abort(403);
+
         $note->sharedUsers()->updateExistingPivot($user->id, ['role' => $request->role]);
         return back();
     }
@@ -215,9 +227,11 @@ class NoteController extends Controller
     {
         if ($note->user_id !== auth()->id())
             abort(403);
+
         $note->sharedUsers()->detach($user->id);
         return back();
     }
+
     public function sharedNotes()
     {
         $notes = auth()->user()->sharedNotes()->with('categories')->latest()->get();

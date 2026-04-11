@@ -35,17 +35,13 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
     const { url } = usePage();
 
     const [searchQuery, setSearchQuery] = useState(() =>{
-        if(typeof window !== 'undefined') {
-            return new URLSearchParams(window.location.search).get('search') || '';
-        }
-        return '';
+        return new URLSearchParams(window.location.search).get('search') || '';
     });
 
     useEffect(()=>{
             const delayDebounceFn = setTimeout(() => {
             const basePath = url.split('?')[0]; 
-            router.get(basePath, {search: searchQuery}, {preserveState:true, preserveScroll:true, replace:true}
-            );
+            router.get(basePath, {search: searchQuery}, {preserveState:true, replace:true});
         }, 300); 
         return () => clearTimeout(delayDebounceFn);
     },[searchQuery]);
@@ -95,7 +91,7 @@ export default function NoteLayout({ children, title, noteCount, categories }: P
                         <input 
                             type="text" 
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e)=>setSearchQuery(e.target.value)}
                             placeholder="Tìm kiếm ghi chú..." 
                             className="w-full bg-back-ground border border-gray-300 text-muted-foreground text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
                         />

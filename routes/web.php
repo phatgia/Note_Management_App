@@ -26,6 +26,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'destroy'])->name('notes.destroy');
     Route::get('/shared-note', [\App\Http\Controllers\NoteController::class, 'sharedNotes'])->name('notes.shared');
     Route::post('/notes/{note}/pin', [\App\Http\Controllers\NoteController::class, 'togglePin']);
+    Route::put('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'update']);
+    Route::delete('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'destroy']);
+
+    Route::post('/otp/send', [\App\Http\Controllers\OtpController::class, 'send']);
+    Route::post('/otp/verify', [\App\Http\Controllers\OtpController::class, 'verify']);
 });
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])

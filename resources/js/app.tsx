@@ -6,9 +6,26 @@ import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { initializeFontSize } from '@/hooks/use-font-size';
 import { initializeViewMode } from '@/hooks/use-view-mode';
-
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+declare global {
+    interface Window {
+        Pusher: any;
+        Echo: any;
+    }
+}
+window.Pusher = Pusher;
 
+window.Echo = new Echo({
+    broadcaster: 'reverb',
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    wsHost: import.meta.env.VITE_REVERB_HOST,
+    wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
+    wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
+    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+    enabledTransports: ['ws', 'wss'],
+});
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {

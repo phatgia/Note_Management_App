@@ -8,8 +8,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd sockets
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

@@ -19,6 +19,15 @@ class NoteController extends Controller
             ->where('user_id', auth()->id())
             ->latest();
 
+
+        if ($request->filled('search')){
+            $searchTerm = '%' . $request->search . '%';
+            $notesQuery->where(function ($query) use ($searchTerm){
+                $query->where('title', 'like', $searchTerm)
+                      ->orWhere('content', 'like', $searchTerm);
+            });
+        }
+
         if ($request->filled('category_id')) {
             $notesQuery->whereHas('categories', function ($q) use ($request) {
                 $q->where('categories.id', $request->category_id);

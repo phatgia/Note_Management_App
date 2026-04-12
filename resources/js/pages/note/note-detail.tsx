@@ -23,6 +23,17 @@ const ICONS: Record<string, React.ReactNode> = {
     folder: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" /></svg>
 };
 
+const modules={
+    toolbar: { container: "#my-custom-toolbar" }
+};
+
+const quillFomat =
+    [['bold', 'italic', 'underline', 'strike'], 
+        [{ 'color': [] }, { 'background': [] }],   
+        ['link', 'image'],                        
+        ['clean']
+    ];
+
 export default function NoteDetail({ auth, note, categories, isOwner, canEdit }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
@@ -58,10 +69,6 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
         bg_color: note.bg_color || 'bg-white',
         password: note.password || '',
     });
-
-    const modules = useMemo(() => ({
-        toolbar: canEdit ? { container: "#my-custom-toolbar" } : false
-    }), [canEdit]);
 
     const funcUpdate = (e: React.FormEvent) => {
         e.preventDefault();
@@ -113,7 +120,25 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                 <Head title={canEdit ? "Chỉnh sửa ghi chú" : "Xem ghi chú"} />
 
                 {/* --- THANH TIÊU ĐỀ --- */}
-                <div className="flex items-center justify-between sticky top-0 bg-white dark:bg-card border-b border-gray-300 dark:border-gray-700 p-6 z-10 transition-colors">
+                <div className="md:hidden h-30 flex items-center justify-between sticky top-0 bg-white dark:bg-card border-b border-gray-300 dark:border-gray-700 p-6 z-10 transition-colors">
+                    <div className="flex items-center gap-4">
+                        <Link href="/home" className="p-2 -ml-2 rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors group">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-orange-500 transition-colors">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                            </svg>
+                        </Link>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Cập nhật lần cuối: {new Date(note.updated_at).toLocaleDateString('vi-VN')}
+                        </span>
+                        {!canEdit && (
+                            <span className="ml-2 px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-700">
+                                Chỉ xem
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                <div className="hidden md:flex  flex items-center justify-between sticky top-0 bg-white dark:bg-card border-b border-gray-300 dark:border-gray-700 p-6 z-10 transition-colors">
                     <div className="flex items-center gap-4">
                         <Link href="/home" className="p-2 -ml-2 rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors group">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-orange-500 transition-colors">
@@ -207,6 +232,20 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                     />
                                 </div>
                                 <InputError message={errors.content} className="mt-2" />
+                            </div>
+
+                            <div className="border-t border-gray-200/60 flex flex-col gap-3 pt-4">
+                                <Label className="text-sm text-card-foreground font-semibold">Ảnh</Label>
+                                <div className="flex gap-3 flex-wrap items-center">
+                                    <button className="text-orange-500 border border-orange-500 border-dashed rounded-lg p-3">
+                                        <div className="flex justify-center ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-orange-500">
+                                                <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        Thêm ảnh
+                                    </button>
+                                </div>
                             </div>
 
                             {/* NHÃN */}

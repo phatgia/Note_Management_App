@@ -205,57 +205,100 @@ export default function Home({ notes,categories }: any) {
                     </div>
                 ) : (
                     notes.map((note: any) => (
-                        
                         <Link 
                             href={`/note-detail/${note.id}`} 
                             key={note.id} 
-                            className={`${note.bg_color || 'bg-white'} dark:bg-gray-800/90 border border-orange-200 dark:border-gray-700 rounded-2xl p-5 flex flex-col min-h-[16rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer`}
+                            className={`${note.bg_color || 'bg-white'} dark:bg-gray-800/90 border border-orange-200 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer ${viewMode === 'grid'?"p-5 flex flex-col min-h-[16rem]":"p-3 sm:p-4 flex flex-row items-center gap-3 sm:gap-4"}`}
                         >                            
-                            {/* Icon thẻ */}
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="bg-orange-100 dark:bg-card dark:border border-orange-500 text-orange-500 p-1 rounded-lg">
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-                                    </svg>
-                                </div>
-                            </div>
+                            {viewMode === 'grid' ?(
+                                <>
+                                    {/* Icon thẻ */}
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="bg-orange-100 dark:bg-card dark:border border-orange-500 text-orange-500 p-1 rounded-lg">
+                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                                            </svg>
+                                        </div>
+                                    </div>
 
-                            {/* Tiêu đề & Nội dung từ Database */}
-                            <h3 className="font-bold text-card-foreground text-lg mb-2 line-clamp-1" title={note.title}>
-                                {note.title}
-                            </h3>
-                            {note.password ? (
-                                <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 font-medium italic mt-3 mb-2 bg-gray-50/50 dark:bg-gray-800/50 p-2 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 w-max">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                        <path fillRule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="text-xs">Ghi chú đã được bảo mật</span>
-                                </div>
+                                    {/* Tiêu đề & Nội dung */}
+                                    <h3 className="font-bold text-card-foreground text-lg mb-2 line-clamp-1" title={note.title}>
+                                        {note.title}
+                                    </h3>
+                                    
+                                    {note.password ? (
+                                        <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 font-medium italic mt-3 mb-2 bg-gray-50/50 dark:bg-gray-800/50 p-2 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 w-max">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clipRule="evenodd" /></svg>
+                                            <span className="text-xs">Ghi chú đã được bảo mật</span>
+                                        </div>
+                                    ) : (
+                                        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mt-2 leading-relaxed">
+                                            {stripHtml(note.content)}
+                                        </p>
+                                    )}
+
+                                    {/* Nhãn */}
+                                    {note.categories && note.categories.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mb-4 mt-2">
+                                            {note.categories.map((cat: any) => (
+                                                <span key={cat.id} className={`text-xs font-bold px-2.5 py-1 rounded-full border ${cat.color ? cat.color : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                                                    {cat.name || cat.Name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Ngày tháng */}
+                                    <div className="border-t border-gray-100 dark:border-gray-700 mt-auto pt-4 flex justify-between items-center">
+                                        <p className="text-xs font-medium text-gray-400">
+                                            {new Date(note.created_at).toLocaleDateString('vi-VN')}
+                                        </p>
+                                    </div>
+                                </>
                             ) : (
-                                <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mt-2 leading-relaxed">
-                                    {note.content.replace(/(<([^>]+)>)/gi, "")}
-                                </p>
-                            )}
+                                <>
+                                    {/* Icon thẻ */}
+                                    <div className="bg-orange-100 dark:bg-card border border-transparent dark:border-orange-500 text-orange-500 p-2.5 rounded-xl shrink-0">
+                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                                        </svg>
+                                    </div>
 
-                           {note.categories && note.categories.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mb-4 mt-2">
-                                    {note.categories.map((cat: any) => (
-                                        <span 
-                                            key={cat.id}
-                                            className={`text-xs font-bold px-2.5 py-1 rounded-full border ${cat.color ? cat.color : 'bg-gray-100 text-gray-600 border-gray-200'}`}
-                                        >
-                                            {cat.name || cat.Name}
-                                        </span>
-                                    ))}
-                                </div>
+                                    {/* Nội dung */}
+                                    <div className="flex-1 overflow-hidden">
+                                        <h3 className="font-bold text-card-foreground text-base truncate mb-0.5" title={note.title}>
+                                            {note.title}
+                                        </h3>
+                                        
+                                        {note.password ? (
+                                            <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 italic">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clipRule="evenodd" /></svg>
+                                                <span className="text-[11px]">Đã bảo mật</span>
+                                            </div>
+                                        ) : (
+                                            <p className="text-gray-500 dark:text-gray-400 text-xs truncate">
+                                                {stripHtml(note.content)}
+                                            </p>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Nhãn và ngày tháng */}
+                                    <div className="flex flex-col items-end shrink-0 gap-1 ml-2">
+                                        <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500">
+                                            {new Date(note.created_at).toLocaleDateString('vi-VN')}
+                                        </p>
+                                        {note.categories && note.categories.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mb-4 mt-2">
+                                                {note.categories.map((cat: any) => (
+                                                    <span key={cat.id} className={`text-xs font-bold px-2.5 py-1 rounded-full border ${cat.color ? cat.color : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                                                        {cat.name || cat.Name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
                             )}
-
-                            {/* Ngày tháng tạo */}
-                            <div className="border-t border-gray-100 mt-auto pt-4 flex justify-between items-center">
-                                <p className="text-xs font-medium text-gray-400">
-                                    {new Date(note.created_at).toLocaleDateString('vi-VN')}
-                                </p>
-                            </div>
                         </Link>
                     ))
                 )}

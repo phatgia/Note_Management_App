@@ -38,7 +38,10 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
     const { url } = usePage();
 
     const [searchQuery, setSearchQuery] = useState(() =>{
-        return new URLSearchParams(window.location.search).get('search') || '';
+        if(typeof window !== 'undefined'){
+            return new URLSearchParams(window.location.search).get('search') || '';
+        }
+        return '';
     });
 
     useEffect(()=>{

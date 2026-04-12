@@ -55,20 +55,28 @@ export default function Security({
         <div className="w-full bg-background min-h-screen pb-12">
             <Head title="Bảo mật"/>
 
-            <div className=" sticky top-0 bg-background text-card-foreground border-b border-gray-200  text-2xl font-bold p-6.5 z-10">
+            {/* Header cho Mobile */}
+            <div className="sticky top-0 md:hidden flex justify-center bg-card border-b border-gray-200 text-xl md:text-2xl text-card-foreground font-bold p-4 md:p-6.5 z-10 shadow-sm">
                 <h1>Bảo mật</h1>
             </div>
 
-            <div className="space-y-6">
-                <div className="p-6 bg-card border border-gray-300 rounded-xl shadow-sm overflow-hidden w-1/3 m-10">
-                    <div className="px-6 py-4 border-b border-gray-300 flex items-center gap-2">
+            <div className="sticky top-0 hidden md:flex bg-card border-b border-gray-200 text-xl md:text-2xl text-card-foreground font-bold p-4 md:p-6.5 z-10 shadow-sm">
+                <h1>Bảo mật</h1>
+            </div>
+
+            <div className="max-w-3xl mx-auto mt-6 md:mt-10 px-4 sm:px-6 lg:px-8 space-y-8">
+                
+                <div className="bg-card border border-gray-300 rounded-xl shadow-sm overflow-hidden w-full">
+                    
+                    {/* Tiêu đề Khối */}
+                    <div className="px-4 md:px-6 py-4 border-b border-gray-300 flex items-center justify-center md:justify-start gap-2 bg-gray-50/50 dark:bg-gray-800/30">
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
                             fill="none" 
                             viewBox="0 0 24 24" 
                             strokeWidth={1.5} 
                             stroke="currentColor" 
-                            className="w-5 h-5 text-orange-500 hover:text-orange-500 cursor-pointer transition-colors"
+                            className="w-5 h-5 text-orange-500"
                         >
                             <path 
                                 strokeLinecap="round" 
@@ -81,98 +89,82 @@ export default function Security({
                     
                     <Form
                         {...SecurityController.update.form()}
-                        options={{
-                            preserveScroll: true,
-                        }}
-                        resetOnError={[
-                            'password',
-                            'password_confirmation',
-                            'current_password',
-                        ]}
+                        options={{ preserveScroll: true }}
+                        resetOnError={['password', 'password_confirmation', 'current_password']}
                         resetOnSuccess
                         onError={(errors) => {
-                            if (errors.password) {
-                                passwordInput.current?.focus();
-                            }
-
-                            if (errors.current_password) {
-                                currentPasswordInput.current?.focus();
-                            }
+                            if (errors.password) passwordInput.current?.focus();
+                            if (errors.current_password) currentPasswordInput.current?.focus();
                         }}
-                        className="space-y-6 dark:text-white"
+                        className="p-4 md:p-6 space-y-6 dark:text-white"
                     >
                         {({ errors, processing, recentlySuccessful }) => (
                             <>
-                                <div className="grid gap-2 mt-5">
-                                    <Label htmlFor="current_password" className="text-orange-600">
+                                {/* Input Mật khẩu hiện tại */}
+                                <div className="grid gap-2">
+                                    <Label htmlFor="current_password" className="text-gray-700 dark:text-gray-300 font-semibold">
                                         Mật khẩu hiện tại
                                     </Label>
-
                                     <PasswordInput
                                         id="current_password"
                                         ref={currentPasswordInput}
                                         name="current_password"
                                         className="mt-1 block w-full"
                                         autoComplete="current-password"
-                                        placeholder="Mật khẩu hiện tại"
+                                        placeholder="Nhập mật khẩu hiện tại"
                                     />
-
                                     <InputError message={errors.current_password} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="password" className="text-orange-600">Mật khẩu mới</Label>
-
+                                    <Label htmlFor="password" className="text-gray-700 dark:text-gray-300 font-semibold">
+                                        Mật khẩu mới
+                                    </Label>
                                     <PasswordInput
                                         id="password"
                                         ref={passwordInput}
                                         name="password"
                                         className="mt-1 block w-full"
                                         autoComplete="new-password"
-                                        placeholder="Mật khẩu mới"
+                                        placeholder="Nhập mật khẩu mới"
                                     />
-
                                     <InputError message={errors.password} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="password_confirmation" className="text-orange-600">
+                                    <Label htmlFor="password_confirmation" className="text-gray-700 dark:text-gray-300 font-semibold">
                                         Xác nhận mật khẩu
                                     </Label>
-
                                     <PasswordInput
                                         id="password_confirmation"
                                         name="password_confirmation"
                                         className="mt-1 block w-full"
                                         autoComplete="new-password"
-                                        placeholder="Xác nhận mật khẩu"
+                                        placeholder="Nhập lại mật khẩu mới"
                                     />
-
-                                    <InputError
-                                        message={errors.password_confirmation}
-                                    />
+                                    <InputError message={errors.password_confirmation} />
                                 </div>
 
-                                <div className="flex justify-end items-center gap-4">
+                                <div className="flex justify-end items-center gap-4 pt-2">
+                                    <Transition
+                                        show={recentlySuccessful}
+                                        enter="transition ease-in-out duration-300"
+                                        enterFrom="opacity-0"
+                                        leave="transition ease-in-out duration-300"
+                                        leaveTo="opacity-0"
+                                    >
+                                        <p className="text-sm text-green-600 font-medium">
+                                            Đã cập nhật thành công!
+                                        </p>
+                                    </Transition>
+
                                     <Button
                                         disabled={processing}
                                         data-test="update-password-button"
-                                        className="dark:bg-card dark:border border-orange-600 text-white bg-orange-500 hover:bg-orange-600 cursor-pointer"
+                                        className="bg-orange-500 text-white hover:bg-orange-600 cursor-pointer px-6"
                                     >
-                                        Lưu mật khẩu
+                                        {processing ? 'Đang lưu...' : 'Lưu mật khẩu'}
                                     </Button>
-
-                                    <Transition
-                                        show={recentlySuccessful}
-                                        enter="transition ease-in-out"
-                                        enterFrom="opacity-0"
-                                        leave="transition ease-in-out"
-                                        leaveTo="opacity-0"
-                                    >
-                                        <p className="text-sm text-neutral-600">
-                                            Đã lưu thành công
-                                        </p>
-                                    </Transition>
                                 </div>
                             </>
                         )}
@@ -180,11 +172,8 @@ export default function Security({
                 </div>
             </div>
         </div>
-
-
     );
 }
-
 
 Security.layout = (page: React.ReactNode) => (
     <NoteSettingLayout title="Cài đặt">

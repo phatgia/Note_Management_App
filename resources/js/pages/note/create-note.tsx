@@ -23,7 +23,19 @@ const ICONS: Record<string, React.ReactNode> = {
     folder: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" /></svg>
 };
 
-export default function Create({ notes, categories }: any) {
+const modules={
+    toolbar: { container: "#my-custom-toolbar" }
+};
+
+const quillFomat =
+    [['bold', 'italic', 'underline', 'strike'], 
+        [{ 'color': [] }, { 'background': [] }],   
+        ['link', 'image'],                        
+        ['clean']
+    ];
+
+
+export default function Create({ notes, categories  }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -37,12 +49,7 @@ export default function Create({ notes, categories }: any) {
         bg_color: 'bg-white',               
     });
 
-    const modules = useMemo(() => ({
-        toolbar: { container: "#my-custom-toolbar" }
-    }), [['bold', 'italic', 'underline', 'strike'], 
-            [{ 'color': [] }, { 'background': [] }],   
-            ['link', 'image'],                        
-            ['clean']]);
+
     const toggleCategory = (id: number) => {
         let newIds = [...data.category_ids];
         if (newIds.includes(id)) {
@@ -63,7 +70,16 @@ export default function Create({ notes, categories }: any) {
                 <Head title="Tạo ghi chú" />
 
                 {/* --- THANH TIÊU ĐỀ --- */}
-                <div className="flex items-center gap-4 sticky top-0 bg-card border-b border-gray-300 p-6 z-10">
+                <div className="md:hidden h-31 flex items-center gap-4 sticky top-0 bg-card border-b border-gray-300 p-6 z-10">
+                    <Link href="/home" className="p-2 -ml-2 rounded-full transition-colors group">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dark:text-orange-500 w-6 h-6 text-gray-500">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                        </svg>
+                    </Link>
+                    <h1 className="text-2xl font-bold text-card-foreground">Tạo ghi chú mới</h1>
+                </div>
+
+                <div className="hidden md:flex flex items-center gap-4 sticky top-0 bg-card border-b border-gray-300 p-6 z-10">
                     <Link href="/home" className="p-2 -ml-2 rounded-full transition-colors group">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dark:text-orange-500 w-6 h-6 text-gray-500">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
@@ -89,22 +105,50 @@ export default function Create({ notes, categories }: any) {
 
                         {/* 2. Nội dung */}
                         <div>
-                                <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 block">Nội dung</Label>
-                                <div className="bg-white/80 dark:bg-card backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 transition-all">
-                                    
-                                    <ReactQuill 
-                                        theme="snow" 
-                                        modules={modules} 
-                                        value={data.content} 
-                                        onChange={(value) => setData('content', value)}
-                                        placeholder="Bắt đầu viết nội dung ghi chú của bạn ở đây..."
-                                        className="border-none [&>.ql-toolbar]:bg-white/50 dark:[&>.ql-toolbar]:bg-gray-800/50 [&>.ql-toolbar]:border-none [&>.ql-toolbar]:border-b [&>.ql-toolbar]:border-gray-200 dark:[&>.ql-toolbar]:border-gray-700 [&>.ql-container.ql-snow]:border-none [&>.ql-container]:text-base [&>.ql-container]:min-h-[250px] dark:text-white"
-                                    />
+                            <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 block">Nội dung</Label>
+                            <div className="bg-white/80 dark:bg-card backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 transition-all">
+                                <div id="my-custom-toolbar" className="flex items-center gap-4 bg-white/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-3 py-2">
+                                    <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-300 dark:border-gray-700 shadow-sm">
+                                        <button type="button" className="ql-bold w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
+                                        <button type="button" className="ql-italic w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
+                                        <button type="button" className="ql-underline w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
+                                        <button type="button" className="ql-strike w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
+                                    </div>
+                                    <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-300 dark:border-gray-700 shadow-sm">
+                                        <select className="ql-color"></select>
+                                        <select className="ql-background"></select>
+                                    </div>
+                                    <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-300 dark:border-gray-700 shadow-sm ml-auto">
+                                        <button type="button" className="ql-clean w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
+                                    </div>
                                 </div>
-                                <InputError message={errors.content} className="mt-2" />
+                                <ReactQuill 
+                                    theme="snow" 
+                                    modules={modules} 
+                                    value={data.content} 
+                                    onChange={(value) => setData('content', value)}
+                                    placeholder="Bắt đầu viết nội dung ghi chú của bạn ở đây..."
+                                    className="border-none [&>.ql-toolbar]:bg-white/50 dark:[&>.ql-toolbar]:bg-gray-800/50 [&>.ql-toolbar]:border-none [&>.ql-toolbar]:border-b [&>.ql-toolbar]:border-gray-200 dark:[&>.ql-toolbar]:border-gray-700 [&>.ql-container.ql-snow]:border-none [&>.ql-container]:text-base [&>.ql-container]:min-h-[250px] dark:text-white"
+                                />
                             </div>
+                            <InputError message={errors.content} className="mt-2" />
+                        </div>
 
-                        {/* 3. KHU VỰC NHÃN & TẠO NHÃN MỚI TÍCH HỢP ICON */}
+                        <div className="border-t border-gray-200/60 flex flex-col gap-3 pt-4">
+                            <Label className="text-sm text-card-foreground font-semibold">Ảnh</Label>
+                            <div className="flex gap-3 flex-wrap items-center">
+                                <button className="text-orange-500 border border-orange-500 border-dashed rounded-lg p-3">
+                                    <div className="flex justify-center ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-orange-500">
+                                            <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    Thêm ảnh
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 3. Nhãn */}
                         <div className="border-t border-gray-200/60 flex flex-col gap-3 pt-4">
                             <Label className="text-sm text-card-foreground font-semibold">Nhãn</Label>
                             
@@ -115,9 +159,9 @@ export default function Create({ notes, categories }: any) {
                                         <button 
                                             key={cat.id} type="button"
                                             onClick={() => toggleCategory(cat.id)}
-                                            className={`rounded-full px-3 py-1.5 flex items-center gap-2 text-sm font-medium border transition-all 
+                                            className={`rounded-full px-3 py-1.5 flex items-center gap-3 text-sm font-medium border transition-all 
                                                 ${cat.color ? cat.color : 'bg-gray-100 text-gray-700 border-gray-200'} 
-                                                ${data.category_ids.includes(cat.id) ? 'ring-2 ring-offset-2 ring-gray-400 scale-105 shadow-md' : 'hover:scale-105 opacity-80 hover:opacity-100'}
+                                                ${data.category_ids.includes(cat.id) ? 'ring-2 ring-offset-1 ring-gray-400 scale-100 shadow-md' : 'hover:scale-105 opacity-80 hover:opacity-100'}
                                             `}
                                         >
                                             {ICONS[cat.icon] || ICONS['tag']}

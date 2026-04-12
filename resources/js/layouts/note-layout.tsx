@@ -17,9 +17,9 @@ const ICONS: Record<string, React.ReactNode> = {
 };
 
 export default function NoteLayout({ children, title }: PropsWithChildren<Props>) {
-    const { auth, sidebarData,flash } = usePage().props as any;
+    const { auth, sidebarData,flash , categories: pageCategories} = usePage().props as any;
     const user = auth.user;
-    const categories = sidebarData?.categories || [];
+    const categories = pageCategories || sidebarData?.categories || [];
     const noteCount = sidebarData?.noteCount || 0;
     const sharedCount = sidebarData?.sharedCount || 0;
     const [processing, setProcessing] = useState(false);

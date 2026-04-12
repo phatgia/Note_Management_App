@@ -264,8 +264,9 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
 
                             {/* Màu nền */}
                             {canEdit && (
+                                
                                 <div className="border-t border-gray-300/60 dark:border-gray-700/60 pt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-                                    <Label className="text-sm text-gray-500 dark:text-card-foreground font-semibold">Màu nền</Label>
+                                    <Label className="text-sm text-gray-400 font-semibold">Màu nền</Label>
                                     <div className="flex items-center gap-3">
                                         <button type="button" onClick={() => setData('bg_color', 'bg-white')} className={`w-8 h-8 rounded-full border-2 bg-white shadow-sm transition-all ${data.bg_color === 'bg-white' ? 'border-orange-500 ring-4 ring-orange-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
                                         <button type="button" onClick={() => setData('bg_color', 'bg-blue-50')} className={`w-8 h-8 rounded-full border-2 bg-blue-50 shadow-sm transition-all ${data.bg_color === 'bg-blue-50' ? 'border-blue-500 ring-4 ring-blue-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />

@@ -14,6 +14,8 @@ class Note extends Model
         'image_path',
         'bg_color',
         'password',
+        'is_pinned',
+        'pinned_at',
     ];
 
     public function user()

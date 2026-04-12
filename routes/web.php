@@ -25,6 +25,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/note-detail/{note}/share/{user}', [\App\Http\Controllers\NoteController::class, 'removeShare'])->name('notes.share.destroy');
     Route::delete('/note-detail/{note}', [\App\Http\Controllers\NoteController::class, 'destroy'])->name('notes.destroy');
     Route::get('/shared-note', [\App\Http\Controllers\NoteController::class, 'sharedNotes'])->name('notes.shared');
+    Route::post('/notes/{note}/pin', [\App\Http\Controllers\NoteController::class, 'togglePin']);
 });
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])

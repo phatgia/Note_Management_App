@@ -40,7 +40,8 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
     const menuRef = useRef<HTMLDivElement>(null);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    
+    const isFirstRender = useRef(true);
+    const [isSaving, setIsSaving] = useState(false);
     const { data: shareData, setData: setShareData, post: postShare, processing: sharing, errors: shareErrors, reset: resetShare } = useForm({
         email: '',
         role: 'viewer'
@@ -97,7 +98,30 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
         }
         setData('category_ids', newIds);
     };
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
 
+        if (!canEdit) return;
+
+        const timer = setTimeout(() => {
+            setIsSaving(true);
+            router.put(`/note-detail/${note.id}`, data, {
+                preserveScroll: true,
+                preserveState: true,  
+                onSuccess: () => {
+                    setIsSaving(false);
+                },
+                onError: () => {
+                    setIsSaving(false);
+                }
+            });
+        }, 1500);
+
+        return () => clearTimeout(timer);
+    }, [data.title, data.content, data.bg_color, data.category_ids]);
     const handleUnlock = (e: React.FormEvent) => {
         e.preventDefault();
         if (unlockPassword === note.password) {
@@ -107,7 +131,7 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
             setUnlockError('Mật khẩu không chính xác!');
         }
     };
-
+    
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -117,7 +141,7 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
+    
     return (
         <NoteLayout title={data.title}>
             <div className="w-full bg-[#F8F9FA] dark:bg-background min-h-screen pb-12 overflow-y-auto">
@@ -134,6 +158,7 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                             Cập nhật lần cuối: {new Date(note.updated_at).toLocaleDateString('vi-VN')}
                         </span>
+                        
                         {!canEdit && (
                             <span className="ml-2 px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-700">
                                 Chỉ xem

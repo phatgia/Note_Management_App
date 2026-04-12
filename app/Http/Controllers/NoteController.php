@@ -9,24 +9,15 @@ use Inertia\Inertia;
 
 class NoteController extends Controller
 {
-    public function index(Request $request) 
+    public function index(Request $request)
     {
-        $categories = \App\Models\Category::where('user_id', auth()->id())
-            ->orWhereNull('user_id')
-            ->get();
+        $categories = \App\Models\Category::where('user_id', auth()->id())->orWhereNull('user_id')->get();
 
-        $notesQuery = Note::with('categories')
+        $notesQuery = Note::with(['categories', 'sharedUsers'])
             ->where('user_id', auth()->id())
-            ->latest();
-
-
-        if ($request->filled('search')){
-            $searchTerm = '%' . $request->search . '%';
-            $notesQuery->where(function ($query) use ($searchTerm){
-                $query->where('title', 'like', $searchTerm)
-                      ->orWhere('content', 'like', $searchTerm);
-            });
-        }
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('pinned_at')
+            ->orderByDesc('updated_at');
 
         if ($request->filled('category_id')) {
             $notesQuery->whereHas('categories', function ($q) use ($request) {
@@ -37,7 +28,7 @@ class NoteController extends Controller
         $notes = $notesQuery->get();
 
         return Inertia::render('note/home', [
-            'notes' => $notes, 
+            'notes' => $notes,
             'categories' => $categories,
             'currentCategoryId' => $request->category_id,
         ]);
@@ -248,5 +239,17 @@ class NoteController extends Controller
         return Inertia::render('note/shared-note', [
             'notes' => $notes
         ]);
+    }
+    public function togglePin(Note $note)
+    {
+        if ($note->user_id !== auth()->id())
+            abort(403);
+
+        $note->update([
+            'is_pinned' => !$note->is_pinned,
+            'pinned_at' => !$note->is_pinned ? now() : null,
+        ]);
+
+        return back();
     }
 }

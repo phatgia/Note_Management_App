@@ -39,6 +39,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'flash' => [
+                'message' => fn() => $request->session()->get('message'),
+                'uuid' => fn() => \Illuminate\Support\Str::uuid(),
+            ],
             'sidebarData' => function () use ($request) {
                 if (!$request->user())
                     return null;

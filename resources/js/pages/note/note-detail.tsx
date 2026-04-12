@@ -28,6 +28,7 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     
     const { data: shareData, setData: setShareData, post: postShare, processing: sharing, errors: shareErrors, reset: resetShare } = useForm({
         email: '',
@@ -69,11 +70,14 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
         put(`/note-detail/${note.id}`); 
     };
 
-    const funcDelete = () => {
+    const funcDelete = (e: React.FormEvent) => {
+        e.preventDefault();
         if (!canEdit) return;
-        if(window.confirm('Bạn có chắc chắn muốn xóa ghi chú này?')) {
-            router.delete(`/note-detail/${note.id}`);
-        }
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        router.delete(`/note-detail/${note.id}`);
     };
 
     const toggleCategory = (id: number) => {
@@ -214,9 +218,9 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                 <Label className="text-sm text-gray-500 dark:text-gray-400 font-semibold">Nhãn</Label>
                                 <div className="flex gap-3 flex-wrap items-center">
                                     {categories && categories.length > 0 && (
-                                        categories.map((cat: any) => (
+                                        categories.map((cat: any, index: number) => (
                                             <button 
-                                                key={cat.id} type="button" onClick={() => toggleCategory(cat.id)}
+                                                key={`${cat.id}-${index}`} type="button" onClick={() => toggleCategory(cat.id)}
                                                 className={`rounded-full px-3 py-1.5 flex items-center gap-2 text-sm font-medium border transition-all ${cat.color ? cat.color : 'bg-gray-100 text-gray-700 border-gray-300'} ${data.category_ids.includes(cat.id) ? 'ring-2 ring-offset-2 ring-gray-400 scale-105 shadow-md' : (canEdit ? 'hover:scale-105 opacity-80 hover:opacity-100' : 'opacity-100 cursor-default')}`}
                                             >
                                                 {ICONS[cat.icon] || ICONS['tag']} {cat.name || cat.Name} 
@@ -292,8 +296,8 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                         
                                         <div className="max-h-48 overflow-y-auto" ref={menuRef}>
                                             {note.shared_users && note.shared_users.length > 0 ? (
-                                                note.shared_users.map((user: any) => (
-                                                    <div key={user.id} className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700/50 last:border-0 relative">
+                                                note.shared_users.map((user: any, index: number) => (
+                                                    <div key={`${user.id}-${index}`} className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700/50 last:border-0 relative">
                                                         <div className="flex items-center gap-3 overflow-hidden pr-2">
                                                             <div className="flex items-center justify-center bg-orange-500 text-white rounded-full w-10 h-10 font-bold shrink-0">
                                                                 {user.name.charAt(0).toUpperCase()}
@@ -443,6 +447,31 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Xác nhận Xóa Ghi chú */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+                    <div className="bg-white dark:bg-card p-6 rounded-3xl shadow-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in duration-200">
+                        <div className="mx-auto w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4 shadow-inner">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white text-center">Xóa ghi chú này?</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6 leading-relaxed">
+                            Hành động này không thể hoàn tác. Ghi chú sẽ bị xóa vĩnh viễn khỏi hệ thống của bạn và những người được chia sẻ.
+                        </p>
+                        <div className="flex items-center gap-3">
+                            <button type="button" onClick={() => setIsDeleteModalOpen(false)} className="cursor-pointer flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 font-bold rounded-xl transition-colors">
+                                Hủy bỏ
+                            </button>
+                            <button type="button" onClick={confirmDelete} className="cursor-pointer flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors shadow-sm">
+                                Xóa vĩnh viễn
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

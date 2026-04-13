@@ -72,7 +72,7 @@ export default function Home({ notes, categories }: any) {
     return (
         <NoteLayout title="Tất cả ghi chú">
             {/* Thanh trên cùng - Mobile */}
-            <div className="grid md:hidden sticky top-0 bg-card border-b border-gray-300 p-4 z-10">
+            <div className="grid md:hidden sticky top-0 bg-card border-b border-gray-300 dark:border-gray-800 p-4 z-10">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold text-foreground">Tất cả ghi chú</h1>
                     <div className="flex items-center gap-4">
@@ -117,7 +117,7 @@ export default function Home({ notes, categories }: any) {
             </div>
 
             {/* Thanh trên cùng - Desktop */}
-            <div className="hidden md:flex sticky top-0 bg-card items-center justify-between border-b border-gray-300 p-6 z-10">
+            <div className="hidden md:flex sticky top-0 bg-card items-center justify-between border-b border-gray-300 dark:border-gray-800 p-6 z-10">
                 <h1 className="text-2xl font-bold text-foreground">Tất cả ghi chú</h1>
                 <div className="flex items-center gap-4">
                     <button onClick={()=>updateViewMode('grid')} className={viewMode ==='grid'?"bg-orange-500 dark:bg-card dark:border-orange-500 cursor-pointer border border-gray-200 rounded-md px-4 py-2":"border border-gray-500 rounded-md px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"}>

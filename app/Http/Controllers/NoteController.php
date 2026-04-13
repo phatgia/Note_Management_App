@@ -26,7 +26,14 @@ class NoteController extends Controller
             });
         }
 
-        $notes = $notesQuery->get();
+        if($request->filled('search')){
+            $searchTerm = $request->search;
+            $notesQuery->where(function($q) use ($searchTerm){
+                $q->where('title','like',"%{$searchTerm}%")->orWhere('content', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        $notes = $notesQuery->latest()->get();
 
         return Inertia::render('note/home', [
             'notes' => $notes,

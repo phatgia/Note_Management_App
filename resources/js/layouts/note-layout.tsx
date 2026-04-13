@@ -63,6 +63,23 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
         }
     }, [flash?.message, flash?.uuid]);
 
+    // Tìm keiems
+    const [searchQuery, setSearchQuery] = useState(() =>{
+        if(typeof window !== 'undefined') {
+            return new URLSearchParams(window.location.search).get('search') || '';
+        }
+        return '';
+    });
+
+    useEffect(()=>{
+            const delayDebounceFn = setTimeout(() =>{
+            const basePath = url.split('?')[0]; 
+            router.get(basePath, {search: searchQuery}, {preserveState:true, preserveScroll:true, replace:true}
+            );
+        }, 300); 
+        return () => clearTimeout(delayDebounceFn);
+    },[searchQuery]);
+
     // --- OTP Handlers ---
     const handleSendOtp = () => {
         setSendingOtp(true);
@@ -114,7 +131,7 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
             <Head title={title} />
 
             <aside className="w-64 bg-sidebar border-r border-gray-200 dark:border-gray-800 flex flex-col h-full transition-colors shrink-0">
-                <Link href="/home" className="cursor-pointer flex border-b border-gray-200 dark:border-gray-800 pb-4 px-4 py-9">
+                <Link href="/home" className="cursor-pointer flex border-b border-gray-300 dark:border-gray-800 pb-5 px-4 py-9">
                     <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
                         <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
@@ -125,6 +142,8 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                 <div className="px-4 py-4">
                     <div className="relative">
                         <input 
+                            value={searchQuery}
+                            onChange={(e)=>setSearchQuery(e.target.value)}
                             type="text" placeholder="Tìm kiếm ghi chú..." 
                             className="w-full bg-background border border-gray-200 dark:border-gray-700 text-foreground text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
                         />
@@ -155,7 +174,7 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
 
                     <div className="flex items-center justify-between mt-4 mb-2">
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Nhãn</p>
-                        <button onClick={() => setIsLabelModalOpen(true)} className="text-gray-400 hover:text-orange-500 transition-colors p-1" title="Quản lý Nhãn">
+                        <button onClick={() => setIsLabelModalOpen(true)} className="cursor-pointer text-gray-400 hover:text-orange-500 transition-colors p-1" title="Quản lý Nhãn">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
                         </button>
                     </div>
@@ -206,6 +225,23 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                                 <Link href="/settings/profile" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 hover:text-orange-600 transition-colors" onClick={() => setIsMenuOpen(false)}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-orange-500"><path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" /></svg> Hồ sơ
                                 </Link>
+
+                                <Link href="/settings/profile" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 hover:text-orange-600 transition-colors" onClick={() => setIsMenuOpen(false)}>
+                                    <svg 
+                                        xmlns="http://www.w3.org/2000/svg" 
+                                        viewBox="0 0 24 24" 
+                                        fill="currentColor" 
+                                        className="w-5 h-5 text-orange-500 hover:text-orange-500 transition-colors duration-300"
+                                    >
+                                        <path 
+                                            fillRule="evenodd" 
+                                            d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.097.078.15.222.15.364 0 .287-.032.576-.032.864 0 .288.032.577.032.864 0 .142-.053.286-.15.364l-.84.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.31.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.675-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.098-.078-.15-.222-.15-.364 0-.287.032-.576.032-.864 0-.288-.032-.577-.032-.864 0-.142.053-.286.15-.364l.84-.692a1.875 1.875 0 00.432-2.385l-.923-1.597a1.875 1.875 0 00-2.28-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" 
+                                            clipRule="evenodd" 
+                                        />
+                                    </svg>
+                                    Cài Đặt
+                                </Link>
+
                                 <button onClick={() => router.post(logout())} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left cursor-pointer">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg> Đăng xuất
                                 </button>

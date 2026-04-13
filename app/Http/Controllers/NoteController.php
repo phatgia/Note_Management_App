@@ -14,7 +14,7 @@ class NoteController extends Controller
     {
         $categories = \App\Models\Category::where('user_id', auth()->id())->orWhereNull('user_id')->get();
 
-        $notesQuery = Note::with(['categories', 'sharedUsers'])
+        $notesQuery = Note::with(['categories', 'sharedUsers', 'images'])
             ->where('user_id', auth()->id())
             ->orderByDesc('is_pinned')
             ->orderByDesc('pinned_at')
@@ -61,7 +61,8 @@ class NoteController extends Controller
             'new_category_icon' => 'nullable|string',
             'bg_color' => 'nullable|string',
             'password' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image'=> 'nullable|array',
+            'image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         $categoryIds = $request->category_ids ?? [];
@@ -76,18 +77,19 @@ class NoteController extends Controller
             $categoryIds[] = $newCategory->id;
         }
 
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('notes', 'public');
-        }
-
         $note = $request->user()->notes()->create([
             'title' => $validated['title'],
             'content' => $validated['content'],
             'bg_color' => $validated['bg_color'] ?? 'bg-white',
-            'image_path' => $imagePath,
             'password' => $validated['password'] ?? null,
         ]);
+
+        if ($request->hasFile('image')) {
+            foreach ($request->file('image') as $file) {
+                $path = $file->store('notes', 'public');
+                $note->images()->create(['file_path' => $path]); 
+            }
+        }
 
         $note->categories()->sync($categoryIds);
 
@@ -104,7 +106,7 @@ class NoteController extends Controller
             abort(403, 'Bạn không có quyền xem ghi chú này!');
         }
 
-        $note->load(['categories', 'sharedUsers']);
+        $note->load(['categories', 'sharedUsers', 'images']);
 
         $categories = \App\Models\Category::where('user_id', auth()->id())
             ->orWhereNull('user_id')
@@ -129,7 +131,7 @@ class NoteController extends Controller
             abort(403, 'Bạn không có quyền sửa ghi chú này!');
         }
 
-        $note->load('categories');
+        $note->load('categories', 'images');
         $categories = \App\Models\Category::where('user_id', auth()->id())->get();
         return Inertia::render('note/edit', [
             'note' => $note,
@@ -156,7 +158,8 @@ class NoteController extends Controller
             'new_category_icon' => 'nullable|string',
             'bg_color' => 'nullable|string',
             'password' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Validate file ảnh
+            'image' => 'nullable|array',
+            'image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Validate file ảnh
         ]);
 
         $categoryIds = $request->category_ids ?? [];
@@ -178,12 +181,11 @@ class NoteController extends Controller
             'password' => $validated['password'] ?? null,
         ];
 
-        if ($request->hasFile('image')) {
-            if ($note->image_path) {
-                Storage::disk('public')->delete($note->image_path);
+        if ($request->hasFile('image')){            
+            foreach ($request->file('image') as $file) {
+                $path = $file->store('notes', 'public');
+                $note->images()->create(['file_path' => $path]);
             }
-            // Lưu ảnh mới
-            $updateData['image_path'] = $request->file('image')->store('notes', 'public');
         }
 
         $note->update($updateData);
@@ -193,7 +195,7 @@ class NoteController extends Controller
         return back()->with('message', 'Đã cập nhật ghi chú thành công!');
     }
 
-    public function removeImage(Note $note)
+    public function removeImage(Note $note, $id)
     {
         $isOwner = $note->user_id === auth()->id();
         $isEditor = $note->sharedUsers()->where('user_id', auth()->id())->wherePivot('role', 'editor')->exists();
@@ -202,9 +204,10 @@ class NoteController extends Controller
             abort(403, 'Bạn không có quyền xóa ảnh này!');
         }
 
-        if ($note->image_path) {
-            Storage::disk('public')->delete($note->image_path); 
-            $note->update(['image_path' => null]); 
+        $image = $note->images()->find($id);
+        if($image){
+            Storage::disk('public')->delete($image->file_path); 
+            $image->delete();
         }
 
         return back()->with('message', 'Đã xóa ảnh đính kèm!');
@@ -216,8 +219,9 @@ class NoteController extends Controller
             abort(403, 'Chỉ chủ bài viết mới có quyền xóa!');
         }
 
-        if ($note->image_path) {
-            Storage::disk('public')->delete($note->image_path);
+
+        foreach ($note->images as $image) {
+            Storage::disk('public')->delete($image->file_path);
         }
 
         $note->delete();
@@ -271,7 +275,7 @@ class NoteController extends Controller
 
     public function sharedNotes()
     {
-        $notes = auth()->user()->sharedNotes()->with('categories')->latest()->get();
+        $notes = auth()->user()->sharedNotes()->with(['categories', 'images'])->latest()->get();
 
         return Inertia::render('note/shared-note', [
             'notes' => $notes

@@ -28,7 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notes/{note}/pin', [\App\Http\Controllers\NoteController::class, 'togglePin']);
     Route::put('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'update']);
     Route::delete('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'destroy']);
-    Route::delete('/notes/{note}/remove-image', [\App\Http\Controllers\NoteController::class, 'removeImage']);
+    Route::delete('/notes/{note}/images/{imageId}', [NoteController::class, 'removeImage'])->name('notes.remove-image');
     Route::post('/otp/send', [\App\Http\Controllers\OtpController::class, 'send']);
     Route::post('/otp/verify', [\App\Http\Controllers\OtpController::class, 'verify']);
 });

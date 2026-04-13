@@ -11,11 +11,15 @@ class Note extends Model
         'user_id',
         'title',
         'content',
-        'image_path',
         'bg_color',
         'password',
         'is_pinned',
         'pinned_at',
+    ];
+
+    protected $casts = [
+        'is_pinned' => 'boolean',
+        'pinned_at' => 'datetime',
     ];
 
     public function user()
@@ -29,5 +33,10 @@ class Note extends Model
     public function sharedUsers()
     {
         return $this->belongsToMany(User::class, 'note_user')->withPivot('role')->withTimestamps();
+    }
+
+    public function images()
+    {
+        return $this->hasMany(NoteImage::class); 
     }
 }

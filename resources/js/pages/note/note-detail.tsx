@@ -34,7 +34,7 @@ const quillFormats = [
     'link', 'image',
 ];
 
-export default function NoteDetail({ auth, note, categories, isOwner, canEdit }: any) {
+export default function NoteDetail({ note, categories, isOwner, canEdit }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -47,8 +47,8 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
     const [isSaving, setIsSaving] = useState(false);
     const [localStatus, setLocalStatus] = useState('');
 
-    // 🌟 KHAI BÁO UI STATE ẢNH
-    const [previewImage, setPreviewImage] = useState<string | null>(note.image_path ? `/storage/${note.image_path}` : null);
+    const [existingImages, setExistingImages] = useState<any[]>(note.images || []); 
+    const [previewImage, setPreviewImage] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { data: shareData, setData: setShareData, post: postShare, processing: sharing, errors: shareErrors, reset: resetShare } = useForm({
@@ -69,52 +69,44 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
         new_category_icon: 'tag', 
         bg_color: note.bg_color || 'bg-white',
         password: note.password || '',
-        image: null as File | null, // Biến chứa ảnh cần upload
-        _method: 'put',             // BẮT BUỘC để gửi formData kèm method PUT cho Laravel
+        image: [] as File [], 
+        _method: 'put',    
     });
 
-    // const modules = useMemo(() => ({
-    //     toolbar: canEdit ? { container: "#my-custom-toolbar" } : false
-    // }), [canEdit]);
-
-    // 🌟 CÁC HÀM XỬ LÝ ẢNH
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setData('image', file);
-            setPreviewImage(URL.createObjectURL(file));
-        }
-    };
+        const files = Array.from(e.target.files || []);
+        if(files.length>0){
+            setData('image', [...data.image, ...files]);
 
-    const handleDeleteImage = () => {
+            const newPreviews = files.map(file=>URL.createObjectURL(file));
+            setPreviewImage([...previewImage, ...newPreviews]);
+        }
+        if(fileInputRef.current) fileInputRef.current.value ='';
+    };
+    const handleDeleteExistingImage = (imageId: number) => {
         if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
-
-        if (note.image_path && !data.image) {
-            // Nếu ảnh đã lưu trong DB, gọi API xóa
-            router.delete(`/notes/${note.id}/remove-image`, {
-                onSuccess: () => {
-                    setPreviewImage(null);
-                    setData('image', null);
-                    setLocalStatus('Đã xóa ảnh');
-                    setTimeout(() => setLocalStatus(''), 3000);
-                }
-            });
-        } else {
-            // Nếu ảnh vừa chọn (chưa lưu) thì chỉ việc clear state
-            setPreviewImage(null);
-            setData('image', null);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-        }
+        
+        router.delete(`/notes/${note.id}/images/${imageId}`, {
+            onSuccess: () => {
+                setExistingImages(existingImages.filter(img => img.id !== imageId));
+                setLocalStatus('Đã xóa 1 ảnh');
+                setTimeout(() => setLocalStatus(''), 3000);
+            }
+        });
     };
 
-    // --- HÀM LƯU NOTE ---
+    const handleRemoveNewImage = (indexToRemove: number) => {
+        setData('image', data.image.filter((_, i) => i !== indexToRemove));
+        setPreviewImage(previewImage.filter((_, i) => i !== indexToRemove));
+    };
+
     const funcUpdate = (e: React.FormEvent) => {
         e.preventDefault();
         if (!canEdit) return;
         
         setIsSaving(true);
         post(`/note-detail/${note.id}`, {
-            forceFormData: true, // Ép Inertia gửi File
+            forceFormData: true, 
             preserveScroll: true,
             preserveState: true,  
             onSuccess: () => {
@@ -381,40 +373,57 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                 </div>
                                 <InputError message={errors.content} className="mt-2" />
                             </div>
-
-                            {/* 🌟 ẢNH ĐÍNH KÈM */}
+                            
+                            {/* Ảnh */}
                             <div className="border-t border-gray-300/60 dark:border-gray-700/60 flex flex-col gap-3 pt-4">
-                                <Label className="text-sm text-gray-500 dark:text-gray-400 font-semibold">Ảnh đính kèm (Tối đa 1 ảnh)</Label>
+                                <Label className="text-sm text-gray-500 dark:text-gray-400 font-semibold">Ảnh đính kèm</Label>
                                 
-                                {previewImage ? (
-                                    <div className="relative group w-48 h-48 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
-                                        <img src={previewImage} alt="Attachment" className="w-full h-full object-cover" />
-                                        {canEdit && (
-                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
-                                                <button type="button" onClick={handleDeleteImage} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg cursor-pointer">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    canEdit && (
+                                <div className="flex gap-3 flex-wrap items-center">
+                                    
+                                    {/* 1. VÒNG LẶP HIỂN THỊ ẢNH CŨ TỪ DATABASE */}
+                                    {existingImages.map((img: any) => (
+                                        <div key={`old-${img.id}`} className="relative group w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm shrink-0">
+                                            <img src={`/storage/${img.file_path}`} alt="Saved Attachment" className="w-full h-full object-cover" />
+                                            {canEdit && (
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm z-20">
+                                                    <button type="button" onClick={() => handleDeleteExistingImage(img.id)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg cursor-pointer">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+
+                                    {/* 2. VÒNG LẶP HIỂN THỊ ẢNH MỚI VỪA CHỌN */}
+                                    {previewImage.map((preview, index) => (
+                                        <div key={`new-${index}`} className="relative group w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden border-2 border-orange-300 shadow-sm shrink-0">
+                                            <div className="absolute top-1 left-1 bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded shadow z-10">Mới</div>
+                                            <img src={preview} alt="New Preview" className="w-full h-full object-cover opacity-80" />
+                                            {canEdit && (
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm z-20">
+                                                    <button type="button" onClick={() => handleRemoveNewImage(index)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg cursor-pointer">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+
+                                    {canEdit && (
                                         <div>
-                                            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageSelect} />
-                                            <button 
-                                                type="button" onClick={() => fileInputRef.current?.click()}
-                                                className="flex flex-col items-center justify-center w-48 h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer text-gray-500 group"
-                                            >
+                                            <input type="file" accept="image/*" multiple className="hidden" ref={fileInputRef} onChange={handleImageSelect} />
+                                            <button type="button" onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center justify-center w-28 h-28 sm:w-32 sm:h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer text-gray-500 group shrink-0">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 mb-2 group-hover:text-orange-500 transition-colors">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                                                 </svg>
-                                                <span className="text-sm font-medium group-hover:text-orange-500 transition-colors">Tải ảnh lên</span>
+                                                <span className="text-xs font-medium group-hover:text-orange-500 transition-colors">Tải ảnh lên</span>
                                             </button>
                                         </div>
-                                    )
-                                )}
-                                <InputError message={errors.image} className="mt-1" />
+                                    )}
+                                </div>
+                                <InputError message={errors.image as unknown as string} className="mt-1" />
                             </div>
+                        
 
                             {/* NHÃN */}
                             <div className="border-t border-gray-300/60 dark:border-gray-700/60 flex flex-col gap-3 pt-4">

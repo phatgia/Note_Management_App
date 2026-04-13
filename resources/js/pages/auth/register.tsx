@@ -47,8 +47,16 @@ export default function Register() {
 
 
             {/* Phải */}
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center p-8">
                 <div className="w-full max-w-md">
+                    <div className="md:hidden flex items-center gap-3">
+                        <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+                            <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
+                            <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
+                        </svg>
+                        <p className="font-bold text-3xl">Note Management</p>
+                    </div>
+
                     <div className="">
                         <h2 className="text-4xl font-bold text-gray-900 mb-2">Tạo tài khoản</h2>
                         <p className="text-gray-500">Điền thông tin bên dưới để đăng ký</p>

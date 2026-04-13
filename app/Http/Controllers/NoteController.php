@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Storage;
 use App\Models\Category;
 use App\Models\Note;
 use Illuminate\Http\Request;
@@ -59,8 +60,8 @@ class NoteController extends Controller
             'new_category_color' => 'nullable|string',
             'new_category_icon' => 'nullable|string',
             'bg_color' => 'nullable|string',
-            'image_path' => 'nullable|string',
-            'password' => 'nullable|string'
+            'password' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         $categoryIds = $request->category_ids ?? [];
@@ -75,11 +76,16 @@ class NoteController extends Controller
             $categoryIds[] = $newCategory->id;
         }
 
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('notes', 'public');
+        }
+
         $note = $request->user()->notes()->create([
             'title' => $validated['title'],
             'content' => $validated['content'],
             'bg_color' => $validated['bg_color'] ?? 'bg-white',
-            'image_path' => $validated['image_path'] ?? null,
+            'image_path' => $imagePath,
             'password' => $validated['password'] ?? null,
         ]);
 
@@ -116,7 +122,6 @@ class NoteController extends Controller
 
     public function edit(Note $note)
     {
-
         $isOwner = $note->user_id === auth()->id();
         $isEditor = $note->sharedUsers()->where('user_id', auth()->id())->wherePivot('role', 'editor')->exists();
 
@@ -151,6 +156,7 @@ class NoteController extends Controller
             'new_category_icon' => 'nullable|string',
             'bg_color' => 'nullable|string',
             'password' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Validate file ảnh
         ]);
 
         $categoryIds = $request->category_ids ?? [];
@@ -165,22 +171,53 @@ class NoteController extends Controller
             $categoryIds[] = $newCategory->id;
         }
 
-        $note->update([
+        $updateData = [
             'title' => $validated['title'],
             'content' => $validated['content'],
             'bg_color' => $validated['bg_color'] ?? 'bg-white',
-            'password' => $validated['password'],
-        ]);
+            'password' => $validated['password'] ?? null,
+        ];
+
+        if ($request->hasFile('image')) {
+            if ($note->image_path) {
+                Storage::disk('public')->delete($note->image_path);
+            }
+            // Lưu ảnh mới
+            $updateData['image_path'] = $request->file('image')->store('notes', 'public');
+        }
+
+        $note->update($updateData);
 
         $note->categories()->sync($categoryIds);
 
         return back()->with('message', 'Đã cập nhật ghi chú thành công!');
     }
 
+    public function removeImage(Note $note)
+    {
+        $isOwner = $note->user_id === auth()->id();
+        $isEditor = $note->sharedUsers()->where('user_id', auth()->id())->wherePivot('role', 'editor')->exists();
+
+        if (!$isOwner && !$isEditor) {
+            abort(403, 'Bạn không có quyền xóa ảnh này!');
+        }
+
+        if ($note->image_path) {
+            Storage::disk('public')->delete($note->image_path); 
+            $note->update(['image_path' => null]); 
+        }
+
+        return back()->with('message', 'Đã xóa ảnh đính kèm!');
+    }
+
     public function destroy(Note $note)
     {
         if ($note->user_id !== auth()->id()) {
             abort(403, 'Chỉ chủ bài viết mới có quyền xóa!');
+        }
+
+        if ($note->image_path) {
+            Storage::disk('public')->delete($note->image_path);
         }
 
         $note->delete();
@@ -240,6 +277,7 @@ class NoteController extends Controller
             'notes' => $notes
         ]);
     }
+    
     public function togglePin(Note $note)
     {
         if ($note->user_id !== auth()->id())

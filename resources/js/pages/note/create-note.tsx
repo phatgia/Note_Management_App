@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import NoteLayout from "@/layouts/note-layout";
 import { Head, Link, useForm } from '@inertiajs/react';
 import InputError from '@/components/input-error';
@@ -27,28 +27,24 @@ const modules={
     toolbar: { container: "#my-custom-toolbar" }
 };
 
-const quillFomat =
-    [['bold', 'italic', 'underline', 'strike'], 
-        [{ 'color': [] }, { 'background': [] }],   
-        ['link', 'image'],                        
-        ['clean']
-    ];
-
-
 export default function Create({ notes, categories  }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-   const { data, setData, post, processing, errors } = useForm({
+    // 🌟 KHAI BÁO UI STATE ẢNH
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const { data, setData, post, processing, errors } = useForm({
         title: '',
         content: '',
         category_ids: [] as number[], 
         new_category_name: '',                     
         new_category_color: TAG_COLORS[0], 
         new_category_icon: 'tag', 
-        bg_color: 'bg-white',               
+        bg_color: 'bg-white',
+        image: null as File | null, // 🌟 Biến chứa ảnh cần upload
     });
-
 
     const toggleCategory = (id: number) => {
         let newIds = [...data.category_ids];
@@ -59,29 +55,49 @@ export default function Create({ notes, categories  }: any) {
         }
         setData('category_ids', newIds);
     };
+
+    // 🌟 HÀM XỬ LÝ ẢNH KHI CHỌN VÀ XÓA
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData('image', file);
+            setPreviewImage(URL.createObjectURL(file));
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setPreviewImage(null);
+        setData('image', null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    // 🌟 HÀM SUBMIT FORM
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/note'); 
+        post('/create-note', {
+            forceFormData: true, // 🌟 BẮT BUỘC ĐỂ GỬI ẢNH LÊN SERVER
+        }); 
     };
 
     return (
-            <NoteLayout title="Tạo ghi chú">
-                <div className="w-full bg-background min-h-screen pb-12 overflow-y-auto">
+        <NoteLayout title="Tạo ghi chú">
+            <div className="w-full bg-background min-h-screen pb-12 overflow-y-auto">
                 <Head title="Tạo ghi chú" />
 
-                {/* --- THANH TIÊU ĐỀ --- */}
-                <div className="md:hidden h-31 flex items-center gap-4 sticky top-0 bg-card border-b border-gray-300 p-6 z-10">
+                {/* --- THANH TIÊU ĐỀ MOBILE --- */}
+                <div className="md:hidden h-31 flex items-center gap-4 sticky top-0 bg-card border-b border-gray-300 dark:border-gray-700 p-6 z-10 transition-colors">
                     <Link href="/home" className="p-2 -ml-2 rounded-full transition-colors group">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dark:text-orange-500 w-6 h-6 text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-orange-500 transition-colors">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                         </svg>
                     </Link>
                     <h1 className="text-2xl font-bold text-card-foreground">Tạo ghi chú mới</h1>
                 </div>
 
-                <div className="hidden md:flex flex items-center gap-4 sticky top-0 bg-card border-b border-gray-300 p-6 z-10">
+                {/* --- THANH TIÊU ĐỀ PC --- */}
+                <div className="hidden md:flex flex items-center gap-4 sticky top-0 bg-card border-b border-gray-300 dark:border-gray-700 p-6 z-10 transition-colors">
                     <Link href="/home" className="p-2 -ml-2 rounded-full transition-colors group">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dark:text-orange-500 w-6 h-6 text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-orange-500 transition-colors">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                         </svg>
                     </Link>
@@ -90,22 +106,22 @@ export default function Create({ notes, categories  }: any) {
 
                 <div className="max-w-7xl mx-auto p-6 lg:p-8 flex flex-col lg:flex-row gap-6 items-start">
                     
-                    {/* Trái*/}
-                    <form onSubmit={submit} className="flex-1 w-full bg-card border border-gray-300 rounded-2xl shadow-sm p-6 space-y-6">
+                    {/* --- CỘT TRÁI --- */}
+                    <form onSubmit={submit} className="flex-1 w-full bg-card border border-gray-300 dark:border-gray-700 rounded-2xl shadow-sm p-6 space-y-6 transition-colors">
                         
                         {/* 1. Tiêu đề */}
                         <div>
                             <Label htmlFor="title" className="text-sm font-bold text-card-foreground">Tiêu đề</Label>
                             <input 
-                                id="title" type="text" value={data.title} onChange={(e) => setData('title', e.target.value)} required placeholder="Nhập tiêu đề ghi chú..."
-                                className="mt-2 w-full text-lg font-semibold bg-white/60 dark:bg-card dark:text-white border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all backdrop-blur-sm"
+                                id="title" type="text" value={data.title} onChange={(e) => setData('title', e.target.value)} required placeholder="Nhập tiêu đề ghi chú..." autoFocus
+                                className="mt-2 w-full text-lg font-semibold bg-white/60 dark:bg-card dark:text-white border border-gray-200 dark:border-gray-700 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all backdrop-blur-sm"
                             />
                             <InputError message={errors.title} className="mt-2" />
                         </div>
 
                         {/* 2. Nội dung */}
                         <div>
-                            <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 block">Nội dung</Label>
+                            <Label className="text-sm font-bold text-card-foreground mb-2 block">Nội dung</Label>
                             <div className="bg-white/80 dark:bg-card backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 transition-all">
                                 <div id="my-custom-toolbar" className="flex items-center gap-4 bg-white/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-3 py-2">
                                     <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-300 dark:border-gray-700 shadow-sm">
@@ -128,28 +144,47 @@ export default function Create({ notes, categories  }: any) {
                                     value={data.content} 
                                     onChange={(value) => setData('content', value)}
                                     placeholder="Bắt đầu viết nội dung ghi chú của bạn ở đây..."
-                                    className="border-none [&>.ql-toolbar]:bg-white/50 dark:[&>.ql-toolbar]:bg-gray-800/50 [&>.ql-toolbar]:border-none [&>.ql-toolbar]:border-b [&>.ql-toolbar]:border-gray-200 dark:[&>.ql-toolbar]:border-gray-700 [&>.ql-container.ql-snow]:border-none [&>.ql-container]:text-base [&>.ql-container]:min-h-[250px] dark:text-white"
+                                    className="border-none [&>.ql-container.ql-snow]:border-none [&>.ql-container]:text-base [&>.ql-container]:min-h-[250px] dark:text-white"
                                 />
                             </div>
                             <InputError message={errors.content} className="mt-2" />
                         </div>
 
-                        <div className="border-t border-gray-200/60 flex flex-col gap-3 pt-4">
-                            <Label className="text-sm text-card-foreground font-semibold">Ảnh</Label>
-                            <div className="flex gap-3 flex-wrap items-center">
-                                <button className="text-orange-500 border border-orange-500 border-dashed rounded-lg p-3">
-                                    <div className="flex justify-center ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-orange-500">
-                                            <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
-                                        </svg>
+                        {/* 🌟 3. ẢNH ĐÍNH KÈM */}
+                        <div className="border-t border-gray-200/60 dark:border-gray-700/60 flex flex-col gap-3 pt-4">
+                            <Label className="text-sm text-card-foreground font-semibold">Ảnh đính kèm (Tối đa 1 ảnh)</Label>
+                            
+                            {previewImage ? (
+                                <div className="relative group w-48 h-48 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
+                                    <img src={previewImage} alt="Attachment preview" className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
+                                        <button type="button" onClick={handleRemoveImage} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg cursor-pointer">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                                        </button>
                                     </div>
-                                    Thêm ảnh
-                                </button>
-                            </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <input 
+                                        type="file" accept="image/*" className="hidden" 
+                                        ref={fileInputRef} onChange={handleImageSelect} 
+                                    />
+                                    <button 
+                                        type="button" onClick={() => fileInputRef.current?.click()}
+                                        className="flex flex-col items-center justify-center w-48 h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer text-gray-500 group"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 mb-2 group-hover:text-orange-500 transition-colors">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                        </svg>
+                                        <span className="text-sm font-medium group-hover:text-orange-500 transition-colors">Bấm để tải ảnh lên</span>
+                                    </button>
+                                </div>
+                            )}
+                            <InputError message={errors.image} className="mt-1" />
                         </div>
 
-                        {/* 3. Nhãn */}
-                        <div className="border-t border-gray-200/60 flex flex-col gap-3 pt-4">
+                        {/* 4. Nhãn */}
+                        <div className="border-t border-gray-200/60 dark:border-gray-700/60 flex flex-col gap-3 pt-4">
                             <Label className="text-sm text-card-foreground font-semibold">Nhãn</Label>
                             
                             <div className="flex gap-3 flex-wrap items-center">
@@ -159,7 +194,7 @@ export default function Create({ notes, categories  }: any) {
                                         <button 
                                             key={cat.id} type="button"
                                             onClick={() => toggleCategory(cat.id)}
-                                            className={`rounded-full px-3 py-1.5 flex items-center gap-3 text-sm font-medium border transition-all 
+                                            className={`rounded-full px-3 py-1.5 flex items-center gap-3 text-sm font-medium border transition-all cursor-pointer
                                                 ${cat.color ? cat.color : 'bg-gray-100 text-gray-700 border-gray-200'} 
                                                 ${data.category_ids.includes(cat.id) ? 'ring-2 ring-offset-1 ring-gray-400 scale-100 shadow-md' : 'hover:scale-105 opacity-80 hover:opacity-100'}
                                             `}
@@ -172,7 +207,7 @@ export default function Create({ notes, categories  }: any) {
 
                                 {/* Form tạo Nhãn mới */}
                                 {isAddingTag ? (
-                                    <div className="flex flex-col gap-2 bg-card border border-gray-300 rounded-xl p-2 shadow-sm animate-in fade-in zoom-in duration-200">
+                                    <div className="flex flex-col gap-2 bg-card border border-gray-300 dark:border-gray-700 rounded-xl p-2 shadow-sm animate-in fade-in zoom-in duration-200">
                                         
                                         <div className="flex items-center gap-2">
                                             <input 
@@ -180,27 +215,27 @@ export default function Create({ notes, categories  }: any) {
                                                 onChange={(e) => {
                                                     setData('new_category_name', e.target.value);
                                                 }}
-                                                className="text-sm border-none bg-transparent focus:ring-0 p-0 w-40 text-gray-700 placeholder-gray-400 font-medium"
+                                                className="text-sm border-none bg-transparent focus:ring-0 p-0 w-40 text-card-foreground placeholder-gray-400 font-medium"
                                             />
                                             <button 
                                                 type="button" 
                                                 onClick={() => { setIsAddingTag(false); setData('new_category_name', ''); }} 
-                                                className="ml-auto dark:bg-card cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 rounded-md"
+                                                className="ml-auto cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 dark:bg-gray-800 rounded-md transition-colors"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
                                             </button>
                                         </div>
 
-                                        <div className="h-px w-full bg-gray-100"></div>
+                                        <div className="h-px w-full bg-gray-100 dark:bg-gray-700"></div>
 
                                         <div className="flex items-center gap-4 justify-between">
                                             {/* Chọn Icon */}
-                                            <div className="flex items-center gap-1 border-r border-gray-200 pr-3">
+                                            <div className="flex items-center gap-1 border-r border-gray-200 dark:border-gray-700 pr-3">
                                                 {Object.keys(ICONS).map((iconKey) => (
                                                     <button
                                                         key={iconKey} type="button"
                                                         onClick={() => setData('new_category_icon', iconKey)}
-                                                        className={` cursor-pointer p-1 rounded-md transition-all ${data.new_category_icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300 ' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`}
+                                                        className={` cursor-pointer p-1 rounded-md transition-all ${data.new_category_icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300 ' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300'}`}
                                                     >
                                                         {ICONS[iconKey]}
                                                     </button>
@@ -222,7 +257,7 @@ export default function Create({ notes, categories  }: any) {
                                 ) : (
                                     <button 
                                         type="button" onClick={() => setIsAddingTag(true)}
-                                        className="dark:bg-card text-sm border border-orange-500 border-dashed bg-white flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 transition-colors text-orange-600 font-medium items-center gap-1"
+                                        className="dark:bg-card text-sm border border-orange-500 border-dashed bg-white flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors text-orange-600 font-medium items-center gap-1"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                                             <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
@@ -233,99 +268,39 @@ export default function Create({ notes, categories  }: any) {
                             </div>
                         </div>
 
-                        {/* 4. Màu nền bài viết */}
-                        <div className="border-t border-gray-200/60 pt-4 flex items-center gap-6">
+                        {/* 5. Màu nền bài viết */}
+                        <div className="border-t border-gray-200/60 dark:border-gray-700/60 pt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
                             <Label className="text-sm text-card-foreground font-semibold">Màu nền</Label>
                             <div className="flex items-center gap-3">
-                                <button type="button" onClick={() => setData('bg_color', 'bg-white')} className={`w-8 h-8 rounded-full border-2 bg-white shadow-sm transition-all ${data.bg_color === 'bg-white' ? 'border-orange-500 ring-4 ring-orange-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
-                                <button type="button" onClick={() => setData('bg_color', 'bg-blue-50')} className={`w-8 h-8 rounded-full border-2 bg-blue-50 shadow-sm transition-all ${data.bg_color === 'bg-blue-50' ? 'border-blue-500 ring-4 ring-blue-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
-                                <button type="button" onClick={() => setData('bg_color', 'bg-green-50')} className={`w-8 h-8 rounded-full border-2 bg-green-50 shadow-sm transition-all ${data.bg_color === 'bg-green-50' ? 'border-green-500 ring-4 ring-green-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
-                                <button type="button" onClick={() => setData('bg_color', 'bg-yellow-50')} className={`w-8 h-8 rounded-full border-2 bg-yellow-50 shadow-sm transition-all ${data.bg_color === 'bg-yellow-50' ? 'border-yellow-500 ring-4 ring-yellow-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
+                                <button type="button" onClick={() => setData('bg_color', 'bg-white')} className={`w-8 h-8 rounded-full border-2 bg-white shadow-sm transition-all cursor-pointer ${data.bg_color === 'bg-white' ? 'border-orange-500 ring-4 ring-orange-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
+                                <button type="button" onClick={() => setData('bg_color', 'bg-blue-50')} className={`w-8 h-8 rounded-full border-2 bg-blue-50 shadow-sm transition-all cursor-pointer ${data.bg_color === 'bg-blue-50' ? 'border-blue-500 ring-4 ring-blue-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
+                                <button type="button" onClick={() => setData('bg_color', 'bg-green-50')} className={`w-8 h-8 rounded-full border-2 bg-green-50 shadow-sm transition-all cursor-pointer ${data.bg_color === 'bg-green-50' ? 'border-green-500 ring-4 ring-green-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
+                                <button type="button" onClick={() => setData('bg_color', 'bg-yellow-50')} className={`w-8 h-8 rounded-full border-2 bg-yellow-50 shadow-sm transition-all cursor-pointer ${data.bg_color === 'bg-yellow-50' ? 'border-yellow-500 ring-4 ring-yellow-100 scale-110' : 'border-gray-300 hover:scale-110'}`} />
                             </div>
                         </div>
                     </form>
 
-                    {/* CỘT PHẢI */}
+                    {/* --- CỘT PHẢI --- */}
                     <div className="w-full lg:w-80 space-y-6">
-                        <div className="dark:bg-card bg-white border border-gray-300 rounded-2xl shadow-sm overflow-hidden">
-                            <div className="flex items-center gap-3 dark:bg-card bg-gray-50 border-b border-gray-300 px-5 py-3 font-bold text-gray-700 text-sm">
-                                <svg 
-                                    xmlns="http://www.w3.org/2000/svg" 
-                                    fill="none" 
-                                    viewBox="0 0 24 24" 
-                                    strokeWidth={1.5} 
-                                    stroke="currentColor" 
-                                    className="w-5 h-5 text-orange-500 group-hover:text-orange-500 transition-colors"
-                                >
-                                <path 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
-                                    d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" 
-                                />
+                        <div className="dark:bg-card bg-white border border-gray-300 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+                            <div className="flex items-center gap-3 dark:bg-card bg-gray-50 border-b border-gray-300 dark:border-gray-700 px-5 py-3 font-bold text-gray-700 dark:text-gray-200 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500 group-hover:text-orange-500 transition-colors">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
                                 </svg>
                                 Chia sẻ
                             </div>
-                            
-                            {/* Thông tin người chia sẻ */}
-                            {/* <div className=" flex items-center justify-between p-5 space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center bg-orange-500 rounded-full w-10 h-10">
-                                        TA
-                                    </div>
-                                    <div className="dark:text-white">
-                                        <h1>Trần Văn A</h1>
-                                        <p className="text-xs">a@gmail.com</p>
 
-                                    </div>
-                                </div>
-
-                                <button type="button" onClick={() => setIsMenuOpen(!isMenuOpen)} className="cursor-pointer text-xs text-green-800 font-bold border border-green-300 rounded-full px-3 py-1 bg-green-100 hover:bg-green-200 transition-colors">
-                                    Sửa
-                                </button>
-
-                                {isMenuOpen && (
-                                    <div className="dark:bg-card absolute w-48 bg-white border border-gray-300 rounded-xl ">
-                                        <button 
-                                            type="button"
-                                            onClick={()=>{setIsMenuOpen(false); }}
-                                            className="dark:bg-card dark:text-orange-500 cursor-pointer px-4 py-2.5 text-sm text-gray-700 hover:text-orange-600 flex items-center gap-2"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                                            </svg>
-                                            Đổi thành Chỉ xem
-                                        </button>
-                                        <div className="border-t border-gray-100 my-1"></div>
-                                        
-                                        <button 
-                                            type="button"
-                                            onClick={()=>{setIsMenuOpen(false);}}
-                                            className="dark:bg-card cursor-pointer px-4 py-2.5 text-sm text-red-600  flex items-center gap-2"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-                                            </svg>
-                                            Gỡ quyền truy cập
-                                        </button>
-                                    </div>
-                                )}
-                            </div> */}
-
-                            <div className="border-t flex items-center justify-center">
-                                <button className="dark:bg-card dark:border border-orange-500 dark:text-orange-500 flex items-center gap-3 cursor-pointer m-3 border border-gray-300 rounded-xl p-3 text-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                    </svg>
-                                    Thêm người chia sẻ
+                            <div className="border-t border-gray-200 dark:border-gray-700 flex items-center justify-center p-3">
+                                <button type="button" className="flex items-center justify-center w-full gap-2 cursor-pointer border border-gray-300 dark:border-gray-600 rounded-xl p-2 text-sm text-gray-700 dark:text-gray-300 font-bold hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 dark:hover:bg-gray-800 transition-colors opacity-50 cursor-not-allowed">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                    Lưu để chia sẻ
                                 </button>
                             </div>
                         </div>
-                        
 
-
-                        <div className="bg-card border border-gray-300 rounded-2xl shadow-sm p-5">
-                            <button onClick={submit} disabled={processing} className="cursor-pointer w-full py-3 px-4 bg-orange-500 dark:bg-card dark:border border-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-                                {processing ? 'Đang lưu...' : 'Lưu ghi chú'}
+                        <div className="bg-card border border-gray-300 dark:border-gray-700 rounded-2xl shadow-sm p-5">
+                            <button onClick={submit} disabled={processing} className="cursor-pointer w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                                {processing ? 'Đang tạo...' : 'Lưu ghi chú'}
                                 {!processing && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>}
                             </button>
                         </div>

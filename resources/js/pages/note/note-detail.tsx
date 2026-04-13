@@ -24,6 +24,16 @@ const ICONS: Record<string, React.ReactNode> = {
     folder: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" /></svg>
 };
 
+const module = {
+    toolbar: { container: "#my-custom-toolbar" }
+};
+
+const quillFormats = [
+    'bold', 'italic', 'underline', 'strike',
+    'color', 'background',
+    'link', 'image',
+];
+
 export default function NoteDetail({ auth, note, categories, isOwner, canEdit }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
@@ -69,9 +79,9 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
         password: note.password || '',
     });
 
-    const modules = useMemo(() => ({
-        toolbar: canEdit ? { container: "#my-custom-toolbar" } : false
-    }), [canEdit]);
+    // const modules = useMemo(() => ({
+    //     toolbar: canEdit ? { container: "#my-custom-toolbar" } : false
+    // }), [canEdit]);
 
     const funcUpdate = (e: React.FormEvent) => {
         e.preventDefault();
@@ -333,14 +343,29 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                         </div>
                                     )}
                                     <ReactQuill 
-                                        ref={quillRef}
+                                        // ref={quillRef}
                                         readOnly={!canEdit}
-                                        theme="snow" modules={modules} value={data.content} onChange={handleEditorChange}
+                                        theme="snow" modules={module} value={data.content} onChange={handleEditorChange}
                                         placeholder="Bắt đầu viết nội dung ghi chú của bạn ở đây..."
                                         className="border-none [&>.ql-container.ql-snow]:border-none [&>.ql-container]:text-base [&>.ql-container]:min-h-[250px] dark:text-white"
                                     />
                                 </div>
                                 <InputError message={errors.content} className="mt-2" />
+                            </div>
+
+                            {/* Ảnh */}
+                            <div className="border-t border-gray-200/60 flex flex-col gap-3 pt-4">
+                                <label className="text-sm text-card-foreground font-semibold">Ảnh</label>
+                                <div className="flex gap-3 flex-wrap items-center">
+                                    <button className="cursor-pointer border border-orange-500 text-orange-500 rounded-lg p-3 border-dashed">
+                                        <div className="flex items-center justify-center m-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="text-orange-500 w-8 h-8">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                            </svg>
+                                        </div>
+                                        Thêm Ảnh
+                                    </button>
+                                </div>
                             </div>
 
                             {/* NHÃN */}
@@ -395,7 +420,6 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                     )}
                                 </div>
                             </div>
-
                             {/* Màu nền */}
                             {canEdit && (
                                 <div className="border-t border-gray-300/60 dark:border-gray-700/60 pt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
@@ -478,7 +502,7 @@ export default function NoteDetail({ auth, note, categories, isOwner, canEdit }:
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-orange-500"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
                                                 Cài đặt Mật khẩu
                                             </Label>
-                                            <input type="password" placeholder="Để trống nếu không khóa..." value={data.password || ''} onChange={(e) => setData('password', e.target.value)} className="w-full text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:text-white transition-colors" />
+                                            <input type="password" placeholder="Để trống nếu không khóa..." autoComplete="new-password" value={data.password || ''} onChange={(e) => setData('password', e.target.value)} className="w-full text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:text-white transition-colors" />
                                             <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                                                 Đặt mật khẩu để bảo vệ ghi chú này. Không ai có thể xóa hay xem nội dung trừ khi nhập đúng mật khẩu.
                                             </p>

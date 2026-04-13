@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import NoteLayout from "@/layouts/note-layout";
 import { Head, Link, useForm } from '@inertiajs/react';
 import InputError from '@/components/input-error';
@@ -23,32 +23,30 @@ const ICONS: Record<string, React.ReactNode> = {
     folder: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" /></svg>
 };
 
-const modules={
+
+const module = {
     toolbar: { container: "#my-custom-toolbar" }
 };
 
-const quillFomat =
-    [['bold', 'italic', 'underline', 'strike'], 
-        [{ 'color': [] }, { 'background': [] }],   
-        ['link', 'image'],                        
-        ['clean']
-    ];
+const quillFormats = [
+    'bold', 'italic', 'underline', 'strike',
+    'color', 'background',
+    'link', 'image',
+];
 
-
-export default function Create({ notes, categories  }: any) {
+export default function Create({ categories }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-   const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         title: '',
         content: '',
         category_ids: [] as number[], 
         new_category_name: '',                     
         new_category_color: TAG_COLORS[0], 
         new_category_icon: 'tag', 
-        bg_color: 'bg-white',               
+        bg_color: 'bg-white',        
+        password: '',
     });
-
 
     const toggleCategory = (id: number) => {
         let newIds = [...data.category_ids];
@@ -59,17 +57,18 @@ export default function Create({ notes, categories  }: any) {
         }
         setData('category_ids', newIds);
     };
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/note'); 
     };
 
     return (
-            <NoteLayout title="Tạo ghi chú">
-                <div className="w-full bg-background min-h-screen pb-12 overflow-y-auto">
+        <NoteLayout title="Tạo ghi chú">
+            <div className="w-full bg-background min-h-screen pb-12 overflow-y-auto">
                 <Head title="Tạo ghi chú" />
 
-                {/* --- THANH TIÊU ĐỀ --- */}
+                {/* Mobile */}
                 <div className="md:hidden h-31 flex items-center gap-4 sticky top-0 bg-card border-b border-gray-300 p-6 z-10">
                     <Link href="/home" className="p-2 -ml-2 rounded-full transition-colors group">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dark:text-orange-500 w-6 h-6 text-gray-500">
@@ -79,6 +78,7 @@ export default function Create({ notes, categories  }: any) {
                     <h1 className="text-2xl font-bold text-card-foreground">Tạo ghi chú mới</h1>
                 </div>
 
+                {/* Desktop */}
                 <div className="hidden md:flex flex items-center gap-4 sticky top-0 bg-card border-b border-gray-300 p-6 z-10">
                     <Link href="/home" className="p-2 -ml-2 rounded-full transition-colors group">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dark:text-orange-500 w-6 h-6 text-gray-500">
@@ -90,10 +90,10 @@ export default function Create({ notes, categories  }: any) {
 
                 <div className="max-w-7xl mx-auto p-6 lg:p-8 flex flex-col lg:flex-row gap-6 items-start">
                     
-                    {/* Trái*/}
+                    {/* Trái */}
                     <form onSubmit={submit} className="flex-1 w-full bg-card border border-gray-300 rounded-2xl shadow-sm p-6 space-y-6">
                         
-                        {/* 1. Tiêu đề */}
+                        {/* Tiêu đề */}
                         <div>
                             <Label htmlFor="title" className="text-sm font-bold text-card-foreground">Tiêu đề</Label>
                             <input 
@@ -103,11 +103,11 @@ export default function Create({ notes, categories  }: any) {
                             <InputError message={errors.title} className="mt-2" />
                         </div>
 
-                        {/* 2. Nội dung */}
+                        {/* Nội dung */}
                         <div>
                             <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 block">Nội dung</Label>
                             <div className="bg-white/80 dark:bg-card backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 transition-all">
-                                <div id="my-custom-toolbar" className="flex items-center gap-4 bg-white/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-3 py-2">
+                                <div id="my-custom-toolbar" className="flex flex-wrap items-center gap-4 bg-white/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-3 py-2">
                                     <div className="flex items-center gap-1 bg-white dark:bg-card p-1 rounded-md border border-gray-300 dark:border-gray-700 shadow-sm">
                                         <button type="button" className="ql-bold w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
                                         <button type="button" className="ql-italic w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"></button>
@@ -124,36 +124,36 @@ export default function Create({ notes, categories  }: any) {
                                 </div>
                                 <ReactQuill 
                                     theme="snow" 
-                                    modules={modules} 
+                                    modules={module} 
+                                    formats={quillFormats}
                                     value={data.content} 
                                     onChange={(value) => setData('content', value)}
                                     placeholder="Bắt đầu viết nội dung ghi chú của bạn ở đây..."
-                                    className="border-none [&>.ql-toolbar]:bg-white/50 dark:[&>.ql-toolbar]:bg-gray-800/50 [&>.ql-toolbar]:border-none [&>.ql-toolbar]:border-b [&>.ql-toolbar]:border-gray-200 dark:[&>.ql-toolbar]:border-gray-700 [&>.ql-container.ql-snow]:border-none [&>.ql-container]:text-base [&>.ql-container]:min-h-[250px] dark:text-white"
+                                    className="border-none [&>.ql-toolbar]:hidden [&>.ql-container.ql-snow]:border-none [&>.ql-container]:text-base [&>.ql-container]:min-h-[250px] dark:text-white"
                                 />
                             </div>
                             <InputError message={errors.content} className="mt-2" />
                         </div>
 
+                        {/* Ảnh */}
                         <div className="border-t border-gray-200/60 flex flex-col gap-3 pt-4">
-                            <Label className="text-sm text-card-foreground font-semibold">Ảnh</Label>
+                            <label className="text-sm text-card-foreground font-semibold">Ảnh</label>
                             <div className="flex gap-3 flex-wrap items-center">
-                                <button className="text-orange-500 border border-orange-500 border-dashed rounded-lg p-3">
-                                    <div className="flex justify-center ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-orange-500">
-                                            <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
+                                <button className="cursor-pointer border border-orange-500 text-orange-500 rounded-lg p-3 border-dashed">
+                                    <div className="flex items-center justify-center m-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="text-orange-500 w-8 h-8">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                         </svg>
                                     </div>
-                                    Thêm ảnh
-                                </button>
-                            </div>
+                                    Thêm Ảnh
+                                </button>                               
+                            </div>                            
                         </div>
 
-                        {/* 3. Nhãn */}
+                        {/* Nhãn */}
                         <div className="border-t border-gray-200/60 flex flex-col gap-3 pt-4">
                             <Label className="text-sm text-card-foreground font-semibold">Nhãn</Label>
-                            
                             <div className="flex gap-3 flex-wrap items-center">
-                                {/* Load danh sách nhãn cũ */}
                                 {categories && categories.length > 0 && (
                                     categories.map((cat: any) => (
                                         <button 
@@ -170,49 +170,34 @@ export default function Create({ notes, categories  }: any) {
                                     ))
                                 )}
 
-                                {/* Form tạo Nhãn mới */}
                                 {isAddingTag ? (
                                     <div className="flex flex-col gap-2 bg-card border border-gray-300 rounded-xl p-2 shadow-sm animate-in fade-in zoom-in duration-200">
-                                        
                                         <div className="flex items-center gap-2">
                                             <input 
                                                 type="text" autoFocus placeholder="Tên nhãn mới..." value={data.new_category_name}
-                                                onChange={(e) => {
-                                                    setData('new_category_name', e.target.value);
-                                                }}
-                                                className="text-sm border-none bg-transparent focus:ring-0 p-0 w-40 text-gray-700 placeholder-gray-400 font-medium"
+                                                onChange={(e) => setData('new_category_name', e.target.value)}
+                                                className="text-sm border-none bg-transparent focus:ring-0 p-0 w-40 text-gray-700 dark:text-gray-200 placeholder-gray-400 font-medium"
                                             />
-                                            <button 
-                                                type="button" 
-                                                onClick={() => { setIsAddingTag(false); setData('new_category_name', ''); }} 
-                                                className="ml-auto dark:bg-card cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 rounded-md"
-                                            >
+                                            <button type="button" onClick={() => { setIsAddingTag(false); setData('new_category_name', ''); }} className="ml-auto dark:bg-card cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 rounded-md">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
                                             </button>
                                         </div>
-
-                                        <div className="h-px w-full bg-gray-100"></div>
-
+                                        <div className="h-px w-full bg-gray-100 dark:bg-gray-700"></div>
                                         <div className="flex items-center gap-4 justify-between">
-                                            {/* Chọn Icon */}
                                             <div className="flex items-center gap-1 border-r border-gray-200 pr-3">
                                                 {Object.keys(ICONS).map((iconKey) => (
                                                     <button
-                                                        key={iconKey} type="button"
-                                                        onClick={() => setData('new_category_icon', iconKey)}
+                                                        key={iconKey} type="button" onClick={() => setData('new_category_icon', iconKey)}
                                                         className={` cursor-pointer p-1 rounded-md transition-all ${data.new_category_icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300 ' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`}
                                                     >
                                                         {ICONS[iconKey]}
                                                     </button>
                                                 ))}
                                             </div>
-
-                                            {/* Chọn Màu */}
                                             <div className="flex items-center gap-1.5">
                                                 {TAG_COLORS.map((colorClass, idx) => (
                                                     <button
-                                                        key={idx} type="button"
-                                                        onClick={() => setData('new_category_color', colorClass)}
+                                                        key={idx} type="button" onClick={() => setData('new_category_color', colorClass)}
                                                         className={`w-5 h-5 rounded-full border cursor-pointer transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${data.new_category_color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`}
                                                     />
                                                 ))}
@@ -220,20 +205,15 @@ export default function Create({ notes, categories  }: any) {
                                         </div>
                                     </div>
                                 ) : (
-                                    <button 
-                                        type="button" onClick={() => setIsAddingTag(true)}
-                                        className="dark:bg-card text-sm border border-orange-500 border-dashed bg-white flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 transition-colors text-orange-600 font-medium items-center gap-1"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                                            <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
-                                        </svg>
+                                    <button type="button" onClick={() => setIsAddingTag(true)} className="dark:bg-card text-sm border border-orange-500 border-dashed bg-white flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 transition-colors text-orange-600 font-medium items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" /></svg>
                                         Thêm nhãn
                                     </button>
                                 )}
                             </div>
                         </div>
 
-                        {/* 4. Màu nền bài viết */}
+                        {/* Nền */}
                         <div className="border-t border-gray-200/60 pt-4 flex items-center gap-6">
                             <Label className="text-sm text-card-foreground font-semibold">Màu nền</Label>
                             <div className="flex items-center gap-3">
@@ -245,84 +225,29 @@ export default function Create({ notes, categories  }: any) {
                         </div>
                     </form>
 
-                    {/* CỘT PHẢI */}
+                    {/* Phải */}
                     <div className="w-full lg:w-80 space-y-6">
-                        <div className="dark:bg-card bg-white border border-gray-300 rounded-2xl shadow-sm overflow-hidden">
-                            <div className="flex items-center gap-3 dark:bg-card bg-gray-50 border-b border-gray-300 px-5 py-3 font-bold text-gray-700 text-sm">
-                                <svg 
-                                    xmlns="http://www.w3.org/2000/svg" 
-                                    fill="none" 
-                                    viewBox="0 0 24 24" 
-                                    strokeWidth={1.5} 
-                                    stroke="currentColor" 
-                                    className="w-5 h-5 text-orange-500 group-hover:text-orange-500 transition-colors"
-                                >
-                                <path 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
-                                    d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" 
-                                />
-                                </svg>
-                                Chia sẻ
-                            </div>
-                            
-                            {/* Thông tin người chia sẻ */}
-                            {/* <div className=" flex items-center justify-between p-5 space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center bg-orange-500 rounded-full w-10 h-10">
-                                        TA
-                                    </div>
-                                    <div className="dark:text-white">
-                                        <h1>Trần Văn A</h1>
-                                        <p className="text-xs">a@gmail.com</p>
-
-                                    </div>
-                                </div>
-
-                                <button type="button" onClick={() => setIsMenuOpen(!isMenuOpen)} className="cursor-pointer text-xs text-green-800 font-bold border border-green-300 rounded-full px-3 py-1 bg-green-100 hover:bg-green-200 transition-colors">
-                                    Sửa
-                                </button>
-
-                                {isMenuOpen && (
-                                    <div className="dark:bg-card absolute w-48 bg-white border border-gray-300 rounded-xl ">
-                                        <button 
-                                            type="button"
-                                            onClick={()=>{setIsMenuOpen(false); }}
-                                            className="dark:bg-card dark:text-orange-500 cursor-pointer px-4 py-2.5 text-sm text-gray-700 hover:text-orange-600 flex items-center gap-2"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                                            </svg>
-                                            Đổi thành Chỉ xem
-                                        </button>
-                                        <div className="border-t border-gray-100 my-1"></div>
-                                        
-                                        <button 
-                                            type="button"
-                                            onClick={()=>{setIsMenuOpen(false);}}
-                                            className="dark:bg-card cursor-pointer px-4 py-2.5 text-sm text-red-600  flex items-center gap-2"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-                                            </svg>
-                                            Gỡ quyền truy cập
-                                        </button>
-                                    </div>
-                                )}
-                            </div> */}
-
-                            <div className="border-t flex items-center justify-center">
-                                <button className="dark:bg-card dark:border border-orange-500 dark:text-orange-500 flex items-center gap-3 cursor-pointer m-3 border border-gray-300 rounded-xl p-3 text-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                    </svg>
-                                    Thêm người chia sẻ
-                                </button>
-                            </div>
+                        
+                        {/* Cài đặt mật khẩu */}
+                        <div className="bg-white dark:bg-card border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-5 space-y-3 transition-colors">
+                            <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-orange-500"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
+                                Cài đặt Mật khẩu
+                            </Label>
+                            <input 
+                                type="password" 
+                                placeholder="Để trống nếu không khóa..." 
+                                value={data.password} 
+                                autoComplete="new-password"
+                                onChange={(e) => setData('password', e.target.value)} 
+                                className="w-full text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:text-white transition-colors" 
+                            />
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                Đặt mật khẩu để bảo vệ ghi chú này. Mọi người sẽ cần nhập mật khẩu để xem được nội dung.
+                            </p>
                         </div>
                         
-
-
+                        {/* Lưu */}
                         <div className="bg-card border border-gray-300 rounded-2xl shadow-sm p-5">
                             <button onClick={submit} disabled={processing} className="cursor-pointer w-full py-3 px-4 bg-orange-500 dark:bg-card dark:border border-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
                                 {processing ? 'Đang lưu...' : 'Lưu ghi chú'}

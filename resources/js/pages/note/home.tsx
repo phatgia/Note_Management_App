@@ -175,7 +175,7 @@ export default function Home({ notes, categories }: any) {
 
                             <Link 
                                 href={`/note-detail/${note.id}`} 
-                                className={`${note.bg_color || 'bg-white'} dark:bg-gray-800/90 border ${note.is_pinned ? 'border-orange-400 dark:border-orange-500/50 shadow-md ring-1 ring-orange-200 dark:ring-orange-900/30' : 'border-gray-200 dark:border-gray-700'} rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer ${viewMode === 'grid' ? "p-5 flex flex-col min-h-[16rem]" : "p-3 sm:p-4 flex flex-row items-center gap-3 sm:gap-4"}`}
+                                className={`${note.bg_color || 'bg-white'} dark:bg-gray-800/90 border ${note.is_pinned ? 'border-orange-400 dark:border-orange-500/50 shadow-md ring-1 ring-orange-200 dark:ring-orange-900/30' : 'border-gray-200 dark:border-gray-700'} rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer ${viewMode === 'grid' ? "p-5 flex flex-col min-h-[18rem] max-h-[18rem]" : "p-3 sm:p-4 flex flex-row items-center gap-3 sm:gap-4"}`}
                             >                            
                                 {viewMode === 'grid' ? (
                                     <>

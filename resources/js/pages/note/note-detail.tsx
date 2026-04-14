@@ -243,7 +243,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
             <div className="w-full bg-[#F8F9FA] dark:bg-background min-h-screen pb-12 overflow-y-auto">
                 <Head title={canEdit ? "Chỉnh sửa ghi chú" : "Xem ghi chú"} />
 
-                {/* --- THANH TIÊU ĐỀ MOBILE --- */}
+                {/* Mobile */}
                 <div className="md:hidden flex items-center justify-between sticky top-0 bg-white dark:bg-card border-b border-gray-300 dark:border-gray-700 p-4 z-10 transition-colors">
                     <div className="flex items-center gap-4">
                         {activeUsers.length > 1 && (
@@ -262,11 +262,32 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                             </svg>
                         </Link>
+                        <span className=" text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Cập nhật lần cuối: {new Date(note.updated_at).toLocaleDateString('vi-VN')}
+                        </span>
                         {!canEdit && <span className="ml-2 px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-700">Chỉ xem</span>}
+                        {canEdit && (
+                            <span className="text-xs font-medium text-gray-400 flex items-center gap-1.5 ml-2 border-l border-gray-300 dark:border-gray-700 pl-4">
+                                {isSaving ? <><span className="animate-pulse w-1.5 h-1.5 bg-orange-500 rounded-full"></span> Đang lưu...</> : <><svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Đã lưu</>}
+                            </span>
+                        )}
+                        {activeUsers.length > 1 && (
+                            <div className="flex items-center ml-2 border-l border-gray-300 dark:border-gray-700 pl-4 relative">
+                                <div className="flex -space-x-2 overflow-hidden">
+                                    {activeUsers.map((u) => (
+                                        <div key={u.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800 bg-orange-500 text-white flex items-center justify-center text-xs font-bold shadow-sm" title={u.name}>
+                                            {u.avatar ? <img src={`/storage/${u.avatar}`} className="w-full h-full rounded-full object-cover"/> : u.name.charAt(0).toUpperCase()}
+                                        </div>
+                                    ))}
+                                </div>
+                                <span className="ml-2 text-xs font-bold text-green-500 animate-pulse">Live</span>
+                                {localStatus && <span className="ml-3 text-xs text-orange-500 italic animate-pulse">{localStatus}</span>}
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* --- THANH TIÊU ĐỀ PC --- */}
+                {/* Desktop */}
                 <div className="hidden md:flex flex items-center justify-between sticky top-0 bg-white dark:bg-card border-b border-gray-300 dark:border-gray-700 p-6 z-10 transition-colors">
                     <div className="flex items-center gap-4">
                         <Link href="/home" className="p-2 -ml-2 rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors group">
@@ -274,7 +295,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                             </svg>
                         </Link>
-                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <span className=" text-sm font-medium text-gray-500 dark:text-gray-400">
                             Cập nhật lần cuối: {new Date(note.updated_at).toLocaleDateString('vi-VN')}
                         </span>
                         {!canEdit && <span className="ml-2 px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-700">Chỉ xem</span>}

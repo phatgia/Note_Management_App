@@ -140,25 +140,24 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
     return (
         <div className="flex h-screen w-full bg-background overflow-hidden text-gray-800 font-sans">
             <Head title={title} />
-            <>
-                {!isMenuSideBarOpen && (
-                    <div className="md:hidden fixed bottom-7 left-4 z-40">
-                        <button 
-                            onClick={() => setIsMenuSideBarOpen(true)} 
-                            className="p-2.5 border rounded-full border-orange-500  text-white rounded-full shadow-lg hover:bg-orange-600 transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-orange-500">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                            </svg>
-                        </button>
-                    </div>
-                )}
-            </>
+
+            {!isMenuSideBarOpen && (
+                <div className="md:hidden fixed bottom-7 left-4 z-40">
+                    <button 
+                        onClick={() => setIsMenuSideBarOpen(true)} 
+                        className="p-2.5 border rounded-full border-orange-500  text-white rounded-full shadow-lg hover:bg-orange-600 transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-orange-500">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+                </div>
+            )}
             {/* Mobile */}
             {isMenuSideBarOpen &&(
                 <aside className="md:hidden bg-sidebar border-r border-gray-200 dark:border-gray-800 flex flex-col h-full transition-colors shrink-0">
-                    <Link href="/home" className="cursor-pointer flex justify-center border-b border-gray-300 dark:border-gray-800 pb-14.5 px-4 py-9">
-                        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <Link href="/home" className="cursor-pointer flex justify-center border-b border-gray-300 dark:border-gray-800 px-4 py-9">
+                        <svg width="45" height="45" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
                             <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
                         </svg>

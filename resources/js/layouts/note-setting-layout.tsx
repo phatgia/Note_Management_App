@@ -7,7 +7,6 @@ import { useAppearance } from '@/hooks/use-appearance';
 
 type Props = {
     title: string;
-    // noteCount?: number;
 };
 
 export default function NoteSettingLayout({ children, title, }: PropsWithChildren<Props>) {
@@ -43,7 +42,7 @@ export default function NoteSettingLayout({ children, title, }: PropsWithChildre
                 <aside className="md:hidden bg-sidebar border-r border-gray-300 flex flex-col h-full">
                     {/* Logo */}
                     <Link href="/home" className="cursor-pointer flex items-center justify-center border-b border-gray-300  px-4 py-9">
-                        <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="45" height="45" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
                             <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
                         </svg>

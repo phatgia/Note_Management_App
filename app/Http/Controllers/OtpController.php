@@ -32,7 +32,8 @@ class OtpController extends Controller
         $cachedOtp = Cache::get('otp_' . auth()->id());
 
         if ($cachedOtp && $cachedOtp == $request->otp) {
-            auth()->user()->update(['email_verified_at' => now()]);
+            $user = auth()->user();
+            $user->forceFill(['email_verified_at' => now()])->save();
             Cache::forget('otp_' . auth()->id());
 
             return back()->with('message', 'Xác minh email thành công! Chào mừng bạn.');

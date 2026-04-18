@@ -385,7 +385,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                         </div>
                                     )}
                                     <ReactQuill 
-                                        // ref={quillRef}
+                                        ref={quillRef}
                                         readOnly={!canEdit}
                                         theme="snow" modules={module} value={data.content} onChange={handleEditorChange}
                                         placeholder="Bắt đầu viết nội dung ghi chú của bạn ở đây..."

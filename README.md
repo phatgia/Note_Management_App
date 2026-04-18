@@ -79,3 +79,6 @@ Hệ thống tuân thủ mô hình 4-Container:
 7. Truy cập ứng dụng:
    Truy cập: http://localhost:8000
    Hệ thống sẽ mô phỏng gửi email. Vui lòng truy cập Hộp thư giả lập (Mailpit) tại: http://localhost:8025
+8. Tài khoản mặc định:
+    Email: [test@example.com]
+    Mật khẩu: password

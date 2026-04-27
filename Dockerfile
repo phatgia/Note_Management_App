@@ -3,12 +3,12 @@ FROM php:8.2-fpm
 
 # --- System dependencies ---
 RUN apt-get update && apt-get install -y \
-    libpng-dev libonig-dev libxml2-dev \
+    libpng-dev libonig-dev libxml2-dev libsqlite3-dev \
     zip unzip git curl nginx supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# --- PHP extensions ---
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd sockets
+# --- PHP extensions (pdo_sqlite for build-time artisan calls) ---
+RUN docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd sockets
 
 # --- Node.js 20 ---
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
@@ -26,12 +26,16 @@ COPY . .
 # --- PHP dependencies ---
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# --- Frontend build (PHP is available here for wayfinder/laravel-vite-plugin) ---
+# --- Frontend build ---
+# Use SQLite so artisan/wayfinder can run without a real DB during build
 RUN cp .env.example .env \
+    && sed -i 's|DB_CONNECTION=mysql|DB_CONNECTION=sqlite|' .env \
+    && echo "DB_DATABASE=/var/www/database/database.sqlite" >> .env \
+    && touch database/database.sqlite \
     && php artisan key:generate \
     && npm ci \
     && npm run build \
-    && rm .env
+    && rm -f .env database/database.sqlite
 
 # --- Permissions ---
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \

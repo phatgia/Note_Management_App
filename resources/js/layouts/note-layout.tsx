@@ -29,6 +29,8 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
     const sharedCount = sidebarData?.sharedCount || 0;
     
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isMenuSideBarOpen, setIsMenuSideBarOpen] = useState(false);
+    const [isMenuMobileOpen, setIsMenuMobileOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '' });
@@ -56,12 +58,36 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
     }, []);
 
     useEffect(() => {
+        setMounted(true);
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) setIsMenuMobileOpen(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
         if (flash?.message) {
             setToast({ show: true, message: flash.message });
             const timer = setTimeout(() => setToast({ show: false, message: '' }), 3000);
             return () => clearTimeout(timer);
         }
     }, [flash?.message, flash?.uuid]);
+
+    // Tìm kiếm
+    const [searchQuery, setSearchQuery] = useState(() =>{
+        if(typeof window !== 'undefined') {
+            return new URLSearchParams(window.location.search).get('search') || '';
+        }
+        return '';
+    });
+
+    const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            const basePath = url.split('?')[0];
+            router.get(basePath, { search: searchQuery }, { preserveState: true, preserveScroll: true });
+        }
+    };
 
     // --- OTP Handlers ---
     const handleSendOtp = () => {
@@ -113,8 +139,155 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
         <div className="flex h-screen w-full bg-background overflow-hidden text-gray-800 font-sans">
             <Head title={title} />
 
-            <aside className="w-64 bg-sidebar border-r border-gray-200 dark:border-gray-800 flex flex-col h-full transition-colors shrink-0">
-                <Link href="/home" className="cursor-pointer flex border-b border-gray-200 dark:border-gray-800 pb-4 px-4 py-9">
+            {!isMenuSideBarOpen && (
+                <div className="md:hidden fixed bottom-7 left-4 z-40">
+                    <button 
+                        onClick={() => setIsMenuSideBarOpen(true)} 
+                        className="p-2.5 border rounded-full border-orange-500  text-white rounded-full shadow-lg hover:bg-orange-600 transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-orange-500">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+                </div>
+            )}
+            {/* Mobile */}
+            {isMenuSideBarOpen &&(
+                <aside className="md:hidden bg-sidebar border-r border-gray-200 dark:border-gray-800 flex flex-col h-full transition-colors shrink-0">
+                    <Link href="/home" className="cursor-pointer flex justify-center border-b border-gray-300 dark:border-gray-800 px-4 py-9">
+                        <svg width="45" height="45" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
+                            <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
+                        </svg>
+                    </Link>
+
+                    <button 
+                        onClick={() => setIsMenuSideBarOpen(false)} 
+                        className="absolute fixed top-1/2 z-[100] left-20 p-2 bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
+                    >
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            strokeWidth={2} 
+                            stroke="currentColor" 
+                            className="w-6 h-6 text-gray-500 hover:text-orange-500 transition-colors duration-200 cursor-pointer"
+                        >
+                            <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                d="M15.75 19.5L8.25 12l7.5-7.5" 
+                            />
+                        </svg>
+                    </button>
+
+                    <div className="flex-1 overflow-y-auto px-4 custom-scrollbar">
+                        <p className="text-xs font-semibold text-gray-400 mb-2 mt-2 uppercase tracking-wider">Danh mục</p>
+                        
+                        <Link href="/home" className={url.startsWith('/home')? "flex items-center justify-between bg-orange-200 dark:bg-gray-800 dark:border border-orange-500 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors" : "flex items-center justify-between bg-transparent dark:hover:bg-gray-800 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
+                            <div className="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+                            </div>
+                            <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{noteCount}</span>
+                        </Link>
+
+                        <Link href="/shared-note" className={url.startsWith('/shared-note') ? "flex items-center justify-between bg-orange-200 dark:bg-gray-800 dark:border border-orange-500 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors" : "flex items-center justify-between bg-transparent dark:hover:bg-gray-800 text-orange-600 px-3 py-2 rounded-lg cursor-pointer mb-1 hover:bg-orange-100 transition-colors"}>
+                            <div className="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500"><path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
+                            </div>
+                            <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{sharedCount}</span>
+                        </Link>
+
+                        <div className="flex items-center justify-between mt-4 mb-2">
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Nhãn</p>
+                            <button onClick={() => setIsLabelModalOpen(true)} className="cursor-pointer text-gray-400 hover:text-orange-500 transition-colors p-1" title="Quản lý Nhãn">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                            </button>
+                        </div>
+
+                        <div className="flex flex-col gap-1 pb-4">
+                            {categories && categories.length > 0 ? (
+                                categories.map((cat: any, index: number) => {
+                                    const colorString = cat.color || '';
+                                    const textColorClass = colorString.split(' ').find((c: string) => c.startsWith('text-')) || 'text-gray-500';
+
+                                    return (
+                                        <Link 
+                                            key={`${cat.id}-${index}`} href={`/home?category_id=${cat.id}`} 
+                                            className={`flex items-center justify-center px-3 py-2 rounded-lg cursor-pointer transition-colors font-medium text-sm group ${url === `/home?category_id=${cat.id}` ? 'bg-orange-100 dark:bg-gray-800 border border-orange-200 dark:border-gray-700 text-orange-700 dark:text-orange-500' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                                        >
+                                            <div className={`${textColorClass} group-hover:scale-110 transition-transform shrink-0`}>
+                                                {ICONS[cat.icon] || ICONS['tag']}
+                                            </div>
+                                        </Link>
+                                    );
+                                })
+                            ) : (
+                                <span className="text-sm text-gray-400 italic px-3">Chưa có nhãn nào</span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="p-4 border-t border-gray-200 dark:border-gray-800 shrink-0">
+                        {/* NÚT CHƯA XÁC MINH EMAIL -> MỞ OTP */}
+                        {user && user.email_verified_at === null && (
+                            <div className="border border-orange-200 dark:border-orange-900/50 rounded-xl bg-orange-50 dark:bg-orange-900/20 p-3 mb-3 text-xs flex flex-col gap-2 shadow-sm">
+                                <div className="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-500"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+                                    <p className="text-orange-800 dark:text-orange-400 font-medium whitespace-nowrap">Chưa xác minh email</p>
+                                </div>
+                                <button onClick={handleSendOtp} disabled={sendingOtp} className="w-full bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-500/30 font-bold text-orange-600 dark:text-orange-500 hover:bg-orange-50 dark:hover:bg-gray-700 py-1.5 rounded-lg transition-colors cursor-pointer">
+                                    {sendingOtp ? 'Đang gửi mã...' : 'Nhập mã OTP ngay'}
+                                </button>
+                            </div>
+                        )}
+                        
+                        <div className="flex items-center justify-between gap-2 relative" ref={menuRef}>
+                            {isMenuMobileOpen && (
+                                <div className="absolute bottom-[calc(100%+0.5rem)] left-0 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-2">
+                                    <Link href="/settings/profile" className="flex items-center justify-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 hover:text-orange-600 transition-colors" onClick={() => setIsMenuOpen(false)}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-orange-500"><path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" /></svg> 
+                                    </Link>
+
+                                    <Link href="/settings/appearance" className="flex items-center justify-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 hover:text-orange-600 transition-colors" onClick={() => setIsMenuOpen(false)}>
+                                        <svg 
+                                            xmlns="http://www.w3.org/2000/svg" 
+                                            viewBox="0 0 24 24" 
+                                            fill="currentColor" 
+                                            className="w-5 h-5 text-orange-500 hover:text-orange-500 transition-colors duration-300"
+                                        >
+                                            <path 
+                                                fillRule="evenodd" 
+                                                d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.097.078.15.222.15.364 0 .287-.032.576-.032.864 0 .288.032.577.032.864 0 .142-.053.286-.15.364l-.84.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.31.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.675-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.098-.078-.15-.222-.15-.364 0-.287.032-.576.032-.864 0-.288-.032-.577-.032-.864 0-.142.053-.286.15-.364l.84-.692a1.875 1.875 0 00.432-2.385l-.923-1.597a1.875 1.875 0 00-2.28-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" 
+                                                clipRule="evenodd" 
+                                            />
+                                        </svg>
+                                    </Link>
+
+                                    <button onClick={() => router.post(logout())} className="w-full flex justify-center items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left cursor-pointer">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg> 
+                                    </button>
+                                </div>
+                            )}
+                            <button onClick={()=>setIsMenuMobileOpen(!isMenuOpen)} className="flex items-center justify-center w-full text-left p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                                <div className="flex items-center justify-center flex-1 overflow-hidden group">
+                                    {user.avatar ? (
+                                        <img src={`/storage/${user.avatar}`} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0" />
+                                    ) : (
+                                        <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-gray-800 text-orange-600 dark:text-orange-500 border border-orange-500 flex items-center justify-center font-bold text-lg shrink-0">
+                                            {user.name.charAt(0).toUpperCase()}
+                                        </div>                          
+                                    )}
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+            )}
+
+            {/* Desktop */}
+            <aside className="hidden md:flex w-64 bg-sidebar border-r border-gray-200 dark:border-gray-800 flex flex-col h-full transition-colors shrink-0">
+                <Link href="/home" className="cursor-pointer flex border-b border-gray-300 dark:border-gray-800 pb-5 px-4 py-9">
                     <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8V20L20 28H8C5.79086 28 4 26.2091 4 24V8Z" fill="#F97316"/>
                         <path d="M28 20H24C21.7909 20 20 21.7909 20 24V28L28 20Z" fill="#C2410C"/>
@@ -125,6 +298,9 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                 <div className="px-4 py-4">
                     <div className="relative">
                         <input 
+                            value={searchQuery}
+                            onChange={(e)=>setSearchQuery(e.target.value)}
+                            onKeyDown={handleSearch}
                             type="text" placeholder="Tìm kiếm ghi chú..." 
                             className="w-full bg-background border border-gray-200 dark:border-gray-700 text-foreground text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
                         />
@@ -155,7 +331,7 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
 
                     <div className="flex items-center justify-between mt-4 mb-2">
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Nhãn</p>
-                        <button onClick={() => setIsLabelModalOpen(true)} className="text-gray-400 hover:text-orange-500 transition-colors p-1" title="Quản lý Nhãn">
+                        <button onClick={() => setIsLabelModalOpen(true)} className="cursor-pointer text-gray-400 hover:text-orange-500 transition-colors p-1" title="Quản lý Nhãn">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
                         </button>
                     </div>
@@ -206,6 +382,23 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                                 <Link href="/settings/profile" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 hover:text-orange-600 transition-colors" onClick={() => setIsMenuOpen(false)}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-orange-500"><path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" /></svg> Hồ sơ
                                 </Link>
+
+                                <Link href="/settings/appearance" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 hover:text-orange-600 transition-colors" onClick={() => setIsMenuOpen(false)}>
+                                    <svg 
+                                        xmlns="http://www.w3.org/2000/svg" 
+                                        viewBox="0 0 24 24" 
+                                        fill="currentColor" 
+                                        className="w-5 h-5 text-orange-500 hover:text-orange-500 transition-colors duration-300"
+                                    >
+                                        <path 
+                                            fillRule="evenodd" 
+                                            d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.097.078.15.222.15.364 0 .287-.032.576-.032.864 0 .288.032.577.032.864 0 .142-.053.286-.15.364l-.84.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.31.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.675-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.098-.078-.15-.222-.15-.364 0-.287.032-.576.032-.864 0-.288-.032-.577-.032-.864 0-.142.053-.286.15-.364l.84-.692a1.875 1.875 0 00.432-2.385l-.923-1.597a1.875 1.875 0 00-2.28-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" 
+                                            clipRule="evenodd" 
+                                        />
+                                    </svg>
+                                    Cài Đặt
+                                </Link>
+
                                 <button onClick={() => router.post(logout())} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left cursor-pointer">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg> Đăng xuất
                                 </button>

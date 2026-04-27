@@ -68,7 +68,10 @@ Dự án đã được tối ưu hóa để triển khai trên các nền tảng
     ```
 7. Truy cập ứng dụng:
    Truy cập: http://localhost:8000
-
+   
+8. Tài khoản mặc định:
+    Email: [test@example.com]
+    Mật khẩu: password
 ---
 
 ## Online Preview (Demo Trực Tuyến)
@@ -79,3 +82,5 @@ Dự án đã được triển khai sẵn trên **Render**. Bạn có thể truy
 
 > [!IMPORTANT]
 > **Lưu ý cho lần truy cập đầu tiên:** Vì dự án sử dụng gói **Render Free**, server sẽ tự động "đi ngủ" sau một thời gian không có người truy cập. Ở lần đầu tiên bạn click vào link, vui lòng đợi khoảng **30 - 50 giây** để server khởi động lại (Wake up). Các lần truy cập sau đó sẽ diễn ra mượt mà và tức thì.
+   Hệ thống sẽ mô phỏng gửi email. Vui lòng truy cập Hộp thư giả lập (Mailpit) tại: http://localhost:8025
+

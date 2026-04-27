@@ -32,8 +32,14 @@ class OtpController extends Controller
         $cachedOtp = Cache::get('otp_' . auth()->id());
 
         if ($cachedOtp && $cachedOtp == $request->otp) {
-            auth()->user()->update(['email_verified_at' => now()]);
-            Cache::forget('otp_' . auth()->id());
+            $user = $request->user();
+            $user->forceFill(['email_verified_at' => now()])->save();
+            
+            if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail) {
+                event(new \Illuminate\Auth\Events\Verified($user));
+            }
+
+            Cache::forget('otp_' . $user->id);
 
             return back()->with('message', 'Xác minh email thành công! Chào mừng bạn.');
         }

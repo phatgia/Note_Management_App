@@ -30,7 +30,7 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Use SQLite so artisan/wayfinder can run without a real DB during build
 RUN cp .env.example .env \
     && sed -i 's|DB_CONNECTION=mysql|DB_CONNECTION=sqlite|' .env \
-    && echo "DB_DATABASE=/var/www/database/database.sqlite" >> .env \
+    && printf "\nDB_DATABASE=/var/www/database/database.sqlite\n" >> .env \
     && touch database/database.sqlite \
     && php artisan key:generate \
     && npm ci \

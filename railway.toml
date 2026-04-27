@@ -1,0 +1,9 @@
+# Railway configuration for Laravel + Inertia + React
+[build]
+builder = "dockerfile"
+
+[deploy]
+healthcheckPath = "/login"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

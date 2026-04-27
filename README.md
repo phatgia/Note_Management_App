@@ -3,38 +3,28 @@
 > **Lưu ý:** Đây là đồ án môn học [Lập trình web] tại [Trường Đại học Tôn Đức Thắng]. Dự án tập trung vào việc xây dựng hệ thống quản lý thông tin hiện đại, hỗ trợ đồng bộ hóa dữ liệu thời gian thực.
 
 [![Architecture: Decoupled](https://img.shields.io/badge/Architecture-Decoupled-orange.svg)](https://en.wikipedia.org/wiki/Multitier_architecture)
-[![Backend: Laravel 10](https://img.shields.io/badge/Backend-Laravel_10-red.svg)](https://laravel.com/)
+[![Backend: Laravel 11](https://img.shields.io/badge/Backend-Laravel_11-red.svg)](https://laravel.com/)
 [![Frontend: React](https://img.shields.io/badge/Frontend-React_Vite-blue.svg)](https://react.dev/)
-[![DevOps: Docker](https://img.shields.io/badge/DevOps-Docker_Compose-blue.svg)](https://www.docker.com/)
+[![DevOps: Docker](https://img.shields.io/badge/DevOps-Docker_Render-blue.svg)](https://render.com/)
 
 ## Giới thiệu
 
-**[Note-Management-System]** là một ứng dụng Fullstack hiện đại, được thiết kế theo mô hình **Decoupled Architecture**. Hệ thống tách biệt hoàn toàn giữa phía Client (React) và Server (Laravel API), giúp tối ưu hóa hiệu năng và khả năng mở rộng.
+**[Note-Management-System]** là một ứng dụng Fullstack hiện đại, được thiết kế theo mô hình **Decoupled Architecture**. Hệ thống sử dụng **Inertia.js** để kết nối mượt mà giữa phía Client (React) và Server (Laravel), mang lại trải nghiệm của một Single Page Application (SPA) nhưng vẫn giữ được sức mạnh của Laravel SEO và routing.
 
-Dự án áp dụng quy trình phát triển chuyên nghiệp, sử dụng **Docker** để chuẩn hóa môi trường triển khai, giúp giảng viên và người phát triển có thể khởi chạy hệ thống chỉ với một vài câu lệnh đơn giản mà không lo ngại về xung đột phiên bản phần mềm.
+Dự án đã được tối ưu hóa để triển khai trên các nền tảng PaaS như **Render** hoặc **Railway** thông qua Dockerfile đơn tầng (Single-stage Docker build), tích hợp sẵn Nginx, PHP-FPM và Node.js trong một container duy nhất.
 
 ## Nhóm phát triển (Team Members)
 
-- **Thành viên 1:** [Trần Gia Phát] - [52400148] - [Vai trò: Backend Developer & DevOps]
-- **Thành viên 2:** [Ngô Khánh Bình] - [52400005] - [Vai trò: Frontend Developer & UI/UX]
+- **Trần Gia Phát** - [52400148] - [Vai trò: Backend Developer & DevOps]
+- **Ngô Khánh Bình** - [52400005] - [Vai trò: Frontend Developer & UI/UX]
 - **Giảng viên hướng dẫn:** [Ths.Dương Hữu Phước]
 
-Không chỉ dừng lại ở các chức năng CRUD cơ bản, hệ thống tích hợp các kỹ thuật xử lý Web chuyên sâu:
+## Các tính năng kỹ thuật chuyên sâu
 
-- **Môi trường Docker hóa toàn diện :** Đóng gói toàn bộ PHP-FPM, Nginx, MySQL và Node.js qua `Docker Compose`. Đảm bảo tính nhất quán 100% giữa máy phát triển và máy chấm bài của giảng viên.
-- **Xác thực Stateless với Laravel Sanctum:** Hệ thống sử dụng Token-based Authentication để quản lý phiên làm việc, đảm bảo tính bảo mật và tối ưu hóa tài nguyên server so với cách dùng Session truyền thống.
-- **Bảo mật dữ liệu :** Tích hợp Middleware kiểm soát truy cập, sử dụng `FormRequest` để validate dữ liệu chặt chẽ và cơ chế auto-escaping của React để ngăn chặn lỗi bảo mật **XSS**.
-- **Vite-Powered Frontend:** Tối ưu hóa tốc độ build và Hot Module Replacement, mang lại trải nghiệm mượt mà cho người dùng cuối với kiến trúc Component-based của React.
-- **RESTful API Design:** Hệ thống Endpoint được thiết kế chuẩn hóa, hỗ trợ trả về dữ liệu JSON đồng nhất, dễ dàng tích hợp thêm các nền tảng khác trong tương lai.
-
-## Kiến trúc Hệ thống
-
-Hệ thống tuân thủ mô hình 4-Container:
-
-1. **Container `app` (Laravel):** Xử lý Logic nghiệp vụ và các API Endpoint.
-2. **Container `node` (React):** Chạy môi trường Node.js để biên dịch và phục vụ giao diện người dùng.
-3. **Container `db` (MySQL):** Lưu trữ dữ liệu hệ thống bền vững.
-4. **Container `web` (Nginx):** Làm Proxy ngược điều phối yêu cầu giữa Client và API.
+- **Triển khai Đám mây (Cloud Native):** Cấu hình Docker tối ưu, tự động nhận diện Port từ Render/Railway, hỗ trợ Trust Proxy để xử lý lỗi HTTPS Mixed Content.
+- **Xác thực OTP qua Email:** Tích hợp hệ thống gửi mã xác thực 6 số qua Gmail SMTP (Google App Password) khi người dùng đăng ký tài khoản mới.
+- **Database đồng bộ:** Sử dụng MySQL (Aiven Cloud) đảm bảo dữ liệu luôn được lưu trữ an toàn và có thể truy cập từ bất cứ đâu.
+- **Vite-Powered Frontend:** Tối ưu hóa tốc độ build, giao diện Responsive hoàn toàn với CSS hiện đại và các micro-animations.
 
 ## Hướng dẫn cài đặt
 
@@ -78,7 +68,19 @@ Hệ thống tuân thủ mô hình 4-Container:
     ```
 7. Truy cập ứng dụng:
    Truy cập: http://localhost:8000
-   Hệ thống sẽ mô phỏng gửi email. Vui lòng truy cập Hộp thư giả lập (Mailpit) tại: http://localhost:8025
+   
 8. Tài khoản mặc định:
     Email: [test@example.com]
     Mật khẩu: password
+---
+
+## Online Preview (Demo Trực Tuyến)
+
+Dự án đã được triển khai sẵn trên **Render**. Bạn có thể truy cập và trải nghiệm trực tiếp tại:
+
+👉 **Link:** [https://note-management-app-1aam.onrender.com](https://note-management-app-1aam.onrender.com)
+
+> [!IMPORTANT]
+> **Lưu ý cho lần truy cập đầu tiên:** Vì dự án sử dụng gói **Render Free**, server sẽ tự động "đi ngủ" sau một thời gian không có người truy cập. Ở lần đầu tiên bạn click vào link, vui lòng đợi khoảng **30 - 50 giây** để server khởi động lại (Wake up). Các lần truy cập sau đó sẽ diễn ra mượt mà và tức thì.
+   Hệ thống sẽ mô phỏng gửi email. Vui lòng truy cập Hộp thư giả lập (Mailpit) tại: http://localhost:8025
+

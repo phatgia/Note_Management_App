@@ -3,18 +3,18 @@ set -e
 
 cd /var/www
 
-# Tạo .env từ biến môi trường Railway nếu chưa có
+# Tạo .env trống nếu chưa có (để Laravel lấy 100% biến từ Render)
 if [ ! -f .env ]; then
-    cp .env.example .env
+    touch .env
 fi
 
-# Ghi các biến Railway vào .env (Railway inject qua env vars)
+# Ghi các biến môi trường vào cache
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Chạy migrations
-php artisan migrate --force
+# Chạy migrations và seed dữ liệu mẫu
+php artisan migrate --force --seed
 
 # Tạo storage symlink nếu chưa có
 php artisan storage:link || true

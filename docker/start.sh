@@ -13,8 +13,8 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Chạy migrations và seed dữ liệu mẫu
-php artisan migrate --force --seed
+# Chạy migrations
+php artisan migrate --force
 
 # Tạo storage symlink nếu chưa có
 php artisan storage:link || true

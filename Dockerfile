@@ -28,7 +28,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # --- Frontend build ---
 # Use SQLite so artisan/wayfinder can run without a real DB during build
-RUN cp .env.example .env \
+RUN mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions \
+    && cp .env.example .env \
     && sed -i 's|DB_CONNECTION=mysql|DB_CONNECTION=sqlite|' .env \
     && printf "\nDB_DATABASE=/var/www/database/database.sqlite\n" >> .env \
     && touch database/database.sqlite \

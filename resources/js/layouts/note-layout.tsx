@@ -113,6 +113,7 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
         return '';
     });
 
+    // const isFirstRender = useRef(true);
     const isFirstRender = useRef(true);
 
     useEffect(() => {
@@ -141,7 +142,7 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
         return () => clearTimeout(delayDebounceFn);
     }, [searchQuery]);
 
-    
+
     // --- OTP Handlers ---
     const handleSendOtp = () => {
         setSendingOtp(true);

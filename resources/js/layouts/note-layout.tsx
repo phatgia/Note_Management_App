@@ -49,7 +49,9 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
 
     const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
     const [editingCatId, setEditingCatId] = useState<number | null>(null);
+    const [isCreatingCat, setIsCreatingCat] = useState(false);
     const { data: catData, setData: setCatData, put: updateCat, processing: catProcessing, reset: resetCat } = useForm({ name: '', color: '', icon: '' });
+    const { data: newCatData, setData: setNewCatData, post: createCatReq, processing: creatingCat, reset: resetNewCat } = useForm({ name: '', color: TAG_COLORS[0], icon: 'tag' });
 
     const toggleTheme = () => { updateAppearance(resolvedAppearance === 'light' ? 'dark' : 'light'); };
 
@@ -186,6 +188,18 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
         if (confirm("Bạn có chắc chắn muốn xóa nhãn này? (Ghi chú thuộc nhãn này sẽ không bị xóa)")) {
             router.delete(`/categories/${id}`, { preserveScroll: true });
         }
+    };
+
+    const handleCreateCat = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newCatData.name.trim()) return;
+        createCatReq('/categories', {
+            preserveScroll: true,
+            onSuccess: () => {
+                resetNewCat();
+                setIsCreatingCat(false);
+            }
+        });
     };
 
     return (
@@ -573,6 +587,49 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                                     )}
                                 </div>
                             ))}
+                        </div>
+
+                        {/* CREATE NEW CATEGORY FORM */}
+                        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
+                            {isCreatingCat ? (
+                                <form onSubmit={handleCreateCat} className="flex flex-col gap-2 bg-orange-50 dark:bg-gray-800/60 border border-orange-200 dark:border-orange-900/50 rounded-xl p-3 animate-in fade-in zoom-in duration-200">
+                                    <p className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider">Tạo nhãn mới</p>
+                                    <input 
+                                        type="text" autoFocus required
+                                        value={newCatData.name} 
+                                        onChange={e => setNewCatData('name', e.target.value)}
+                                        placeholder="Tên nhãn mới..."
+                                        className="w-full text-sm font-bold bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 dark:text-white focus:ring-1 focus:ring-orange-500"
+                                    />
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-1 shrink-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 rounded-lg">
+                                            {Object.keys(ICONS).map(iconKey => (
+                                                <button key={iconKey} type="button" onClick={() => setNewCatData('icon', iconKey)} className={`p-1 rounded-md transition-all ${newCatData.icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{ICONS[iconKey]}</button>
+                                            ))}
+                                        </div>
+                                        <div className="flex items-center gap-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 rounded-lg">
+                                            {TAG_COLORS.map((col, idx) => (
+                                                <button key={idx} type="button" onClick={() => setNewCatData('color', col)} className={`w-5 h-5 rounded-full border transition-all ${col.split(' ')[0]} ${col.split(' ')[2]} ${newCatData.color === col ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2 mt-1">
+                                        <button type="button" onClick={() => { setIsCreatingCat(false); resetNewCat(); }} className="flex-1 text-sm font-bold px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 cursor-pointer transition-colors">Hủy</button>
+                                        <button type="submit" disabled={creatingCat || !newCatData.name.trim()} className="flex-1 text-sm font-bold px-3 py-2 rounded-xl bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 cursor-pointer transition-colors">
+                                            {creatingCat ? 'Đang tạo...' : 'Tạo nhãn'}
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <button 
+                                    type="button"
+                                    onClick={() => setIsCreatingCat(true)}
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-orange-300 dark:border-orange-800 rounded-xl text-sm font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" /></svg>
+                                    Tạo nhãn mới
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

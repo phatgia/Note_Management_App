@@ -7,6 +7,7 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import { LocalDB } from '@/lib/local-db';
 
 const TAG_COLORS = [
     'bg-orange-100 text-orange-700 border-orange-200',
@@ -36,6 +37,7 @@ const quillFormats = [
 
 export default function NoteDetail({ note, categories, isOwner, canEdit }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
+    const [tempCategory, setTempCategory] = useState({ name: '', color: TAG_COLORS[0], icon: 'tag' });
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
     const quillRef = useRef<ReactQuill>(null); 
@@ -46,6 +48,8 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
     const isFirstRender = useRef(true);
     const [isSaving, setIsSaving] = useState(false);
     const [localStatus, setLocalStatus] = useState('');
+    const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+    const [syncPending, setSyncPending] = useState(false);
 
     const [existingImages, setExistingImages] = useState<any[]>(note.images || []); 
     const [previewImage, setPreviewImage] = useState<string[]>([]);
@@ -64,9 +68,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         title: note.title || '',
         content: note.content || '',
         category_ids: note.categories ? note.categories.map((c: any) => c.id) : [] as number[], 
-        new_category_name: '',                     
-        new_category_color: TAG_COLORS[0], 
-        new_category_icon: 'tag', 
+        new_categories: [] as Array<{name: string, color: string, icon: string}>,
         bg_color: note.bg_color || 'bg-white',
         password: note.password || '',
         image: [] as File [], 
@@ -100,9 +102,65 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         setPreviewImage(previewImage.filter((_, i) => i !== indexToRemove));
     };
 
+    // Save note to IndexedDB whenever it loads (so it's available offline)
+    useEffect(() => {
+        LocalDB.saveNote(note).catch(console.error);
+    }, [note.id]);
+
+    // Track online/offline status
+    useEffect(() => {
+        const handleOnline = async () => {
+            setIsOffline(false);
+            // Flush sync queue when connection is restored
+            if (syncPending) {
+                try {
+                    const queue = await LocalDB.getSyncQueue();
+                    for (const item of queue) {
+                        if (item.noteId === note.id) {
+                            await fetch(`/note-detail/${note.id}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-HTTP-Method-Override': 'PUT',
+                                },
+                                body: JSON.stringify(item.data),
+                            });
+                            await LocalDB.removeSyncQueueItem(item.id);
+                        }
+                    }
+                    setSyncPending(false);
+                    setLocalStatus('Đã đồng bộ lên máy chủ!');
+                    setTimeout(() => setLocalStatus(''), 3000);
+                } catch (err) {
+                    console.error('[Sync] Failed to flush queue:', err);
+                }
+            }
+        };
+        const handleOffline = () => setIsOffline(true);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, [syncPending, note.id]);
+
     const funcUpdate = (e: React.FormEvent) => {
         e.preventDefault();
         if (!canEdit) return;
+
+        if (isOffline) {
+            // Save to IndexedDB sync queue
+            LocalDB.saveNote({ ...note, title: data.title, content: data.content, bg_color: data.bg_color })
+                .catch(console.error);
+            LocalDB.addToSyncQueue({ noteId: note.id, type: 'update', data: { title: data.title, content: data.content, bg_color: data.bg_color, category_ids: data.category_ids } })
+                .catch(console.error);
+            setSyncPending(true);
+            setLocalStatus('Đã lưu trên thiết bị, sẽ đồng bộ khi có mạng');
+            setTimeout(() => setLocalStatus(''), 4000);
+            return;
+        }
         
         setIsSaving(true);
         post(`/note-detail/${note.id}`, {
@@ -242,6 +300,19 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         <NoteLayout title={data.title}>
             <div className="w-full bg-[#F8F9FA] dark:bg-background min-h-screen pb-12 overflow-y-auto">
                 <Head title={canEdit ? "Chỉnh sửa ghi chú" : "Xem ghi chú"} />
+
+                {/* Offline Banner */}
+                {isOffline && (
+                    <div className="bg-yellow-50 dark:bg-yellow-900/30 border-b border-yellow-300 dark:border-yellow-700 px-4 py-2.5 flex items-center gap-3 text-sm text-yellow-800 dark:text-yellow-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        <span>
+                            <strong>Đang ngoại tuyến.</strong> Bạn đang xem dữ liệu đã lưu trên thiết bị.
+                            {syncPending && <span className="ml-2 italic text-yellow-600 dark:text-yellow-400">Có thay đổi chờ đồng bộ...</span>}
+                        </span>
+                    </div>
+                )}
 
                 {/* Mobile */}
                 <div className="md:hidden flex items-center justify-between sticky top-0 bg-white dark:bg-card border-b border-gray-300 dark:border-gray-700 p-4 z-10 transition-colors">
@@ -466,34 +537,69 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                             <div className="flex flex-col gap-2 bg-white dark:bg-card border border-gray-300 dark:border-gray-600 rounded-xl p-2 shadow-sm animate-in fade-in zoom-in duration-200">
                                                 <div className="flex items-center gap-2">
                                                     <input 
-                                                        type="text" autoFocus placeholder="Tên nhãn mới..." value={data.new_category_name}
-                                                        onChange={(e) => setData('new_category_name', e.target.value)}
+                                                        type="text" autoFocus placeholder="Tên nhãn mới..." value={tempCategory.name}
+                                                        onChange={(e) => setTempCategory({...tempCategory, name: e.target.value})}
                                                         className="text-sm border-none bg-transparent focus:ring-0 p-0 w-40 text-gray-700 dark:text-gray-200 placeholder-gray-400 font-medium"
                                                     />
-                                                    <button type="button" onClick={() => { setIsAddingTag(false); setData('new_category_name', ''); }} className="ml-auto cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 dark:bg-gray-800 rounded-md transition-colors">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
-                                                    </button>
+                                                    <div className="flex gap-1 ml-auto">
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={() => { 
+                                                                if(tempCategory.name.trim() !== '') {
+                                                                    setData('new_categories', [...data.new_categories, tempCategory]);
+                                                                    setTempCategory({ name: '', color: TAG_COLORS[0], icon: 'tag' });
+                                                                    setIsAddingTag(false); 
+                                                                }
+                                                            }} 
+                                                            className="cursor-pointer text-green-500 hover:text-green-600 p-1 bg-green-50 dark:bg-green-900/30 rounded-md transition-colors"
+                                                            title="Xác nhận nhãn này"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.815a.75.75 0 011.05-.145z" clipRule="evenodd" /></svg>
+                                                        </button>
+                                                        <button type="button" onClick={() => { setIsAddingTag(false); setTempCategory({ name: '', color: TAG_COLORS[0], icon: 'tag' }); }} className="cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 dark:bg-gray-800 rounded-md transition-colors" title="Hủy">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <div className="h-px w-full bg-gray-100 dark:bg-gray-700"></div>
                                                 <div className="flex items-center gap-4 justify-between">
                                                     <div className="flex items-center gap-1 border-r border-gray-300 dark:border-gray-700 pr-3">
                                                         {Object.keys(ICONS).map((iconKey) => (
-                                                            <button key={iconKey} type="button" onClick={() => setData('new_category_icon', iconKey)} className={`p-1 rounded-md transition-all ${data.new_category_icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300'}`}>
+                                                            <button key={iconKey} type="button" onClick={() => setTempCategory({...tempCategory, icon: iconKey})} className={`p-1 rounded-md transition-all ${tempCategory.icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300'}`}>
                                                                 {ICONS[iconKey]}
                                                             </button>
                                                         ))}
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
                                                         {TAG_COLORS.map((colorClass, idx) => (
-                                                            <button key={idx} type="button" onClick={() => setData('new_category_color', colorClass)} className={`w-5 h-5 rounded-full border transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${data.new_category_color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`} />
+                                                            <button key={idx} type="button" onClick={() => setTempCategory({...tempCategory, color: colorClass})} className={`w-5 h-5 rounded-full border transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${tempCategory.color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`} />
                                                         ))}
                                                     </div>
                                                 </div>
                                             </div>
                                         ) : (
-                                            <button type="button" onClick={() => setIsAddingTag(true)} className="text-sm border border-orange-400 border-dashed bg-white dark:bg-card flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors text-orange-600 font-medium items-center gap-1">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" /></svg> Thêm nhãn
-                                            </button>
+                                            <>
+                                                {data.new_categories && data.new_categories.map((cat: any, idx: number) => (
+                                                    <button 
+                                                        key={`new-${idx}`}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const newCats = [...data.new_categories];
+                                                            newCats.splice(idx, 1);
+                                                            setData('new_categories', newCats);
+                                                        }}
+                                                        className={`rounded-full px-3 py-1.5 flex items-center gap-3 text-sm font-medium border transition-all cursor-pointer ring-2 ring-offset-1 ring-gray-400 scale-100 shadow-md ${cat.color}`}
+                                                        title="Bỏ nhãn này"
+                                                    >
+                                                        {ICONS[cat.icon] || ICONS['tag']}
+                                                        {cat.name}
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 ml-1 opacity-50 hover:opacity-100"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
+                                                    </button>
+                                                ))}
+                                                <button type="button" onClick={() => setIsAddingTag(true)} className="text-sm border border-orange-400 border-dashed bg-white dark:bg-card flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors text-orange-600 font-medium items-center gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" /></svg> Thêm nhãn mới
+                                                </button>
+                                            </>
                                         )
                                     )}
                                 </div>

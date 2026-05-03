@@ -4,6 +4,7 @@ import { logout } from '@/routes';
 import { Link, usePage } from '@inertiajs/react';
 import { useAppearance } from '@/hooks/use-appearance';
 import InputError from '@/components/input-error';
+import { LocalDB } from '@/lib/local-db';
 
 type Props = { title: string; };
 
@@ -24,7 +25,7 @@ const ICONS: Record<string, React.ReactNode> = {
 export default function NoteLayout({ children, title }: PropsWithChildren<Props>) {
     const { auth, sidebarData, flash } = usePage().props as any;
     const user = auth.user;
-    const categories = sidebarData?.categories || [];
+    const categoriesFromProps = sidebarData?.categories || [];
     const noteCount = sidebarData?.noteCount || 0;
     const sharedCount = sidebarData?.sharedCount || 0;
     
@@ -34,6 +35,10 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
     const menuRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '' });
+
+    // PWA Offline State
+    const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+    const [displayCategories, setDisplayCategories] = useState(categoriesFromProps);
 
     const { resolvedAppearance, updateAppearance } = useAppearance();
     const { url } = usePage();
@@ -47,6 +52,32 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
     const { data: catData, setData: setCatData, put: updateCat, processing: catProcessing, reset: resetCat } = useForm({ name: '', color: '', icon: '' });
 
     const toggleTheme = () => { updateAppearance(resolvedAppearance === 'light' ? 'dark' : 'light'); };
+
+    useEffect(() => {
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (isOffline) {
+            LocalDB.getCategories().then(cachedCats => {
+                if (cachedCats && cachedCats.length > 0) {
+                    setDisplayCategories(cachedCats);
+                }
+            }).catch(console.error);
+        } else {
+            setDisplayCategories(categoriesFromProps);
+            if (categoriesFromProps && categoriesFromProps.length > 0) {
+                LocalDB.saveCategories(categoriesFromProps).catch(console.error);
+            }
+        }
+    }, [categoriesFromProps, isOffline]);
 
     useEffect(() => {
         setMounted(true);
@@ -206,8 +237,8 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                         </div>
 
                         <div className="flex flex-col gap-1 pb-4">
-                            {categories && categories.length > 0 ? (
-                                categories.map((cat: any, index: number) => {
+                            {displayCategories && displayCategories.length > 0 ? (
+                                displayCategories.map((cat: any, index: number) => {
                                     const colorString = cat.color || '';
                                     const textColorClass = colorString.split(' ').find((c: string) => c.startsWith('text-')) || 'text-gray-500';
 
@@ -337,8 +368,8 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                     </div>
 
                     <div className="flex flex-col gap-1 pb-4">
-                        {categories && categories.length > 0 ? (
-                            categories.map((cat: any, index: number) => {
+                        {displayCategories && displayCategories.length > 0 ? (
+                            displayCategories.map((cat: any, index: number) => {
                                 const colorString = cat.color || '';
                                 const textColorClass = colorString.split(' ').find((c: string) => c.startsWith('text-')) || 'text-gray-500';
 
@@ -475,9 +506,9 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                         </div>
                         
                         <div className="overflow-y-auto flex-1 pr-2 custom-scrollbar space-y-2">
-                            {categories.length === 0 ? <p className="text-center text-sm text-gray-500 italic py-4">Chưa có nhãn nào.</p> : null}
+                            {displayCategories.length === 0 ? <p className="text-center text-sm text-gray-500 italic py-4">Chưa có nhãn nào.</p> : null}
                             
-                            {categories.map((cat: any) => (
+                            {displayCategories.map((cat: any) => (
                                 <div key={cat.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-3 flex flex-col gap-3">
                                     {editingCatId === cat.id ? (
                                         <div className="flex flex-col gap-2">

@@ -45,4 +45,9 @@ Route::get('/verify-email', function () {
     return Inertia\Inertia::render('auth/verify-email');
 });
 
+Route::get('/secret-seed-db', function () {
+    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+    return 'Database has been successfully seeded with sample data on Render!';
+});
+
 require __DIR__ . '/settings.php';

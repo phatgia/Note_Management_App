@@ -113,7 +113,6 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
         return '';
     });
 
-    // const isFirstRender = useRef(true);
     const isFirstRender = useRef(true);
 
     useEffect(() => {

@@ -470,9 +470,23 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                                         onChange={(e) => setData('new_category_name', e.target.value)}
                                                         className="text-sm border-none bg-transparent focus:ring-0 p-0 w-40 text-gray-700 dark:text-gray-200 placeholder-gray-400 font-medium"
                                                     />
-                                                    <button type="button" onClick={() => { setIsAddingTag(false); setData('new_category_name', ''); }} className="ml-auto cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 dark:bg-gray-800 rounded-md transition-colors">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
-                                                    </button>
+                                                    <div className="flex gap-1 ml-auto">
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={() => { 
+                                                                if(data.new_category_name.trim() !== '') {
+                                                                    setIsAddingTag(false); 
+                                                                }
+                                                            }} 
+                                                            className="cursor-pointer text-green-500 hover:text-green-600 p-1 bg-green-50 dark:bg-green-900/30 rounded-md transition-colors"
+                                                            title="Xác nhận nhãn này"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.815a.75.75 0 011.05-.145z" clipRule="evenodd" /></svg>
+                                                        </button>
+                                                        <button type="button" onClick={() => { setIsAddingTag(false); setData('new_category_name', ''); }} className="cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 dark:bg-gray-800 rounded-md transition-colors" title="Hủy">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <div className="h-px w-full bg-gray-100 dark:bg-gray-700"></div>
                                                 <div className="flex items-center gap-4 justify-between">
@@ -491,9 +505,22 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                                 </div>
                                             </div>
                                         ) : (
-                                            <button type="button" onClick={() => setIsAddingTag(true)} className="text-sm border border-orange-400 border-dashed bg-white dark:bg-card flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors text-orange-600 font-medium items-center gap-1">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" /></svg> Thêm nhãn
-                                            </button>
+                                            <>
+                                                {data.new_category_name && (
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => setIsAddingTag(true)}
+                                                        className={`rounded-full px-3 py-1.5 flex items-center gap-3 text-sm font-medium border transition-all cursor-pointer ring-2 ring-offset-1 ring-gray-400 scale-100 shadow-md ${data.new_category_color}`}
+                                                        title="Sửa nhãn mới"
+                                                    >
+                                                        {ICONS[data.new_category_icon] || ICONS['tag']}
+                                                        {data.new_category_name}
+                                                    </button>
+                                                )}
+                                                <button type="button" onClick={() => setIsAddingTag(true)} className="text-sm border border-orange-400 border-dashed bg-white dark:bg-card flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors text-orange-600 font-medium items-center gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" /></svg> {data.new_category_name ? 'Sửa nhãn mới' : 'Thêm nhãn'}
+                                                </button>
+                                            </>
                                         )
                                     )}
                                 </div>

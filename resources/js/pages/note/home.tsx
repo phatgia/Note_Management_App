@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import NoteLayout from '@/layouts/note-layout';
 import { Link, usePage, router } from '@inertiajs/react';
 import { useViewMode } from '@/hooks/use-view-mode';
+import { LocalDB } from '@/lib/local-db';
 
 const stripHtml = (htmlStr: string) => {
     if (!htmlStr) return "";
@@ -16,12 +17,41 @@ export default function Home({ notes, categories }: any) {
     
     const { url } = usePage();
 
+    // PWA Offline State
+    const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+    const [displayNotes, setDisplayNotes] = useState(notes || []);
+
     const [searchQuery, setSearchQuery] = useState(() => {
         if (typeof window !== 'undefined') {
             return new URLSearchParams(window.location.search).get('search') || '';
         }
         return '';
     });
+
+    useEffect(() => {
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (isOffline) {
+            LocalDB.getNotes().then(cachedNotes => {
+                setDisplayNotes(cachedNotes);
+            }).catch(console.error);
+        } else {
+            setDisplayNotes(notes || []);
+            // Sync current online notes to IndexedDB
+            if (notes) {
+                LocalDB.saveNotes(notes).catch(console.error);
+            }
+        }
+    }, [notes, isOffline]);
 
     const isFirstRender = useRef(true);
 
@@ -69,8 +99,8 @@ export default function Home({ notes, categories }: any) {
         router.post(`/notes/${noteId}/pin`, {}, { preserveScroll: true, preserveState: true });
     };
 
-    const pinnedNote = notes?.filter((note:any)=>note.is_pinned) || [];
-    const otherNote = notes?.filter((note:any)=>!note.is_pinned) || [];
+    const pinnedNote = displayNotes?.filter((note:any)=>note.is_pinned) || [];
+    const otherNote = displayNotes?.filter((note:any)=>!note.is_pinned) || [];
 
     const showNote =(note: any, index: number)=>(
         <div key={`${note.id}-${index}`} className="relative group">   
@@ -279,6 +309,16 @@ export default function Home({ notes, categories }: any) {
                 </div>
             </div>
 
+            {/* Offline Banner */}
+            {isOffline && (
+                <div className="bg-yellow-100 dark:bg-yellow-900/50 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-400 p-3 m-4 rounded shadow-sm text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Bạn đang ngoại tuyến. Ứng dụng đang hiển thị dữ liệu đã lưu từ thiết bị.
+                </div>
+            )}
+
             {/* Thanh trên cùng - Desktop */}
             <div className="hidden md:flex sticky top-0 bg-card items-center justify-between border-b border-gray-300 dark:border-gray-800 p-6 z-10">
                 <h1 className="text-2xl font-bold text-foreground">Tất cả ghi chú</h1>
@@ -302,7 +342,7 @@ export default function Home({ notes, categories }: any) {
 
             {/* Ghi chú đã ghim */}
             <div className="mb-10">
-                {!notes || notes.length === 0 ? (
+                {!displayNotes || displayNotes.length === 0 ? (
                     <div className="col-span-full flex flex-col items-center justify-center py-16 text-gray-400">
                         <svg className="w-16 h-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />

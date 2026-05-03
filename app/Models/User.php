@@ -58,4 +58,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany(Note::class, 'note_user')->withPivot('role')->withTimestamps();
     }
+
+    /**
+     * Override the default email verification notification.
+     * We use a custom OTP system, so we don't want Laravel to send the default link.
+     * This also prevents 504 timeouts on Render during registration.
+     */
+    public function sendEmailVerificationNotification()
+    {
+        // Do nothing. OTP is sent manually via OtpController.
+    }
 }

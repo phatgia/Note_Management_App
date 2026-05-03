@@ -113,12 +113,33 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
         return '';
     });
 
-    const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            const basePath = url.split('?')[0];
-            router.get(basePath, { search: searchQuery }, { preserveState: true, preserveScroll: true });
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
         }
-    };
+
+        const delayDebounceFn = setTimeout(() => {
+            const currentParams = new URLSearchParams(window.location.search);
+            
+            if (searchQuery) {
+                currentParams.set('search', searchQuery);
+            } else {
+                currentParams.delete('search');
+            }
+
+            const basePath = url.split('?')[0]; 
+            
+            router.get(basePath, Object.fromEntries(currentParams), {
+                preserveState: true, 
+                replace: true
+            });
+        }, 300); 
+        
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchQuery]);
 
     // --- OTP Handlers ---
     const handleSendOtp = () => {
@@ -331,7 +352,6 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                         <input 
                             value={searchQuery}
                             onChange={(e)=>setSearchQuery(e.target.value)}
-                            onKeyDown={handleSearch}
                             type="text" placeholder="Tìm kiếm ghi chú..." 
                             className="w-full bg-background border border-gray-200 dark:border-gray-700 text-foreground text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
                         />

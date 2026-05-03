@@ -46,7 +46,6 @@ export default function Home({ notes, categories }: any) {
             }).catch(console.error);
         } else {
             setDisplayNotes(notes || []);
-            // Sync current online notes to IndexedDB
             if (notes) {
                 LocalDB.saveNotes(notes).catch(console.error);
             }
@@ -104,9 +103,6 @@ export default function Home({ notes, categories }: any) {
 
     const showNote =(note: any, index: number)=>(
         <div key={`${note.id}-${index}`} className="relative group">   
-            {/* NÚT GHIM KHI HOVER */}
-           
-
             <Link 
                 href={`/note-detail/${note.id}`} 
                 className={`${note.bg_color || 'bg-white'} dark:bg-gray-800/90 border ${note.is_pinned ? 'border-orange-400 dark:border-orange-500/50 shadow-md ring-1 ring-orange-200 dark:ring-orange-900/30' : 'border-gray-200 dark:border-gray-700'} rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer ${viewMode === 'grid' ? "p-5 flex flex-col min-h-[18rem] max-h-[18rem]" : "p-3 sm:p-4 flex flex-row items-center gap-3 sm:gap-4"}`}
@@ -129,19 +125,15 @@ export default function Home({ notes, categories }: any) {
                                 </svg>
                             </button>
 
-                            {/* Icon Note Mặc định */}
                             <div className="bg-orange-100 dark:bg-gray-900 border border-transparent dark:border-orange-500/30 text-orange-500 p-1.5 rounded-lg shrink-0">
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" /></svg>
                             </div>
                             
-                            {/* Icon Share */}
                             {note.shared_users && note.shared_users.length > 0 && (
                                 <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg shrink-0" title="Đã chia sẻ">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
                                 </div>
                             )}
-
-                            {/* Icon Password */}
                             {note.password && (
                                 <div className="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-1.5 rounded-lg shrink-0" title="Có mật khẩu">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>

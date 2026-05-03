@@ -254,7 +254,7 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
                                     );
                                 })
                             ) : (
-                                <span className="text-sm text-gray-400 italic px-3">Chưa có nhãn nào</span>
+                               <></>
                             )}
                         </div>
                     </div>

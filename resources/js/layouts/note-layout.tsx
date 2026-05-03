@@ -141,6 +141,7 @@ export default function NoteLayout({ children, title }: PropsWithChildren<Props>
         return () => clearTimeout(delayDebounceFn);
     }, [searchQuery]);
 
+    
     // --- OTP Handlers ---
     const handleSendOtp = () => {
         setSendingOtp(true);

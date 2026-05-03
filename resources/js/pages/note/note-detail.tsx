@@ -56,6 +56,11 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
     const [previewImage, setPreviewImage] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Sync existingImages whenever Inertia refreshes note.images from server
+    useEffect(() => {
+        setExistingImages(note.images || []);
+    }, [note.images]);
+
     const { data: shareData, setData: setShareData, post: postShare, processing: sharing, errors: shareErrors, reset: resetShare } = useForm({
         email: '',
         role: 'viewer'
@@ -164,18 +169,23 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         }
         
         setIsSaving(true);
+        const hasNewImages = data.image && data.image.length > 0;
         post(`/note-detail/${note.id}`, {
             forceFormData: true, 
             preserveScroll: true,
-            preserveState: true,  
+            // When uploading new images: preserveState=false so Inertia refreshes
+            // note.images from server → existingImages useEffect will pick it up.
+            // When no images: preserveState=true to avoid form flicker.
+            preserveState: !hasNewImages,
             onSuccess: () => {
                 setIsSaving(false);
                 setLocalStatus('Đã lưu thành công');
                 setTimeout(() => setLocalStatus(''), 3000);
-                // Clear new images after successful upload to prevent re-uploading on next save
-                setData('image', []);
-                setPreviewImage([]);
-                if (fileInputRef.current) fileInputRef.current.value = '';
+                if (hasNewImages) {
+                    setData('image', []);
+                    setPreviewImage([]);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                }
             },
             onError: () => setIsSaving(false)
         });

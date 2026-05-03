@@ -37,6 +37,7 @@ const quillFormats = [
 
 export default function Create({ categories }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
+    const [tempCategory, setTempCategory] = useState({ name: '', color: TAG_COLORS[0], icon: 'tag' });
 
     const [previewImage, setPreviewImage] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,9 +46,7 @@ export default function Create({ categories }: any) {
         title: '',
         content: '',
         category_ids: [] as number[], 
-        new_category_name: '',                     
-        new_category_color: TAG_COLORS[0], 
-        new_category_icon: 'tag', 
+        new_categories: [] as Array<{name: string, color: string, icon: string}>,
         bg_color: 'bg-white',
         image: [] as File[], 
         password:'',
@@ -219,9 +218,9 @@ export default function Create({ categories }: any) {
                                         
                                         <div className="flex items-center gap-2">
                                             <input 
-                                                type="text" autoFocus placeholder="Tên nhãn mới..." value={data.new_category_name}
+                                                type="text" autoFocus placeholder="Tên nhãn mới..." value={tempCategory.name}
                                                 onChange={(e) => {
-                                                    setData('new_category_name', e.target.value);
+                                                    setTempCategory({...tempCategory, name: e.target.value});
                                                 }}
                                                 className="text-sm border-none bg-transparent focus:ring-0 p-0 w-40 text-card-foreground placeholder-gray-400 font-medium"
                                             />
@@ -229,7 +228,9 @@ export default function Create({ categories }: any) {
                                                 <button 
                                                     type="button" 
                                                     onClick={() => { 
-                                                        if(data.new_category_name.trim() !== '') {
+                                                        if(tempCategory.name.trim() !== '') {
+                                                            setData('new_categories', [...data.new_categories, tempCategory]);
+                                                            setTempCategory({ name: '', color: TAG_COLORS[0], icon: 'tag' });
                                                             setIsAddingTag(false); 
                                                         }
                                                     }} 
@@ -240,7 +241,7 @@ export default function Create({ categories }: any) {
                                                 </button>
                                                 <button 
                                                     type="button" 
-                                                    onClick={() => { setIsAddingTag(false); setData('new_category_name', ''); }} 
+                                                    onClick={() => { setIsAddingTag(false); setTempCategory({ name: '', color: TAG_COLORS[0], icon: 'tag' }); }} 
                                                     className="cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 dark:bg-gray-800 rounded-md transition-colors"
                                                     title="Hủy"
                                                 >
@@ -257,8 +258,8 @@ export default function Create({ categories }: any) {
                                                 {Object.keys(ICONS).map((iconKey) => (
                                                     <button
                                                         key={iconKey} type="button"
-                                                        onClick={() => setData('new_category_icon', iconKey)}
-                                                        className={` cursor-pointer p-1 rounded-md transition-all ${data.new_category_icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300 ' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                                                        onClick={() => setTempCategory({...tempCategory, icon: iconKey})}
+                                                        className={` cursor-pointer p-1 rounded-md transition-all ${tempCategory.icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300 ' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300'}`}
                                                     >
                                                         {ICONS[iconKey]}
                                                     </button>
@@ -267,8 +268,8 @@ export default function Create({ categories }: any) {
                                             <div className="flex items-center gap-1.5">
                                                 {TAG_COLORS.map((colorClass, idx) => (
                                                     <button
-                                                        key={idx} type="button" onClick={() => setData('new_category_color', colorClass)}
-                                                        className={`w-5 h-5 rounded-full border cursor-pointer transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${data.new_category_color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`}
+                                                        key={idx} type="button" onClick={() => setTempCategory({...tempCategory, color: colorClass})}
+                                                        className={`w-5 h-5 rounded-full border cursor-pointer transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${tempCategory.color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`}
                                                     />
                                                 ))}
                                             </div>
@@ -276,17 +277,23 @@ export default function Create({ categories }: any) {
                                     </div>
                                 ) : (
                                     <>
-                                        {data.new_category_name && (
+                                        {data.new_categories && data.new_categories.map((cat: any, idx: number) => (
                                             <button 
+                                                key={`new-${idx}`}
                                                 type="button"
-                                                onClick={() => setIsAddingTag(true)}
-                                                className={`rounded-full px-3 py-1.5 flex items-center gap-3 text-sm font-medium border transition-all cursor-pointer ring-2 ring-offset-1 ring-gray-400 scale-100 shadow-md ${data.new_category_color}`}
-                                                title="Sửa nhãn mới"
+                                                onClick={() => {
+                                                    const newCats = [...data.new_categories];
+                                                    newCats.splice(idx, 1);
+                                                    setData('new_categories', newCats);
+                                                }}
+                                                className={`rounded-full px-3 py-1.5 flex items-center gap-3 text-sm font-medium border transition-all cursor-pointer ring-2 ring-offset-1 ring-gray-400 scale-100 shadow-md ${cat.color}`}
+                                                title="Bỏ nhãn này"
                                             >
-                                                {ICONS[data.new_category_icon] || ICONS['tag']}
-                                                {data.new_category_name}
+                                                {ICONS[cat.icon] || ICONS['tag']}
+                                                {cat.name}
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 ml-1 opacity-50 hover:opacity-100"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
                                             </button>
-                                        )}
+                                        ))}
                                         <button 
                                             type="button" onClick={() => setIsAddingTag(true)}
                                             className="dark:bg-card text-sm border border-orange-500 border-dashed bg-white flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors text-gray-600 hover:text-orange-600 font-medium items-center gap-1"
@@ -294,7 +301,7 @@ export default function Create({ categories }: any) {
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                                                 <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
                                             </svg>
-                                            {data.new_category_name ? 'Sửa nhãn mới' : 'Thêm nhãn'}
+                                            Thêm nhãn mới
                                         </button>
                                     </>
                                 )}

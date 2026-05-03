@@ -36,6 +36,7 @@ const quillFormats = [
 
 export default function NoteDetail({ note, categories, isOwner, canEdit }: any) {
     const [isAddingTag, setIsAddingTag] = useState(false);
+    const [tempCategory, setTempCategory] = useState({ name: '', color: TAG_COLORS[0], icon: 'tag' });
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
     const quillRef = useRef<ReactQuill>(null); 
@@ -64,9 +65,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         title: note.title || '',
         content: note.content || '',
         category_ids: note.categories ? note.categories.map((c: any) => c.id) : [] as number[], 
-        new_category_name: '',                     
-        new_category_color: TAG_COLORS[0], 
-        new_category_icon: 'tag', 
+        new_categories: [] as Array<{name: string, color: string, icon: string}>,
         bg_color: note.bg_color || 'bg-white',
         password: note.password || '',
         image: [] as File [], 
@@ -466,15 +465,17 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                             <div className="flex flex-col gap-2 bg-white dark:bg-card border border-gray-300 dark:border-gray-600 rounded-xl p-2 shadow-sm animate-in fade-in zoom-in duration-200">
                                                 <div className="flex items-center gap-2">
                                                     <input 
-                                                        type="text" autoFocus placeholder="Tên nhãn mới..." value={data.new_category_name}
-                                                        onChange={(e) => setData('new_category_name', e.target.value)}
+                                                        type="text" autoFocus placeholder="Tên nhãn mới..." value={tempCategory.name}
+                                                        onChange={(e) => setTempCategory({...tempCategory, name: e.target.value})}
                                                         className="text-sm border-none bg-transparent focus:ring-0 p-0 w-40 text-gray-700 dark:text-gray-200 placeholder-gray-400 font-medium"
                                                     />
                                                     <div className="flex gap-1 ml-auto">
                                                         <button 
                                                             type="button" 
                                                             onClick={() => { 
-                                                                if(data.new_category_name.trim() !== '') {
+                                                                if(tempCategory.name.trim() !== '') {
+                                                                    setData('new_categories', [...data.new_categories, tempCategory]);
+                                                                    setTempCategory({ name: '', color: TAG_COLORS[0], icon: 'tag' });
                                                                     setIsAddingTag(false); 
                                                                 }
                                                             }} 
@@ -483,7 +484,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                                         >
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.815a.75.75 0 011.05-.145z" clipRule="evenodd" /></svg>
                                                         </button>
-                                                        <button type="button" onClick={() => { setIsAddingTag(false); setData('new_category_name', ''); }} className="cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 dark:bg-gray-800 rounded-md transition-colors" title="Hủy">
+                                                        <button type="button" onClick={() => { setIsAddingTag(false); setTempCategory({ name: '', color: TAG_COLORS[0], icon: 'tag' }); }} className="cursor-pointer text-gray-400 hover:text-red-500 p-1 bg-gray-50 dark:bg-gray-800 rounded-md transition-colors" title="Hủy">
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
                                                         </button>
                                                     </div>
@@ -492,33 +493,39 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                                 <div className="flex items-center gap-4 justify-between">
                                                     <div className="flex items-center gap-1 border-r border-gray-300 dark:border-gray-700 pr-3">
                                                         {Object.keys(ICONS).map((iconKey) => (
-                                                            <button key={iconKey} type="button" onClick={() => setData('new_category_icon', iconKey)} className={`p-1 rounded-md transition-all ${data.new_category_icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300'}`}>
+                                                            <button key={iconKey} type="button" onClick={() => setTempCategory({...tempCategory, icon: iconKey})} className={`p-1 rounded-md transition-all ${tempCategory.icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300'}`}>
                                                                 {ICONS[iconKey]}
                                                             </button>
                                                         ))}
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
                                                         {TAG_COLORS.map((colorClass, idx) => (
-                                                            <button key={idx} type="button" onClick={() => setData('new_category_color', colorClass)} className={`w-5 h-5 rounded-full border transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${data.new_category_color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`} />
+                                                            <button key={idx} type="button" onClick={() => setTempCategory({...tempCategory, color: colorClass})} className={`w-5 h-5 rounded-full border transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${tempCategory.color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`} />
                                                         ))}
                                                     </div>
                                                 </div>
                                             </div>
                                         ) : (
                                             <>
-                                                {data.new_category_name && (
+                                                {data.new_categories && data.new_categories.map((cat: any, idx: number) => (
                                                     <button 
+                                                        key={`new-${idx}`}
                                                         type="button"
-                                                        onClick={() => setIsAddingTag(true)}
-                                                        className={`rounded-full px-3 py-1.5 flex items-center gap-3 text-sm font-medium border transition-all cursor-pointer ring-2 ring-offset-1 ring-gray-400 scale-100 shadow-md ${data.new_category_color}`}
-                                                        title="Sửa nhãn mới"
+                                                        onClick={() => {
+                                                            const newCats = [...data.new_categories];
+                                                            newCats.splice(idx, 1);
+                                                            setData('new_categories', newCats);
+                                                        }}
+                                                        className={`rounded-full px-3 py-1.5 flex items-center gap-3 text-sm font-medium border transition-all cursor-pointer ring-2 ring-offset-1 ring-gray-400 scale-100 shadow-md ${cat.color}`}
+                                                        title="Bỏ nhãn này"
                                                     >
-                                                        {ICONS[data.new_category_icon] || ICONS['tag']}
-                                                        {data.new_category_name}
+                                                        {ICONS[cat.icon] || ICONS['tag']}
+                                                        {cat.name}
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 ml-1 opacity-50 hover:opacity-100"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
                                                     </button>
-                                                )}
+                                                ))}
                                                 <button type="button" onClick={() => setIsAddingTag(true)} className="text-sm border border-orange-400 border-dashed bg-white dark:bg-card flex p-1.5 pl-2 pr-3 cursor-pointer rounded-full hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors text-orange-600 font-medium items-center gap-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" /></svg> {data.new_category_name ? 'Sửa nhãn mới' : 'Thêm nhãn'}
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" /></svg> Thêm nhãn mới
                                                 </button>
                                             </>
                                         )

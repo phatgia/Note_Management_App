@@ -63,9 +63,10 @@ class NoteController extends Controller
             'content' => 'required|string',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:categories,id',
-            'new_category_name' => 'nullable|string|max:50',
-            'new_category_color' => 'nullable|string',
-            'new_category_icon' => 'nullable|string',
+            'new_categories' => 'nullable|array',
+            'new_categories.*.name' => 'required|string|max:50',
+            'new_categories.*.color' => 'nullable|string',
+            'new_categories.*.icon' => 'nullable|string',
             'bg_color' => 'nullable|string',
             'password' => 'nullable|string',
             'image'=> 'nullable|array',
@@ -74,14 +75,16 @@ class NoteController extends Controller
 
         $categoryIds = $request->category_ids ?? [];
 
-        if ($request->filled('new_category_name')) {
-            $newCategory = \App\Models\Category::create([
-                'user_id' => auth()->id(),
-                'name' => $request->new_category_name,
-                'color' => $request->new_category_color,
-                'icon' => $request->new_category_icon,
-            ]);
-            $categoryIds[] = $newCategory->id;
+        if ($request->filled('new_categories')) {
+            foreach ($request->new_categories as $newCat) {
+                $newCategory = \App\Models\Category::create([
+                    'user_id' => auth()->id(),
+                    'name' => $newCat['name'],
+                    'color' => $newCat['color'] ?? 'bg-orange-100 text-orange-700 border-orange-200',
+                    'icon' => $newCat['icon'] ?? 'tag',
+                ]);
+                $categoryIds[] = $newCategory->id;
+            }
         }
 
         $note = $request->user()->notes()->create([
@@ -160,9 +163,10 @@ class NoteController extends Controller
             'content' => 'required|string',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:categories,id',
-            'new_category_name' => 'nullable|string|max:50',
-            'new_category_color' => 'nullable|string',
-            'new_category_icon' => 'nullable|string',
+            'new_categories' => 'nullable|array',
+            'new_categories.*.name' => 'required|string|max:50',
+            'new_categories.*.color' => 'nullable|string',
+            'new_categories.*.icon' => 'nullable|string',
             'bg_color' => 'nullable|string',
             'password' => 'nullable|string',
             'image' => 'nullable|array',
@@ -171,14 +175,16 @@ class NoteController extends Controller
 
         $categoryIds = $request->category_ids ?? [];
 
-        if ($request->filled('new_category_name')) {
-            $newCategory = \App\Models\Category::create([
-                'user_id' => auth()->id(),
-                'name' => $request->new_category_name,
-                'color' => $request->new_category_color,
-                'icon' => $request->new_category_icon,
-            ]);
-            $categoryIds[] = $newCategory->id;
+        if ($request->filled('new_categories')) {
+            foreach ($request->new_categories as $newCat) {
+                $newCategory = \App\Models\Category::create([
+                    'user_id' => auth()->id(),
+                    'name' => $newCat['name'],
+                    'color' => $newCat['color'] ?? 'bg-orange-100 text-orange-700 border-orange-200',
+                    'icon' => $newCat['icon'] ?? 'tag',
+                ]);
+                $categoryIds[] = $newCategory->id;
+            }
         }
 
         $updateData = [

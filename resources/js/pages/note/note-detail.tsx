@@ -170,13 +170,13 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         
         setIsSaving(true);
         const hasNewImages = data.image && data.image.length > 0;
+        const hasNewCategories = data.new_categories && data.new_categories.length > 0;
         post(`/note-detail/${note.id}`, {
             forceFormData: true, 
             preserveScroll: true,
-            // When uploading new images: preserveState=false so Inertia refreshes
-            // note.images from server → existingImages useEffect will pick it up.
-            // When no images: preserveState=true to avoid form flicker.
-            preserveState: !hasNewImages,
+            // Disable preserveState when we have new images or new categories,
+            // so Inertia refreshes page props (note.images, categories) from server.
+            preserveState: !hasNewImages && !hasNewCategories,
             onSuccess: () => {
                 setIsSaving(false);
                 setLocalStatus('Đã lưu thành công');
@@ -185,6 +185,9 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                     setData('image', []);
                     setPreviewImage([]);
                     if (fileInputRef.current) fileInputRef.current.value = '';
+                }
+                if (hasNewCategories) {
+                    setData('new_categories', []);
                 }
             },
             onError: () => setIsSaving(false)
@@ -224,23 +227,32 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         const timer = setTimeout(() => {
             // Only send text/category data — NOT image files
             // Sending images in auto-save causes duplicate uploads
+            const pendingNewCategories = data.new_categories;
             const textOnlyData = {
                 title: data.title,
                 content: data.content,
                 bg_color: data.bg_color,
                 category_ids: data.category_ids,
-                new_categories: data.new_categories,
+                new_categories: pendingNewCategories,
                 password: data.password,
                 _method: 'put',
             };
             setIsSaving(true);
             router.post(`/note-detail/${note.id}`, textOnlyData as any, {
                 preserveScroll: true,
-                preserveState: true,  
+                // If we have new_categories to create, disable preserveState so
+                // Inertia refreshes categories from server (prevents duplicate creation
+                // on subsequent auto-saves)
+                preserveState: pendingNewCategories.length === 0,
                 onSuccess: () => {
                     setIsSaving(false);
                     setLocalStatus('Đã tự động lưu');
                     setTimeout(() => setLocalStatus(''), 3000);
+                    // Clear pending new categories so they are NOT re-sent
+                    // on the next auto-save trigger
+                    if (pendingNewCategories.length > 0) {
+                        setData('new_categories', []);
+                    }
                 },
                 onError: () => setIsSaving(false)
             });

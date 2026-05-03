@@ -7,6 +7,7 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import { LocalDB } from '@/lib/local-db';
 
 const TAG_COLORS = [
     'bg-orange-100 text-orange-700 border-orange-200',
@@ -47,6 +48,8 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
     const isFirstRender = useRef(true);
     const [isSaving, setIsSaving] = useState(false);
     const [localStatus, setLocalStatus] = useState('');
+    const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+    const [syncPending, setSyncPending] = useState(false);
 
     const [existingImages, setExistingImages] = useState<any[]>(note.images || []); 
     const [previewImage, setPreviewImage] = useState<string[]>([]);
@@ -99,9 +102,65 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         setPreviewImage(previewImage.filter((_, i) => i !== indexToRemove));
     };
 
+    // Save note to IndexedDB whenever it loads (so it's available offline)
+    useEffect(() => {
+        LocalDB.saveNote(note).catch(console.error);
+    }, [note.id]);
+
+    // Track online/offline status
+    useEffect(() => {
+        const handleOnline = async () => {
+            setIsOffline(false);
+            // Flush sync queue when connection is restored
+            if (syncPending) {
+                try {
+                    const queue = await LocalDB.getSyncQueue();
+                    for (const item of queue) {
+                        if (item.noteId === note.id) {
+                            await fetch(`/note-detail/${note.id}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-HTTP-Method-Override': 'PUT',
+                                },
+                                body: JSON.stringify(item.data),
+                            });
+                            await LocalDB.removeSyncQueueItem(item.id);
+                        }
+                    }
+                    setSyncPending(false);
+                    setLocalStatus('Đã đồng bộ lên máy chủ!');
+                    setTimeout(() => setLocalStatus(''), 3000);
+                } catch (err) {
+                    console.error('[Sync] Failed to flush queue:', err);
+                }
+            }
+        };
+        const handleOffline = () => setIsOffline(true);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, [syncPending, note.id]);
+
     const funcUpdate = (e: React.FormEvent) => {
         e.preventDefault();
         if (!canEdit) return;
+
+        if (isOffline) {
+            // Save to IndexedDB sync queue
+            LocalDB.saveNote({ ...note, title: data.title, content: data.content, bg_color: data.bg_color })
+                .catch(console.error);
+            LocalDB.addToSyncQueue({ noteId: note.id, type: 'update', data: { title: data.title, content: data.content, bg_color: data.bg_color, category_ids: data.category_ids } })
+                .catch(console.error);
+            setSyncPending(true);
+            setLocalStatus('Đã lưu trên thiết bị, sẽ đồng bộ khi có mạng');
+            setTimeout(() => setLocalStatus(''), 4000);
+            return;
+        }
         
         setIsSaving(true);
         post(`/note-detail/${note.id}`, {
@@ -241,6 +300,19 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         <NoteLayout title={data.title}>
             <div className="w-full bg-[#F8F9FA] dark:bg-background min-h-screen pb-12 overflow-y-auto">
                 <Head title={canEdit ? "Chỉnh sửa ghi chú" : "Xem ghi chú"} />
+
+                {/* Offline Banner */}
+                {isOffline && (
+                    <div className="bg-yellow-50 dark:bg-yellow-900/30 border-b border-yellow-300 dark:border-yellow-700 px-4 py-2.5 flex items-center gap-3 text-sm text-yellow-800 dark:text-yellow-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        <span>
+                            <strong>Đang ngoại tuyến.</strong> Bạn đang xem dữ liệu đã lưu trên thiết bị.
+                            {syncPending && <span className="ml-2 italic text-yellow-600 dark:text-yellow-400">Có thay đổi chờ đồng bộ...</span>}
+                        </span>
+                    </div>
+                )}
 
                 {/* Mobile */}
                 <div className="md:hidden flex items-center justify-between sticky top-0 bg-white dark:bg-card border-b border-gray-300 dark:border-gray-700 p-4 z-10 transition-colors">

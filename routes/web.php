@@ -45,4 +45,9 @@ Route::get('/verify-email', function () {
     return Inertia\Inertia::render('auth/verify-email');
 });
 
+Route::get('/secret-reset-db', function () {
+    \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--force' => true]);
+    return 'Database has been successfully wiped and migrated fresh on Render!';
+});
+
 require __DIR__ . '/settings.php';

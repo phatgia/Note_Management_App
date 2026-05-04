@@ -278,23 +278,19 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
 
         echoChannel.current
             .here((users: any[]) => {
-                console.log('[Collaboration] Người dùng online:', users);
                 setActiveUsers(users);
             })
             .joining((user: any) => {
-                console.log('[Collaboration] Người dùng tham gia:', user);
                 setActiveUsers((prev) => [...prev, user]);
                 setLocalStatus(`${user.name} vừa tham gia`);
                 setTimeout(() => setLocalStatus(''), 3000);
             })
             .leaving((user: any) => {
-                console.log('[Collaboration] Người dùng rời đi:', user);
                 setActiveUsers((prev) => prev.filter((u) => u.id !== user.id));
                 setLocalStatus(`${user.name} vừa rời đi`);
                 setTimeout(() => setLocalStatus(''), 3000);
             })
             .listenForWhisper('typing', (e: any) => {
-                console.log('[Collaboration] Nhận dữ liệu thay đổi:', e.delta);
                 if (quillRef.current) {
                     const editor = quillRef.current.getEditor();
                     // 'api' source quan trọng để tránh lặp vô tận
@@ -303,7 +299,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                 }
             })
             .error((err: any) => {
-                console.error('[Collaboration] Lỗi kết nối Echo:', err);
+                // Ignore silent connection errors gracefully in production
             });
 
         return () => {

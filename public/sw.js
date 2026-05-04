@@ -16,11 +16,21 @@ const PRECACHE_ASSETS = [
     '/apple-touch-icon.png',
 ];
 
-// ---- INSTALL: pre-cache static assets ----
+// ---- INSTALL: pre-cache static assets robustly ----
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(STATIC_CACHE)
-            .then((cache) => cache.addAll(PRECACHE_ASSETS))
+            .then((cache) => {
+                // Tải từng file độc lập để không làm hỏng toàn bộ quá trình install nếu 1 file bị lỗi 404
+                return Promise.allSettled(
+                    PRECACHE_ASSETS.map(url => 
+                        fetch(url).then(response => {
+                            if (!response.ok) throw new Error('Not ok');
+                            return cache.put(url, response);
+                        }).catch(err => console.warn('[SW] Failed to cache asset:', url))
+                    )
+                );
+            })
             .then(() => self.skipWaiting())
     );
 });

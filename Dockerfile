@@ -27,6 +27,10 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # --- Frontend build ---
+# ARG CACHEBUST forces this layer to rebuild even if Docker cache is hit.
+# Update the default value (e.g., today's date) to bust the cache.
+ARG CACHEBUST=2026-05-05
+RUN echo "Cache bust: $CACHEBUST"
 # Use SQLite so artisan/wayfinder can run without a real DB during build
 RUN mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions \
     && cp .env.example .env \

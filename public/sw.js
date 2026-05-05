@@ -3,9 +3,11 @@
 // Strategy: Cache-First for assets, Network-First for pages/API
 // ============================================================
 
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const STATIC_CACHE = `note-static-${CACHE_VERSION}`;
-const DYNAMIC_CACHE = `note-dynamic-${CACHE_VERSION}`;
+const DYNAMIC_HTML_CACHE = `note-html-${CACHE_VERSION}`;
+const DYNAMIC_INERTIA_CACHE = `note-inertia-${CACHE_VERSION}`;
+const DYNAMIC_ASSETS_CACHE = `note-assets-${CACHE_VERSION}`;
 
 // Static assets to pre-cache on install
 const PRECACHE_ASSETS = [
@@ -41,7 +43,7 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames
-                    .filter((name) => name !== STATIC_CACHE && name !== DYNAMIC_CACHE)
+                    .filter((name) => !name.includes(CACHE_VERSION))
                     .map((name) => caches.delete(name))
             );
         }).then(() => self.clients.claim())
@@ -83,12 +85,12 @@ self.addEventListener('fetch', (event) => {
                 .then((response) => {
                     if (response && response.status === 200) {
                         const clone = response.clone();
-                        caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request.url, clone));
+                        caches.open(DYNAMIC_HTML_CACHE).then((cache) => cache.put(request.url, clone));
                     }
                     return response;
                 })
                 .catch(() => {
-                    return caches.match(request.url, { ignoreSearch: true })
+                    return caches.open(DYNAMIC_HTML_CACHE).then(cache => cache.match(request.url, { ignoreSearch: true }))
                         .then((cached) => cached || caches.match('/offline.html'));
                 })
         );
@@ -103,17 +105,17 @@ self.addEventListener('fetch', (event) => {
                     if (response && response.status === 200) {
                         const clone = response.clone();
                         // Cache using the full URL including Inertia headers by using request object
-                        caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+                        caches.open(DYNAMIC_INERTIA_CACHE).then((cache) => cache.put(request.url, clone));
                     }
                     return response;
                 })
                 .catch(() => {
-                    return caches.match(request).then((cached) => {
+                    return caches.open(DYNAMIC_INERTIA_CACHE).then(cache => cache.match(request.url, { ignoreSearch: true })).then((cached) => {
                         if (cached) return cached;
                         // If no Inertia cache, we can't fall back to HTML because Inertia expects JSON
                         return new Response(JSON.stringify({ error: 'offline' }), {
                             status: 503,
-                            headers: { 'Content-Type': 'application/json' }
+                            headers: { 'Content-Type': 'application/json', 'X-Inertia': 'true' }
                         });
                     });
                 })
@@ -127,11 +129,11 @@ self.addEventListener('fetch', (event) => {
             .then((response) => {
                 if (response && response.status === 200 && response.type === 'basic') {
                     const clone = response.clone();
-                    caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request.url, clone));
+                    caches.open(DYNAMIC_ASSETS_CACHE).then((cache) => cache.put(request.url, clone));
                 }
                 return response;
             })
-            .catch(() => caches.match(request.url, { ignoreSearch: true }))
+            .catch(() => caches.open(DYNAMIC_ASSETS_CACHE).then(cache => cache.match(request.url, { ignoreSearch: true })))
     );
 });
 

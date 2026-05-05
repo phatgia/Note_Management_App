@@ -3,7 +3,7 @@
 // Strategy: Cache-First for assets, Network-First for pages/API
 // ============================================================
 
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const STATIC_CACHE = `note-static-${CACHE_VERSION}`;
 const DYNAMIC_HTML_CACHE = `note-html-${CACHE_VERSION}`;
 const DYNAMIC_INERTIA_CACHE = `note-inertia-${CACHE_VERSION}`;
@@ -78,26 +78,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // STRATEGY 2: Network-First for navigation & HTML requests
-    if (request.mode === 'navigate' || request.headers.get('Accept')?.includes('text/html')) {
-        event.respondWith(
-            fetch(request)
-                .then((response) => {
-                    if (response && response.status === 200) {
-                        const clone = response.clone();
-                        caches.open(DYNAMIC_HTML_CACHE).then((cache) => cache.put(request.url, clone));
-                    }
-                    return response;
-                })
-                .catch(() => {
-                    return caches.open(DYNAMIC_HTML_CACHE).then(cache => cache.match(request.url, { ignoreSearch: true }))
-                        .then((cached) => cached || caches.match('/offline.html'));
-                })
-        );
-        return;
-    }
-
-    // STRATEGY 3: Network-First for Inertia JSON requests
+    // STRATEGY 2: Network-First for Inertia JSON requests
     if (request.headers.has('x-inertia')) {
         event.respondWith(
             fetch(request)
@@ -118,6 +99,28 @@ self.addEventListener('fetch', (event) => {
                             headers: { 'Content-Type': 'application/json', 'X-Inertia': 'true' }
                         });
                     });
+                })
+        );
+        return;
+    }
+
+    // STRATEGY 3: Network-First for navigation & HTML requests
+    if (request.mode === 'navigate' || request.headers.get('Accept')?.includes('text/html')) {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    if (response && response.status === 200) {
+                        const clone = response.clone();
+                        caches.open(DYNAMIC_HTML_CACHE).then((cache) => cache.put(request.url, clone));
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    return caches.open(DYNAMIC_HTML_CACHE).then(cache => cache.match(request.url, { ignoreSearch: true }))
+                        .then((cached) => {
+                            if (cached) return cached;
+                            return caches.match('/offline.html').then(offline => offline || new Response('You are offline.', {status: 503, headers: {'Content-Type': 'text/html'}}));
+                        });
                 })
         );
         return;

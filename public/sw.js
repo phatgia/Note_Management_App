@@ -3,7 +3,7 @@
 // Strategy: Cache-First for assets, Network-First for pages/API
 // ============================================================
 
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const STATIC_CACHE = `note-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `note-dynamic-${CACHE_VERSION}`;
 
@@ -76,38 +76,62 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // STRATEGY 2: Network-First for navigation & page requests
-    // If network fails → serve from dynamic cache → fallback to offline.html
+    // STRATEGY 2: Network-First for navigation & HTML requests
     if (request.mode === 'navigate' || request.headers.get('Accept')?.includes('text/html')) {
         event.respondWith(
             fetch(request)
                 .then((response) => {
                     if (response && response.status === 200) {
                         const clone = response.clone();
-                        caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+                        caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request.url, clone));
                     }
                     return response;
                 })
                 .catch(() => {
-                    return caches.match(request)
+                    return caches.match(request.url, { ignoreSearch: true })
                         .then((cached) => cached || caches.match('/offline.html'));
                 })
         );
         return;
     }
 
-    // STRATEGY 3: Network-First for all other requests (images, fonts, etc.)
-    // Falls back to cache silently
+    // STRATEGY 3: Network-First for Inertia JSON requests
+    if (request.headers.has('x-inertia')) {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    if (response && response.status === 200) {
+                        const clone = response.clone();
+                        // Cache using the full URL including Inertia headers by using request object
+                        caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    return caches.match(request).then((cached) => {
+                        if (cached) return cached;
+                        // If no Inertia cache, we can't fall back to HTML because Inertia expects JSON
+                        return new Response(JSON.stringify({ error: 'offline' }), {
+                            status: 503,
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                    });
+                })
+        );
+        return;
+    }
+
+    // STRATEGY 4: Network-First for all other requests (images, fonts, APIs)
     event.respondWith(
         fetch(request)
             .then((response) => {
                 if (response && response.status === 200 && response.type === 'basic') {
                     const clone = response.clone();
-                    caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+                    caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request.url, clone));
                 }
                 return response;
             })
-            .catch(() => caches.match(request))
+            .catch(() => caches.match(request.url, { ignoreSearch: true }))
     );
 });
 

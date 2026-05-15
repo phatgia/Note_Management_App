@@ -40,8 +40,8 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
     const [tempCategory, setTempCategory] = useState({ name: '', color: TAG_COLORS[0], icon: 'tag' });
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
-    const quillRef = useRef<ReactQuill>(null); 
-    const [activeUsers, setActiveUsers] = useState<any[]>([]); 
+    const quillRef = useRef<ReactQuill>(null);
+    const [activeUsers, setActiveUsers] = useState<any[]>([]);
     const echoChannel = useRef<any>(null);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -50,10 +50,16 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
     const [localStatus, setLocalStatus] = useState('');
     const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
     const [syncPending, setSyncPending] = useState(false);
+    const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
-    const [existingImages, setExistingImages] = useState<any[]>(note.images || []); 
+    const [existingImages, setExistingImages] = useState<any[]>(note.images || []);
     const [previewImage, setPreviewImage] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Sync existingImages whenever Inertia refreshes note.images from server
+    useEffect(() => {
+        setExistingImages(note.images || []);
+    }, [note.images]);
 
     const { data: shareData, setData: setShareData, post: postShare, processing: sharing, errors: shareErrors, reset: resetShare } = useForm({
         email: '',
@@ -67,27 +73,27 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
     const { data, setData, post, processing, errors } = useForm({
         title: note.title || '',
         content: note.content || '',
-        category_ids: note.categories ? note.categories.map((c: any) => c.id) : [] as number[], 
-        new_categories: [] as Array<{name: string, color: string, icon: string}>,
+        category_ids: note.categories ? note.categories.map((c: any) => c.id) : [] as number[],
+        new_categories: [] as Array<{ name: string, color: string, icon: string }>,
         bg_color: note.bg_color || 'bg-white',
         password: note.password || '',
-        image: [] as File [], 
-        _method: 'put',    
+        image: [] as File[],
+        _method: 'put',
     });
 
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
-        if(files.length>0){
+        if (files.length > 0) {
             setData('image', [...data.image, ...files]);
 
-            const newPreviews = files.map(file=>URL.createObjectURL(file));
+            const newPreviews = files.map(file => URL.createObjectURL(file));
             setPreviewImage([...previewImage, ...newPreviews]);
         }
-        if(fileInputRef.current) fileInputRef.current.value ='';
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
     const handleDeleteExistingImage = (imageId: number) => {
         if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
-        
+
         router.delete(`/notes/${note.id}/images/${imageId}`, {
             onSuccess: () => {
                 setExistingImages(existingImages.filter(img => img.id !== imageId));
@@ -161,16 +167,28 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
             setTimeout(() => setLocalStatus(''), 4000);
             return;
         }
-        
+
         setIsSaving(true);
+        const hasNewImages = data.image && data.image.length > 0;
+        const hasNewCategories = data.new_categories && data.new_categories.length > 0;
         post(`/note-detail/${note.id}`, {
-            forceFormData: true, 
+            forceFormData: true,
             preserveScroll: true,
-            preserveState: true,  
+            // Disable preserveState when we have new images or new categories,
+            // so Inertia refreshes page props (note.images, categories) from server.
+            preserveState: !hasNewImages && !hasNewCategories,
             onSuccess: () => {
                 setIsSaving(false);
                 setLocalStatus('Đã lưu thành công');
                 setTimeout(() => setLocalStatus(''), 3000);
+                if (hasNewImages) {
+                    setData('image', []);
+                    setPreviewImage([]);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                }
+                if (hasNewCategories) {
+                    setData('new_categories', []);
+                }
             },
             onError: () => setIsSaving(false)
         });
@@ -190,14 +208,14 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         if (!canEdit) return;
         let newIds = [...data.category_ids];
         if (newIds.includes(id)) {
-            newIds = newIds.filter(item => item !== id); 
+            newIds = newIds.filter(item => item !== id);
         } else {
-            newIds.push(id); 
+            newIds.push(id);
         }
         setData('category_ids', newIds);
     };
 
-    // --- AUTO SAVE ---
+    // --- AUTO SAVE (text fields only, never images) ---
     useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
@@ -207,15 +225,34 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
         if (!canEdit) return;
 
         const timer = setTimeout(() => {
+            // Only send text/category data — NOT image files
+            // Sending images in auto-save causes duplicate uploads
+            const pendingNewCategories = data.new_categories;
+            const textOnlyData = {
+                title: data.title,
+                content: data.content,
+                bg_color: data.bg_color,
+                category_ids: data.category_ids,
+                new_categories: pendingNewCategories,
+                password: data.password,
+                _method: 'put',
+            };
             setIsSaving(true);
-            router.post(`/note-detail/${note.id}`, data, {
-                forceFormData: true,
+            router.post(`/note-detail/${note.id}`, textOnlyData as any, {
                 preserveScroll: true,
-                preserveState: true,  
+                // If we have new_categories to create, disable preserveState so
+                // Inertia refreshes categories from server (prevents duplicate creation
+                // on subsequent auto-saves)
+                preserveState: pendingNewCategories.length === 0,
                 onSuccess: () => {
                     setIsSaving(false);
                     setLocalStatus('Đã tự động lưu');
                     setTimeout(() => setLocalStatus(''), 3000);
+                    // Clear pending new categories so they are NOT re-sent
+                    // on the next auto-save trigger
+                    if (pendingNewCategories.length > 0) {
+                        setData('new_categories', []);
+                    }
                 },
                 onError: () => setIsSaving(false)
             });
@@ -241,36 +278,40 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
 
         echoChannel.current
             .here((users: any[]) => {
-                setActiveUsers(users); 
+                setActiveUsers(users);
             })
             .joining((user: any) => {
-                setActiveUsers((prev) => [...prev, user]); 
+                setActiveUsers((prev) => [...prev, user]);
                 setLocalStatus(`${user.name} vừa tham gia`);
                 setTimeout(() => setLocalStatus(''), 3000);
             })
             .leaving((user: any) => {
-                setActiveUsers((prev) => prev.filter((u) => u.id !== user.id)); 
+                setActiveUsers((prev) => prev.filter((u) => u.id !== user.id));
                 setLocalStatus(`${user.name} vừa rời đi`);
                 setTimeout(() => setLocalStatus(''), 3000);
             })
             .listenForWhisper('typing', (e: any) => {
                 if (quillRef.current) {
                     const editor = quillRef.current.getEditor();
-                    editor.updateContents(e.delta);
+                    // 'api' source quan trọng để tránh lặp vô tận
+                    editor.updateContents(e.delta, 'api');
                     setData('content', editor.root.innerHTML);
                 }
+            })
+            .error((err: any) => {
+                // Ignore silent connection errors gracefully in production
             });
 
         return () => {
             if (echoChannel.current) {
-                window.Echo.leave(`note.${note.id}`); 
+                window.Echo.leave(`note.${note.id}`);
             }
         };
     }, [note.id, isLocked]);
 
     const handleEditorChange = (content: string, delta: any, source: string, editor: any) => {
         setData('content', content);
-        
+
         if (source === 'user' && echoChannel.current && canEdit) {
             echoChannel.current.whisper('typing', { delta: delta });
         }
@@ -295,7 +336,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
             }
         });
     };
-    
+
     return (
         <NoteLayout title={data.title}>
             <div className="w-full bg-[#F8F9FA] dark:bg-background min-h-screen pb-12 overflow-y-auto">
@@ -322,7 +363,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                 <div className="flex -space-x-2 overflow-hidden">
                                     {activeUsers.map((u) => (
                                         <div key={u.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800 bg-orange-500 text-white flex items-center justify-center text-xs font-bold shadow-sm" title={u.name}>
-                                            {u.avatar ? <img src={`/storage/${u.avatar}`} className="w-full h-full rounded-full object-cover"/> : u.name.charAt(0).toUpperCase()}
+                                            {u.avatar ? <img src={`/storage/${u.avatar}`} className="w-full h-full rounded-full object-cover" /> : u.name.charAt(0).toUpperCase()}
                                         </div>
                                     ))}
                                 </div>
@@ -347,7 +388,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                 <div className="flex -space-x-2 overflow-hidden">
                                     {activeUsers.map((u) => (
                                         <div key={u.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800 bg-orange-500 text-white flex items-center justify-center text-xs font-bold shadow-sm" title={u.name}>
-                                            {u.avatar ? <img src={`/storage/${u.avatar}`} className="w-full h-full rounded-full object-cover"/> : u.name.charAt(0).toUpperCase()}
+                                            {u.avatar ? <img src={`/storage/${u.avatar}`} className="w-full h-full rounded-full object-cover" /> : u.name.charAt(0).toUpperCase()}
                                         </div>
                                     ))}
                                 </div>
@@ -380,7 +421,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                 <div className="flex -space-x-2 overflow-hidden">
                                     {activeUsers.map((u) => (
                                         <div key={u.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800 bg-orange-500 text-white flex items-center justify-center text-xs font-bold shadow-sm" title={u.name}>
-                                            {u.avatar ? <img src={`/storage/${u.avatar}`} className="w-full h-full rounded-full object-cover"/> : u.name.charAt(0).toUpperCase()}
+                                            {u.avatar ? <img src={`/storage/${u.avatar}`} className="w-full h-full rounded-full object-cover" /> : u.name.charAt(0).toUpperCase()}
                                         </div>
                                     ))}
                                 </div>
@@ -403,10 +444,10 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Ghi chú bảo mật</h2>
                                 <form onSubmit={handleUnlock}>
-                                    <input 
+                                    <input
                                         type="password" autoFocus
                                         value={unlockPassword} onChange={(e) => setUnlockPassword(e.target.value)}
-                                        placeholder="Nhập mật khẩu..." 
+                                        placeholder="Nhập mật khẩu..."
                                         className="w-full text-center tracking-widest bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 mb-2 dark:text-white transition-colors"
                                     />
                                     {unlockError && <p className="text-red-500 text-xs mb-2 font-bold">{unlockError}</p>}
@@ -419,14 +460,14 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                     )}
 
                     <div className={`flex flex-col lg:flex-row gap-6 items-start transition-all duration-500 ${isLocked ? 'blur-md pointer-events-none select-none opacity-40' : ''}`}>
-                        
+
                         {/* CỘT TRÁI */}
                         <form className={`flex-1 w-full border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 space-y-6 transition-colors duration-500 ${data.bg_color}`}>
-                            
+
                             {/* Tiêu đề */}
                             <div>
                                 <Label htmlFor="title" className="text-sm font-bold text-gray-700 dark:text-gray-300">Tiêu đề</Label>
-                                <input 
+                                <input
                                     readOnly={!canEdit}
                                     id="title" type="text" value={data.title} onChange={(e) => setData('title', e.target.value)} required placeholder="Nhập tiêu đề ghi chú..."
                                     className={`mt-2 w-full text-lg font-semibold border text-gray-900 dark:text-white rounded-xl px-4 py-3 transition-all backdrop-blur-sm ${!canEdit ? 'bg-transparent border-transparent focus:ring-0 px-0' : 'bg-white/60 dark:bg-gray-900/60 border-gray-200 focus:ring-2 focus:ring-orange-500'}`}
@@ -455,7 +496,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                             </div>
                                         </div>
                                     )}
-                                    <ReactQuill 
+                                    <ReactQuill
                                         ref={quillRef}
                                         readOnly={!canEdit}
                                         theme="snow" modules={module} value={data.content} onChange={handleEditorChange}
@@ -465,20 +506,28 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                 </div>
                                 <InputError message={errors.content} className="mt-2" />
                             </div>
-                            
+
                             {/* Ảnh */}
                             <div className="border-t border-gray-300/60 dark:border-gray-700/60 flex flex-col gap-3 pt-4">
                                 <Label className="text-sm text-gray-500 dark:text-gray-400 font-semibold">Ảnh đính kèm</Label>
-                                
+
                                 <div className="flex gap-3 flex-wrap items-center">
-                                    
+
                                     {/* 1. VÒNG LẶP HIỂN THỊ ẢNH CŨ TỪ DATABASE */}
                                     {existingImages.map((img: any) => (
                                         <div key={`old-${img.id}`} className="relative group w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm shrink-0">
-                                            <img src={`/storage/${img.file_path}`} alt="Saved Attachment" className="w-full h-full object-cover" />
+                                            <img
+                                                src={`/storage/${img.file_path}`}
+                                                alt="Saved Attachment"
+                                                className="w-full h-full object-cover cursor-zoom-in"
+                                                onClick={() => setLightboxImage(`/storage/${img.file_path}`)}
+                                            />
                                             {canEdit && (
-                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm z-20">
-                                                    <button type="button" onClick={() => handleDeleteExistingImage(img.id)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg cursor-pointer">
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity backdrop-blur-sm z-20">
+                                                    <button type="button" onClick={() => setLightboxImage(`/storage/${img.file_path}`)} className="p-2 bg-white/20 text-white rounded-full hover:bg-white/40 transition-colors shadow-lg cursor-pointer" title="Xem ảnh">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                                                    </button>
+                                                    <button type="button" onClick={() => handleDeleteExistingImage(img.id)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg cursor-pointer" title="Xóa ảnh">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
                                                     </button>
                                                 </div>
@@ -486,14 +535,21 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                         </div>
                                     ))}
 
-                                    {/* 2. VÒNG LẶP HIỂN THỊ ẢNH MỚI VỪA CHỌN */}
+                                    {/* 2. ẢNH MỚI VỪA CHỌN (PREVIEW) */}
                                     {previewImage.map((preview, index) => (
                                         <div key={`new-${index}`} className="relative group w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden border-2 border-orange-300 shadow-sm shrink-0">
                                             <div className="absolute top-1 left-1 bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded shadow z-10">Mới</div>
-                                            <img src={preview} alt="New Preview" className="w-full h-full object-cover opacity-80" />
+                                            <img
+                                                src={preview} alt="New Preview"
+                                                className="w-full h-full object-cover opacity-80 cursor-zoom-in"
+                                                onClick={() => setLightboxImage(preview)}
+                                            />
                                             {canEdit && (
-                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm z-20">
-                                                    <button type="button" onClick={() => handleRemoveNewImage(index)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg cursor-pointer">
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity backdrop-blur-sm z-20">
+                                                    <button type="button" onClick={() => setLightboxImage(preview)} className="p-2 bg-white/20 text-white rounded-full hover:bg-white/40 transition-colors shadow-lg cursor-pointer" title="Xem ảnh">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                                                    </button>
+                                                    <button type="button" onClick={() => handleRemoveNewImage(index)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg cursor-pointer" title="Xóa ảnh">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
                                                     </button>
                                                 </div>
@@ -515,7 +571,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                 </div>
                                 <InputError message={errors.image as unknown as string} className="mt-1" />
                             </div>
-                        
+
 
                             {/* NHÃN */}
                             <div className="border-t border-gray-300/60 dark:border-gray-700/60 flex flex-col gap-3 pt-4">
@@ -523,11 +579,11 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                 <div className="flex gap-3 flex-wrap items-center">
                                     {categories && categories.length > 0 && (
                                         categories.map((cat: any, index: number) => (
-                                            <button 
+                                            <button
                                                 key={`${cat.id}-${index}`} type="button" onClick={() => toggleCategory(cat.id)}
                                                 className={`rounded-full px-3 py-1.5 flex items-center gap-2 text-sm font-medium border transition-all ${cat.color ? cat.color : 'bg-gray-100 text-gray-700 border-gray-300'} ${data.category_ids.includes(cat.id) ? 'ring-2 ring-offset-2 ring-gray-400 scale-105 shadow-md' : (canEdit ? 'hover:scale-105 opacity-80 hover:opacity-100' : 'opacity-100 cursor-default')}`}
                                             >
-                                                {ICONS[cat.icon] || ICONS['tag']} {cat.name || cat.Name} 
+                                                {ICONS[cat.icon] || ICONS['tag']} {cat.name || cat.Name}
                                             </button>
                                         ))
                                     )}
@@ -536,21 +592,21 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                         isAddingTag ? (
                                             <div className="flex flex-col gap-2 bg-white dark:bg-card border border-gray-300 dark:border-gray-600 rounded-xl p-2 shadow-sm animate-in fade-in zoom-in duration-200">
                                                 <div className="flex items-center gap-2">
-                                                    <input 
+                                                    <input
                                                         type="text" autoFocus placeholder="Tên nhãn mới..." value={tempCategory.name}
-                                                        onChange={(e) => setTempCategory({...tempCategory, name: e.target.value})}
+                                                        onChange={(e) => setTempCategory({ ...tempCategory, name: e.target.value })}
                                                         className="text-sm border-none bg-transparent focus:ring-0 p-0 w-40 text-gray-700 dark:text-gray-200 placeholder-gray-400 font-medium"
                                                     />
                                                     <div className="flex gap-1 ml-auto">
-                                                        <button 
-                                                            type="button" 
-                                                            onClick={() => { 
-                                                                if(tempCategory.name.trim() !== '') {
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                if (tempCategory.name.trim() !== '') {
                                                                     setData('new_categories', [...data.new_categories, tempCategory]);
                                                                     setTempCategory({ name: '', color: TAG_COLORS[0], icon: 'tag' });
-                                                                    setIsAddingTag(false); 
+                                                                    setIsAddingTag(false);
                                                                 }
-                                                            }} 
+                                                            }}
                                                             className="cursor-pointer text-green-500 hover:text-green-600 p-1 bg-green-50 dark:bg-green-900/30 rounded-md transition-colors"
                                                             title="Xác nhận nhãn này"
                                                         >
@@ -565,14 +621,14 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                                 <div className="flex items-center gap-4 justify-between">
                                                     <div className="flex items-center gap-1 border-r border-gray-300 dark:border-gray-700 pr-3">
                                                         {Object.keys(ICONS).map((iconKey) => (
-                                                            <button key={iconKey} type="button" onClick={() => setTempCategory({...tempCategory, icon: iconKey})} className={`p-1 rounded-md transition-all ${tempCategory.icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300'}`}>
+                                                            <button key={iconKey} type="button" onClick={() => setTempCategory({ ...tempCategory, icon: iconKey })} className={`p-1 rounded-md transition-all ${tempCategory.icon === iconKey ? 'bg-orange-100 text-orange-600 ring-1 ring-orange-300' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300'}`}>
                                                                 {ICONS[iconKey]}
                                                             </button>
                                                         ))}
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
                                                         {TAG_COLORS.map((colorClass, idx) => (
-                                                            <button key={idx} type="button" onClick={() => setTempCategory({...tempCategory, color: colorClass})} className={`w-5 h-5 rounded-full border transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${tempCategory.color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`} />
+                                                            <button key={idx} type="button" onClick={() => setTempCategory({ ...tempCategory, color: colorClass })} className={`w-5 h-5 rounded-full border transition-all ${colorClass.split(' ')[0]} ${colorClass.split(' ')[2]} ${tempCategory.color === colorClass ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-110'}`} />
                                                         ))}
                                                     </div>
                                                 </div>
@@ -580,7 +636,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                         ) : (
                                             <>
                                                 {data.new_categories && data.new_categories.map((cat: any, idx: number) => (
-                                                    <button 
+                                                    <button
                                                         key={`new-${idx}`}
                                                         type="button"
                                                         onClick={() => {
@@ -645,7 +701,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                                                             {openMenuId === user.id && (
                                                                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 border rounded-xl shadow-lg z-50 overflow-hidden">
                                                                     <button type="button" onClick={() => { setOpenMenuId(null); router.put(`/note-detail/${note.id}/share/${user.id}`, { role: user.pivot.role === 'editor' ? 'viewer' : 'editor' }); }} className="w-full text-left cursor-pointer px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50">Đổi quyền</button>
-                                                                    <button type="button" onClick={() => { setOpenMenuId(null); if(confirm('Gỡ quyền?')) router.delete(`/note-detail/${note.id}/share/${user.id}`); }} className="w-full text-left cursor-pointer px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">Gỡ truy cập</button>
+                                                                    <button type="button" onClick={() => { setOpenMenuId(null); if (confirm('Gỡ quyền?')) router.delete(`/note-detail/${note.id}/share/${user.id}`); }} className="w-full text-left cursor-pointer px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">Gỡ truy cập</button>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -687,7 +743,7 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                     </div>
                 </div>
             </div>
-            
+
             {/* Modal Chia sẻ & Modal Xóa */}
             {isShareModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
@@ -718,6 +774,36 @@ export default function NoteDetail({ note, categories, isOwner, canEdit }: any) 
                             <button type="button" onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl cursor-pointer">Xóa vĩnh viễn</button>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* LIGHTBOX - XỪ ẢNH PHÓNG TO */}
+            {lightboxImage && (
+                <div
+                    className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-md animate-in fade-in duration-200"
+                    onClick={() => setLightboxImage(null)}
+                >
+                    {/* Nút đóng */}
+                    <button
+                        type="button"
+                        onClick={() => setLightboxImage(null)}
+                        className="absolute top-4 right-4 z-10 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors cursor-pointer backdrop-blur-sm"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    {/* Ảnh */}
+                    <img
+                        src={lightboxImage}
+                        alt="Lightbox"
+                        className="max-w-[90vw] max-h-[90vh] object-contain rounded-xl shadow-2xl ring-1 ring-white/10"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+
+                    {/* Gợi ý đóng */}
+                    <p className="absolute bottom-4 text-white/40 text-xs">Click ra ngoài để đóng</p>
                 </div>
             )}
         </NoteLayout>

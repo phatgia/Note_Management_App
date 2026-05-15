@@ -3,9 +3,11 @@
 // Strategy: Cache-First for assets, Network-First for pages/API
 // ============================================================
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v6';
 const STATIC_CACHE = `note-static-${CACHE_VERSION}`;
-const DYNAMIC_CACHE = `note-dynamic-${CACHE_VERSION}`;
+const DYNAMIC_HTML_CACHE = `note-html-${CACHE_VERSION}`;
+const DYNAMIC_INERTIA_CACHE = `note-inertia-${CACHE_VERSION}`;
+const DYNAMIC_ASSETS_CACHE = `note-assets-${CACHE_VERSION}`;
 
 // Static assets to pre-cache on install
 const PRECACHE_ASSETS = [
@@ -16,11 +18,21 @@ const PRECACHE_ASSETS = [
     '/apple-touch-icon.png',
 ];
 
-// ---- INSTALL: pre-cache static assets ----
+// ---- INSTALL: pre-cache static assets robustly ----
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(STATIC_CACHE)
-            .then((cache) => cache.addAll(PRECACHE_ASSETS))
+            .then((cache) => {
+                // Tải từng file độc lập để không làm hỏng toàn bộ quá trình install nếu 1 file bị lỗi 404
+                return Promise.allSettled(
+                    PRECACHE_ASSETS.map(url => 
+                        fetch(url).then(response => {
+                            if (!response.ok) throw new Error('Not ok');
+                            return cache.put(url, response);
+                        }).catch(err => console.warn('[SW] Failed to cache asset:', url))
+                    )
+                );
+            })
             .then(() => self.skipWaiting())
     );
 });
@@ -31,7 +43,7 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames
-                    .filter((name) => name !== STATIC_CACHE && name !== DYNAMIC_CACHE)
+                    .filter((name) => !name.includes(CACHE_VERSION))
                     .map((name) => caches.delete(name))
             );
         }).then(() => self.clients.claim())
@@ -66,38 +78,65 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // STRATEGY 2: Network-First for navigation & page requests
-    // If network fails → serve from dynamic cache → fallback to offline.html
+    // STRATEGY 2: Network-First for Inertia JSON requests
+    if (request.headers.has('x-inertia')) {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    if (response && response.status === 200) {
+                        const clone = response.clone();
+                        // Cache using the full URL including Inertia headers by using request object
+                        caches.open(DYNAMIC_INERTIA_CACHE).then((cache) => cache.put(request.url, clone));
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    return caches.open(DYNAMIC_INERTIA_CACHE).then(cache => cache.match(request.url, { ignoreSearch: true })).then((cached) => {
+                        if (cached) return cached;
+                        // If no Inertia cache, we can't fall back to HTML because Inertia expects JSON
+                        return new Response(JSON.stringify({ error: 'offline' }), {
+                            status: 503,
+                            headers: { 'Content-Type': 'application/json', 'X-Inertia': 'true' }
+                        });
+                    });
+                })
+        );
+        return;
+    }
+
+    // STRATEGY 3: Network-First for navigation & HTML requests
     if (request.mode === 'navigate' || request.headers.get('Accept')?.includes('text/html')) {
         event.respondWith(
             fetch(request)
                 .then((response) => {
                     if (response && response.status === 200) {
                         const clone = response.clone();
-                        caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+                        caches.open(DYNAMIC_HTML_CACHE).then((cache) => cache.put(request.url, clone));
                     }
                     return response;
                 })
                 .catch(() => {
-                    return caches.match(request)
-                        .then((cached) => cached || caches.match('/offline.html'));
+                    return caches.open(DYNAMIC_HTML_CACHE).then(cache => cache.match(request.url, { ignoreSearch: true }))
+                        .then((cached) => {
+                            if (cached) return cached;
+                            return caches.match('/offline.html').then(offline => offline || new Response('You are offline.', {status: 503, headers: {'Content-Type': 'text/html'}}));
+                        });
                 })
         );
         return;
     }
 
-    // STRATEGY 3: Network-First for all other requests (images, fonts, etc.)
-    // Falls back to cache silently
+    // STRATEGY 4: Network-First for all other requests (images, fonts, APIs)
     event.respondWith(
         fetch(request)
             .then((response) => {
                 if (response && response.status === 200 && response.type === 'basic') {
                     const clone = response.clone();
-                    caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+                    caches.open(DYNAMIC_ASSETS_CACHE).then((cache) => cache.put(request.url, clone));
                 }
                 return response;
             })
-            .catch(() => caches.match(request))
+            .catch(() => caches.open(DYNAMIC_ASSETS_CACHE).then(cache => cache.match(request.url, { ignoreSearch: true })))
     );
 });
 

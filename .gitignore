@@ -1,11 +1,15 @@
 /.phpunit.cache
 /bootstrap/ssr
+/bootstrap/cache
+!bootstrap/cache/.gitkeep
 /node_modules
 /public/build
 /public/hot
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/logs
+!storage/logs/.gitkeep
 /resources/js/actions
 /resources/js/routes
 /resources/js/wayfinder
@@ -28,3 +32,8 @@ yarn-error.log
 /.zed
 
 /storage/framework/views/*.php
+/storage/framework/cache/data
+/storage/framework/sessions/*
+!storage/framework/sessions/.gitkeep
+!storage/framework/cache/.gitkeep
+!storage/framework/views/.gitkeep

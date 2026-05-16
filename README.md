@@ -1,86 +1,124 @@
-# [Note-Management-System]
+# Note Management System
 
-> **Lưu ý:** Đây là đồ án môn học [Lập trình web] tại [Trường Đại học Tôn Đức Thắng]. Dự án tập trung vào việc xây dựng hệ thống quản lý thông tin hiện đại, hỗ trợ đồng bộ hóa dữ liệu thời gian thực.
+> **Lưu ý:** Đây là đồ án môn học **Lập trình Web** tại Trường Đại học Tôn Đức Thắng. Dự án tập trung vào việc xây dựng hệ thống quản lý ghi chú hiện đại, hỗ trợ cộng tác và đồng bộ hóa dữ liệu thời gian thực.
 
-[![Architecture: Decoupled](https://img.shields.io/badge/Architecture-Decoupled-orange.svg)](https://en.wikipedia.org/wiki/Multitier_architecture)
 [![Backend: Laravel 11](https://img.shields.io/badge/Backend-Laravel_11-red.svg)](https://laravel.com/)
-[![Frontend: React](https://img.shields.io/badge/Frontend-React_Vite-blue.svg)](https://react.dev/)
-[![DevOps: Docker](https://img.shields.io/badge/DevOps-Docker_Render-blue.svg)](https://render.com/)
+[![Frontend: React + Inertia](https://img.shields.io/badge/Frontend-React_Inertia-blue.svg)](https://inertiajs.com/)
+[![DevOps: Docker](https://img.shields.io/badge/DevOps-Docker-2496ED.svg)](https://www.docker.com/)
+[![Deploy: Render](https://img.shields.io/badge/Deploy-Render-46E3B7.svg)](https://render.com/)
 
 ## Giới thiệu
 
-**[Note-Management-System]** là một ứng dụng Fullstack hiện đại, được thiết kế theo mô hình **Decoupled Architecture**. Hệ thống sử dụng **Inertia.js** để kết nối mượt mà giữa phía Client (React) và Server (Laravel), mang lại trải nghiệm của một Single Page Application (SPA) nhưng vẫn giữ được sức mạnh của Laravel SEO và routing.
+**Note Management System** là ứng dụng Fullstack hiện đại, được xây dựng theo mô hình **Monolith + Inertia.js**. Inertia.js đóng vai trò "cầu nối" mượt mà giữa phía Client (React) và Server (Laravel), mang lại trải nghiệm SPA nhưng vẫn tận dụng được toàn bộ sức mạnh của Laravel (routing, auth, middleware...).
 
-Dự án đã được tối ưu hóa để triển khai trên các nền tảng PaaS như **Render** hoặc **Railway** thông qua Dockerfile đơn tầng (Single-stage Docker build), tích hợp sẵn Nginx, PHP-FPM và Node.js trong một container duy nhất.
+Dự án được đóng gói bằng **Docker** và triển khai thực tế trên **Render (PaaS)**, sử dụng **MySQL** trên Aiven Cloud và **WebSockets** (Laravel Reverb) cho tính năng cộng tác thời gian thực.
 
-## Nhóm phát triển (Team Members)
+## Nhóm phát triển
 
-- **Trần Gia Phát** - [52400148] - [Vai trò: Backend Developer & DevOps]
-- **Ngô Khánh Bình** - [52400005] - [Vai trò: Frontend Developer & UI/UX]
-- **Giảng viên hướng dẫn:** [Ths.Dương Hữu Phước]
+| MSSV | Họ và Tên | Vai trò |
+|---|---|---|
+| 52400148 | Trần Gia Phát | Backend Developer & DevOps |
+| 52400005 | Ngô Khánh Bình | Frontend Developer & UI/UX |
 
-## Các tính năng kỹ thuật chuyên sâu
+**Giảng viên hướng dẫn:** ThS. Dương Hữu Phước
 
-- **Triển khai Đám mây (Cloud Native):** Cấu hình Docker tối ưu, tự động nhận diện Port từ Render/Railway, hỗ trợ Trust Proxy để xử lý lỗi HTTPS Mixed Content.
-- **Xác thực OTP qua Email:** Tích hợp hệ thống gửi mã xác thực 6 số qua Gmail SMTP (Google App Password) khi người dùng đăng ký tài khoản mới.
-- **Database đồng bộ:** Sử dụng MySQL (Aiven Cloud) đảm bảo dữ liệu luôn được lưu trữ an toàn và có thể truy cập từ bất cứ đâu.
-- **Vite-Powered Frontend:** Tối ưu hóa tốc độ build, giao diện Responsive hoàn toàn với CSS hiện đại và các micro-animations.
+## Tính năng nổi bật
 
-## Hướng dẫn cài đặt
+- 📝 **Quản lý ghi chú:** Tạo, sửa, xóa, ghim ghi chú với trình soạn thảo văn bản phong phú (Rich Text Editor)
+- 🔒 **Bảo vệ bằng mật khẩu:** Khóa/mở khóa ghi chú riêng tư với mật khẩu được mã hóa bằng Bcrypt
+- 🤝 **Chia sẻ & Phân quyền:** Chia sẻ ghi chú với người khác theo vai trò Viewer / Editor
+- ⚡ **Cộng tác thời gian thực:** Nhiều người cùng chỉnh sửa một ghi chú với WebSockets (Laravel Reverb)
+- 🏷️ **Nhãn & Tìm kiếm:** Phân loại ghi chú bằng nhãn màu sắc và lọc theo nhãn
+- 📱 **Responsive & PWA:** Giao diện tương thích mọi thiết bị, hỗ trợ cài đặt như ứng dụng native và hoạt động offline
+- 📧 **Xác thực OTP:** Gửi mã OTP 6 số qua email khi đăng ký tài khoản
 
-### Điều kiện tiên quyết:
+## Hướng dẫn cài đặt (Local - Docker)
 
-- Máy tính đã cài đặt **Docker** và **Docker Desktop**.
+### Điều kiện tiên quyết
 
-### Các bước thực hiện:
+- Máy tính đã cài đặt **Docker Desktop**
 
-1. **Clone dự án:**
-    ```bash
-    git clone [https://github.com/phatgia/Note_Management_App.git]
-    cd [Note_Management_App]
-    ```
-2. **Khởi động các Container:**
+### Các bước thực hiện
 
-    ```bash
-    docker-compose up -d
-    ```
+**Bước 1: Clone dự án**
+```bash
+git clone https://github.com/phatgia/Note_Management_App.git
+cd Note_Management_App
+```
 
-3. Thiết lập Backend:
-    ```bash
-    docker-compose exec app cp .env.example .env
-    docker-compose exec app composer install
-    docker-compose exec app php artisan key:generate
-    ```
-4. Tạo cơ sở dữ liệu và dữ liệu mẫu
-    ```bash
-    docker-compose exec app php artisan migrate --seed
-    ```
-5. Mở khóa thư mục lưu trữ ảnh (Bắt buộc để hiện Avatar)
+**Bước 2: Tạo file cấu hình môi trường**
+```bash
+# Windows (PowerShell)
+copy .env.example .env
 
-    ```bash
-    docker-compose exec app php artisan storage:link
-    ```
+# macOS / Linux
+cp .env.example .env
+```
 
-6. Thiết lập Frontend:
-    ```bash
-    docker-compose exec node npm install
-    docker-compose exec node npm run dev
-    ```
-7. Truy cập ứng dụng:
-   Truy cập: http://localhost:8000
-   
-8. Tài khoản mặc định:
-    Email: [test@example.com]
-    Mật khẩu: password
+**Bước 3: Cài đặt thư viện PHP (vendor)**
+```bash
+docker-compose run --rm app composer install
+```
+
+**Bước 4: Tạo Application Key**
+```bash
+docker-compose run --rm app php artisan key:generate
+```
+
+**Bước 5: Sinh các file TypeScript cho Wayfinder (routing)**
+```bash
+docker-compose run --rm app php artisan wayfinder:generate --with-form
+```
+
+**Bước 6: Khởi động toàn bộ hệ thống**
+```bash
+docker-compose up -d
+```
+
+**Bước 7: Chạy Migration và Seed dữ liệu mẫu**
+```bash
+docker-compose exec app php artisan migrate --seed
+```
+
+**Bước 8: Tạo Storage Symlink (để hiển thị ảnh đính kèm)**
+```bash
+docker-compose exec app php artisan storage:link
+```
+
+**Bước 9: Truy cập ứng dụng**
+
+| Dịch vụ | URL |
+|---|---|
+| 🌐 Ứng dụng chính | http://localhost:8000 |
+| 📬 Hộp thư giả lập (Mailpit) | http://localhost:8025 |
+
+**Tài khoản mặc định (sau khi seed):**
+- Email: `test@example.com`
+- Mật khẩu: `password`
+
+> [!NOTE]
+> **Lần đầu khởi động:** Container `laravel_node` cần tải `npm install` (~2-5 phút). Frontend sẽ sẵn sàng sau khi log hiện `VITE ready in ... ms`.
+
 ---
 
-## Online Preview (Demo Trực Tuyến)
+## Demo Trực Tuyến (Online Preview)
 
 Dự án đã được triển khai sẵn trên **Render**. Bạn có thể truy cập và trải nghiệm trực tiếp tại:
 
-👉 **Link:** [https://note-management-app-1aam.onrender.com](https://note-management-app-1aam.onrender.com)
+👉 **[https://note-management-app-1aam.onrender.com](https://note-management-app-1aam.onrender.com)**
 
 > [!IMPORTANT]
-> **Lưu ý cho lần truy cập đầu tiên:** Vì dự án sử dụng gói **Render Free**, server sẽ tự động "đi ngủ" sau một thời gian không có người truy cập. Ở lần đầu tiên bạn click vào link, vui lòng đợi khoảng **30 - 50 giây** để server khởi động lại (Wake up). Các lần truy cập sau đó sẽ diễn ra mượt mà và tức thì.
-   Hệ thống sẽ mô phỏng gửi email. Vui lòng truy cập Hộp thư giả lập (Mailpit) tại: http://localhost:8025
+> **Lưu ý lần truy cập đầu tiên:** Vì dự án sử dụng gói **Render Free**, server sẽ tự động "ngủ" sau khi không có lượt truy cập. Lần đầu vào link, vui lòng đợi khoảng **30 - 60 giây** để server khởi động lại. Các lần sau sẽ mượt mà và tức thì.
 
+## Công nghệ sử dụng
+
+| Hạng mục | Công nghệ |
+|---|---|
+| Backend | Laravel 11, PHP 8.2 |
+| Frontend | React 19, TypeScript, Inertia.js |
+| Styling | Tailwind CSS v4, Shadcn UI |
+| Realtime | Laravel Reverb (WebSockets) |
+| Database | MySQL (Aiven Cloud) |
+| DevOps | Docker, Nginx, Supervisor |
+| Deploy | Render (PaaS) |
+| PWA | Service Worker, IndexedDB |
